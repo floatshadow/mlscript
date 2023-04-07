@@ -456,7 +456,7 @@ class ClassLifter(logDebugMsg: Boolean = false) {
     Field(inT, outT) -> (iCtx.getOrElse(emptyCtx) ++ oCtx)
   }
 
-  private def liftType(target: TypeLike)(using ctx: LocalContext, cache: ClassCache, outer: Option[ClassInfoCache]): (Type, LocalContext) = target match{
+  private def liftType(target: Type)(using ctx: LocalContext, cache: ClassCache, outer: Option[ClassInfoCache]): (Type, LocalContext) = target match{
     case AppliedType(base, targs) =>
       val (nTargs, nCtx) = targs.map(liftType).unzip
       val (nBase, bCtx) = liftTypeName(base)
@@ -465,7 +465,7 @@ class ClassLifter(logDebugMsg: Boolean = false) {
       val nlhs = liftType(lb)
       val nrhs = liftType(ub)
       Bounds(nlhs._1, nrhs._1) -> (nlhs._2 ++ nrhs._2)
-    case Constrained(base, bounds, where) =>
+    case Constrained(base: Type, bounds, where) =>
       val (nTargs, nCtx) = bounds.map { case (tv, Bounds(lb, ub)) =>
         val nlhs = liftType(lb)
         val nrhs = liftType(ub)
@@ -479,6 +479,7 @@ class ClassLifter(logDebugMsg: Boolean = false) {
       val (nBase, bCtx) = liftType(base)
       Constrained(nBase, nTargs, bounds2) ->
         ((nCtx ++ nCtx2).fold(emptyCtx)(_ ++ _) ++ bCtx)
+    case Constrained(_, _, _) => die
     case Function(lhs, rhs) =>
       val nlhs = liftType(lhs)
       val nrhs = liftType(rhs)
@@ -533,7 +534,6 @@ class ClassLifter(logDebugMsg: Boolean = false) {
       val (body2, ctx) = liftType(body)
       PolyType(targs, body2) -> ctx
     case Top | Bot | _: Literal | _: TypeTag | _: TypeVar => target.asInstanceOf[Type] -> emptyCtx
-    case _ => ???
   }
   
 
