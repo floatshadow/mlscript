@@ -15,7 +15,7 @@ class RecordObj(fields: Map[String, Type]):
   // final result (passed as function call) should be a valid pointer.
   def getFieldOffset(name: String): Int = ???
 
-class VariantObj(variants: Map[String, Type.Record]):
+class VariantObj(variants: Map[String, Type.Record | Type.Unit]):
   def apply(name: String): Type.Record = variants(name)
   // Pattern to check if the variant is of a certain type
   // The first element is the offset in bits, the second element is

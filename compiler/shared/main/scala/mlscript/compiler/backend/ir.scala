@@ -5,7 +5,7 @@ import mlscript.utils.lastWords
 
 enum Operand:
   case Const(value: Boolean | Int | Float | String)
-  case Var()
+  case Var(name: String)
 
   def replace(implicit map: Map[Operand.Var, Operand]): Operand =
     this match
@@ -73,7 +73,7 @@ enum Instruction:
   case Assignment(lhs: Operand.Var, rhs: PureValue)
   case Branch(target: BasicBlock, args: List[Operand])
   case Call(result: Option[Operand.Var], fn: Operand, args: List[Operand])
-  case Match(value: Operand, cases: Map[String, BasicBlock])
+  case Match(value: Operand, cases: Map[String, (BasicBlock, List[Operand])])
   case Return(value: Option[Operand])
   case SetField(obj: Operand.Var, field: String, value: Operand)
   case Unreachable
