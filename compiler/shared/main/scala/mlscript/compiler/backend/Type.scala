@@ -5,7 +5,7 @@ import scala.collection.mutable.Map
 
 // this class allows the compiler to optimize memory layout for specific record
 // type
-class RecordObj(fields: Map[String, Type]):
+class RecordObj(val fields: Map[String, Type]):
   def apply(name: String): Type = fields(name)
   // Field offset in bits
   // Note: The offset is in bits instead of bytes. Booleans may be represented
@@ -15,13 +15,21 @@ class RecordObj(fields: Map[String, Type]):
   // final result (passed as function call) should be a valid pointer.
   def getFieldOffset(name: String): Int = ???
 
-class VariantObj(variants: Map[String, Type.Record | Type.Unit]):
-  def apply(name: String): Type.Record = variants(name)
+  override def toString(): String = "{" + fields
+    .map((name, ty) => s"$name: ${ty.toString()}")
+    .mkString(", ") + "}"
+
+class VariantObj(val variants: Map[String, Option[Type.Record]]):
+  def apply(name: String): Option[Type.Record] = variants(name)
   // Pattern to check if the variant is of a certain type
   // The first element is the offset in bits, the second element is
   // the bit pattern. offset + bit pattern length = record offset,
   // the third element is a list of forbidden patterns.
   def checkBits(name: String): (Int, BitSet, List[BitSet]) = ???
+
+  override def toString(): String = "<" + variants
+    .map((name, ty) => name + ty.map(rec => s": $rec").getOrElse(""))
+    .mkString(" | ") + ">"
 
 enum Type:
   case Unit
@@ -29,10 +37,10 @@ enum Type:
   case Int32
   case Float32
   case OpaquePointer
-  case Record(impl: RecordObj)
-  case Variant(impl: VariantObj)
-  case Function(args: List[Type], ret: Type)
-  case TypeName(name: String)
+  case Record(val impl: RecordObj)
+  case Variant(val impl: VariantObj)
+  case Function(val args: List[Type], val ret: Type)
+  case TypeName(val name: String)
 
   // TypeName equality is nominal, and we do not perform structural equality
   // because the same type can admit different representations.
@@ -52,3 +60,14 @@ enum Type:
       case _ => this eq other
 
   def size: Int = ???
+
+  override def toString(): String = this match
+    case Unit                => "()"
+    case Boolean             => "bool"
+    case Int32               => "i32"
+    case Float32             => "f32"
+    case OpaquePointer       => "Any"
+    case Record(impl)        => impl.toString()
+    case Variant(impl)       => impl.toString()
+    case Function(args, ret) => s"(${args.mkString(", ")}) -> $ret"
+    case TypeName(name)      => name
