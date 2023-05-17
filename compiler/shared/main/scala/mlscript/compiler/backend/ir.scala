@@ -2,26 +2,32 @@ package mlscript.compiler.backend
 
 import mlscript.compiler.backend.Type
 import mlscript.utils.lastWords
+import scala.collection.mutable.ListBuffer
+import scala.collection.immutable
+import mlscript.utils.shorthands.*
 
 enum Operand:
   case Const(val value: Boolean | Int | Float | String)
+  case Unit
   case Var(val name: String)
 
   def replace(implicit map: Map[Operand.Var, Operand]): Operand =
     this match
-      case Const(_)       => this
       case v: Operand.Var => map.getOrElse(v, this)
+      case _              => this
 
   def getType(implicit ctx: Map[Operand.Var, Type]): Type = this match
     case Const(value: Boolean) => Type.Boolean
     case Const(value: Int)     => Type.Int32
     case Const(value: Float)   => Type.Float32
     case Const(value: String)  => Type.OpaquePointer
+    case Unit                  => Type.Unit
     case v: Operand.Var        => ctx(v)
 
   override def toString(): String = this match
     case Operand.Const(value: String) => return s"""$value"""
     case Operand.Const(value)         => return value.toString()
+    case Operand.Unit                 => return "()"
     case Operand.Var(name)            => return name
 
 enum BinOpKind:
@@ -38,7 +44,27 @@ enum BinOpKind:
   case Lt
   case Le
 
+object BinOpKind:
+  private val map = immutable.HashMap[Str, BinOpKind](
+    "+" -> Add,
+    "-" -> Sub,
+    "*" -> Mul,
+    "/" -> Div,
+    "%" -> Rem,
+    "&" -> And,
+    "|" -> Or,
+    "&&" -> And,
+    "||" -> Or,
+    "^" -> Xor,
+    "==" -> Eq,
+    "!=" -> Ne,
+    "<" -> Lt,
+    "<=" -> Le
+  )
+  def getBinOp(op: Str): Option[BinOpKind] = map.get(op)
+
 enum PureValue:
+  case Op(val op: Operand)
   case Alloc(val ty: Type)
   case BinOp(val kind: BinOpKind, val lhs: Operand, val rhs: Operand)
   case Neg(val value: Operand)
@@ -53,6 +79,7 @@ enum PureValue:
   case Intrinsic(val name: String, val args: List[Operand])
 
   def replace(implicit map: Map[Operand.Var, Operand]): PureValue = this match
+    case Op(op)                  => Op(op.replace)
     case Alloc(ty)               => Alloc(ty)
     case BinOp(kind, lhs, rhs)   => BinOp(kind, lhs.replace, rhs.replace)
     case Neg(value)              => Neg(value.replace)
@@ -64,6 +91,7 @@ enum PureValue:
     case Intrinsic(name, params) => Intrinsic(name, params.map(_.replace))
 
   def operands: Seq[Operand] = this match
+    case Op(op)                  => Seq(op)
     case Alloc(ty)               => Seq.empty
     case BinOp(kind, lhs, rhs)   => Seq(lhs, rhs)
     case Neg(value)              => Seq(value)
@@ -75,6 +103,7 @@ enum PureValue:
     case Intrinsic(obj, params)  => params
 
   override def toString(): String = this match
+    case Op(op)                  => s"${op}"
     case Alloc(ty)               => s"alloc ${ty}"
     case BinOp(kind, lhs, rhs)   => s"${kind} ${lhs}, ${rhs}"
     case Neg(value)              => s"neg ${value}"
@@ -112,7 +141,7 @@ enum Instruction:
 class BasicBlock(
     val name: String,
     val params: List[Operand.Var],
-    var instructions: List[Instruction]
+    var instructions: ListBuffer[Instruction]
 ):
   def printIR =
     var visited: Map[String, BasicBlock] = Map(name -> this)

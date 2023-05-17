@@ -69,12 +69,12 @@ class Scope(name: Str, enclosing: Opt[Scope]) {
   /**
     * Allocate a non-sense runtime name.
     */
-  private def allocateRuntimeName(): Str = allocateRuntimeNameIter.next()
+  def allocateRuntimeName(): Str = allocateRuntimeNameIter.next()
 
   /**
     * Allocate a runtime name starting with the given prefix.
     */
-  private def allocateRuntimeName(prefix: Str): Str = {
+  def allocateRuntimeName(prefix: Str): Str = {
     // Fallback case.
     if (prefix.isEmpty()) {
       return allocateRuntimeName()
