@@ -336,7 +336,7 @@ class JSBackend(allowUnresolvedSymbols: Boolean) {
       val define = method.rhs.value match {
         // Define methods for functions.
         case Lam(params, body) =>
-          val methodScope = scope.derive(s"Method $name")
+          val methodScope = scope.deriveUnit(s"Method $name")
           val methodParams = translateParams(params)(methodScope)
           methodScope.declareValue("this", Some(false), false)
           instance(name) := JSFuncExpr(
@@ -346,7 +346,7 @@ class JSBackend(allowUnresolvedSymbols: Boolean) {
           )
         // Define getters for pure expressions.
         case term =>
-          val getterScope = scope.derive(s"Getter $name")
+          val getterScope = scope.deriveUnit(s"Getter $name")
           getterScope.declareValue("this", Some(false), false)
           id("Object")("defineProperty")(
             instance,
@@ -432,7 +432,7 @@ class JSBackend(allowUnresolvedSymbols: Boolean) {
       baseClassSymbol: Opt[ClassSymbol]
   )(implicit scope: Scope): JSClassDecl = {
     // Translate class methods and getters.
-    val classScope = scope.derive(s"class ${classSymbol.lexicalName}")
+    val classScope = scope.deriveUnit(s"class ${classSymbol.lexicalName}")
     val members = classSymbol.methods.map {
       translateClassMember(_)(classScope)
     }
@@ -454,8 +454,8 @@ class JSBackend(allowUnresolvedSymbols: Boolean) {
   protected def translateMixinDeclaration(
       mixinSymbol: MixinSymbol
   )(implicit scope: Scope): JSClassMethod = {
-    val getterScope = scope.derive(s"getter ${mixinSymbol.lexicalName}")
-    val mixinScope = getterScope.derive(s"mixin ${mixinSymbol.lexicalName}")
+    val getterScope = scope.deriveUnit(s"getter ${mixinSymbol.lexicalName}")
+    val mixinScope = getterScope.deriveUnit(s"mixin ${mixinSymbol.lexicalName}")
     // Collect class fields.
     val fields = mixinSymbol.body.collectFields ++
       mixinSymbol.body.collectTypeNames.flatMap(resolveTraitFields)
@@ -470,7 +470,7 @@ class JSBackend(allowUnresolvedSymbols: Boolean) {
     val members = mixinSymbol.methods.map {
       translateNewClassMember(_, fields)(mixinScope)
     } 
-    val constructorScope = mixinScope.derive(s"${mixinSymbol.lexicalName} constructor")
+    val constructorScope = mixinScope.deriveUnit(s"${mixinSymbol.lexicalName} constructor")
     fields.foreach(constructorScope.declareValue(_, Some(false), false))
     val rest = constructorScope.declareValue("rest", Some(false), false)
     val base = getterScope.declareValue("base", Some(false), false)
@@ -541,9 +541,9 @@ class JSBackend(allowUnresolvedSymbols: Boolean) {
   protected def translateModuleDeclaration(
       moduleSymbol: ModuleSymbol
   )(implicit scope: Scope): JSClassGetter = {
-    val getterScope = scope.derive(s"getter ${moduleSymbol.lexicalName}")
-    val moduleScope = scope.derive(s"module ${moduleSymbol.lexicalName}")
-    val constructorScope = moduleScope.derive(s"${moduleSymbol.lexicalName} constructor")
+    val getterScope = scope.deriveUnit(s"getter ${moduleSymbol.lexicalName}")
+    val moduleScope = scope.deriveUnit(s"module ${moduleSymbol.lexicalName}")
+    val constructorScope = moduleScope.deriveUnit(s"${moduleSymbol.lexicalName} constructor")
     // Collect class fields.
     val fields = moduleSymbol.body.collectFields ++
       moduleSymbol.body.collectTypeNames.flatMap(resolveTraitFields)
@@ -607,7 +607,7 @@ class JSBackend(allowUnresolvedSymbols: Boolean) {
   protected def translateNewClassDeclaration(
       classSymbol: NewClassSymbol
   )(implicit scope: Scope): JSClassGetter = {
-    val getterScope = scope.derive(s"${classSymbol.lexicalName} getter")
+    val getterScope = scope.deriveUnit(s"${classSymbol.lexicalName} getter")
     val cacheSymbol = getterScope.declareValue("cache", Some(false), false)
     val classBody = translateNewClassExpression(classSymbol, N, cacheSymbol.runtimeName)(getterScope)
     val constructor = classBody match {
@@ -635,7 +635,7 @@ class JSBackend(allowUnresolvedSymbols: Boolean) {
       cacheName: Str
   )(implicit scope: Scope): JSClassNewDecl = {
     // Translate class methods and getters.
-    val classScope = scope.derive(s"class ${classSymbol.lexicalName}")
+    val classScope = scope.deriveUnit(s"class ${classSymbol.lexicalName}")
     // Collect class fields.
     val fields = classSymbol.body.collectFields ++
       classSymbol.body.collectTypeNames.flatMap(resolveTraitFields)
@@ -650,7 +650,7 @@ class JSBackend(allowUnresolvedSymbols: Boolean) {
       translateNewClassMember(_, fields, S(JSConstDecl(classSymbol.lexicalName, JSField(JSIdent(cacheName), classSymbol.lexicalName))))(classScope)
     }
 
-    val constructorScope = classScope.derive(s"${classSymbol.lexicalName} constructor")
+    val constructorScope = classScope.deriveUnit(s"${classSymbol.lexicalName} constructor")
     fields.foreach(constructorScope.declareValue(_, Some(false), false))
     val restRuntime = rest.flatMap(name => S(constructorScope.declareValue(name, Some(false), false).runtimeName))
     val base: Opt[JSExpr] =
@@ -695,8 +695,8 @@ class JSBackend(allowUnresolvedSymbols: Boolean) {
     val name = method.nme.name
     // Create the method/getter scope.
     val memberScope = method.rhs.value match {
-      case _: Lam => scope.derive(s"method $name")
-      case _ => scope.derive(s"getter $name")
+      case _: Lam => scope.deriveUnit(s"method $name")
+      case _ => scope.deriveUnit(s"getter $name")
     }
     // Declare the alias for `this` before declaring parameters.
     val selfSymbol = memberScope.declareThisAlias()
@@ -733,8 +733,8 @@ class JSBackend(allowUnresolvedSymbols: Boolean) {
     val name = method.nme.name
     // Create the method/getter scope.
     val memberScope = method.rhs.value match {
-      case _: Lam => scope.derive(s"method $name")
-      case _ => scope.derive(s"getter $name")
+      case _: Lam => scope.deriveUnit(s"method $name")
+      case _ => scope.deriveUnit(s"getter $name")
     }
     // Declare the alias for `this` before declaring parameters.
     val selfSymbol = memberScope.declareThisAlias()

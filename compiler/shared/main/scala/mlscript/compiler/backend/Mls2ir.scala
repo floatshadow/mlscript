@@ -17,9 +17,6 @@ class Mls2ir {
   val entryBB = BasicBlock("entry", Nil, ListBuffer())
   var bb = entryBB
 
-  // FIXME: cannot use allocateRuntimeName as they can repeat in different
-  // scopes...
-
   def makeCall(name: Str, fn: Operand, args: List[Operand])(implicit
       scope: Scope
   ): Operand =

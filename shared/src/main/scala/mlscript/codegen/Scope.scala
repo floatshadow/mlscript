@@ -1,5 +1,6 @@
 package mlscript.codegen
 
+import scala.collection.mutable.{HashSet, HashMap}
 import mlscript.utils.shorthands._
 import mlscript.{JSStmt, JSExpr, JSLetDecl}
 import mlscript.Type
@@ -10,10 +11,11 @@ import mlscript.{Term, Statement}
 import mlscript.utils.{AnyOps, lastWords}
 import mlscript.JSField
 
-class Scope(name: Str, enclosing: Opt[Scope]) {
-  private val lexicalTypeSymbols = scala.collection.mutable.HashMap[Str, TypeSymbol]()
-  private val lexicalValueSymbols = scala.collection.mutable.HashMap[Str, RuntimeSymbol]()
-  private val runtimeSymbols = scala.collection.mutable.HashSet[Str]()
+// the set of runtimeSymbols should be globally unique, or at least unique
+// within a function...
+class Scope(name: Str, enclosing: Opt[Scope], runtimeSymbols: HashSet[Str]) {
+  private val lexicalTypeSymbols = HashMap[Str, TypeSymbol]()
+  private val lexicalValueSymbols = HashMap[Str, RuntimeSymbol]()
 
   val tempVars: TemporaryVariableEmitter = TemporaryVariableEmitter()
 
@@ -21,7 +23,7 @@ class Scope(name: Str, enclosing: Opt[Scope]) {
     * Shorthands for creating top-level scopes.
     */
   def this(name: Str) = {
-    this(name, N)
+    this(name, N, HashSet())
     // TODO: allow types and values to have the same name
     // TODO: read built-in symbols from `Typer`.
     Ls(
@@ -365,11 +367,17 @@ class Scope(name: Str, enclosing: Opt[Scope]) {
   def existsRuntimeSymbol(name: Str): Bool = runtimeSymbols.contains(name)
 
   /**
-    * Shorthands for deriving normal scopes.
-    */
-  def derive(name: Str): Scope = new Scope(name, S(this))
+   * derive a new scope from current scope with shared runtime symbol set
+   * used for scope within a function
+   */
+  def derive(name: Str): Scope = new Scope(name, S(this), runtimeSymbols)
 
-  
+  /**
+    * derive a new scope from current scope with a different runtime symbol set
+    * used as the top-level scope of a function.
+    */
+  def deriveUnit(name: Str): Scope = new Scope(name, S(this), HashSet())
+
   def refreshRes(): Unit = {
     lexicalValueSymbols("res") = ValueSymbol("res", "res", Some(false), false)
   }
