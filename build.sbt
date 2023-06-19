@@ -85,6 +85,7 @@ lazy val compiler = crossProject(JSPlatform, JVMPlatform).in(file("compiler"))
     name := "mlscript-compiler",
     scalaVersion := "3.1.3",
     sourceDirectory := baseDirectory.value.getParentFile()/"shared",
+    libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test,
     watchSources += WatchSource(
       baseDirectory.value.getParentFile()/"shared"/"test"/"diff", "*.mls", NothingFilter),
   )
