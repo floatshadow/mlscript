@@ -6,7 +6,7 @@ import scala.collection.mutable.Map
 // this class allows the compiler to optimize memory layout for specific record
 // type
 class RecordObj(val fields: Map[String, Type]):
-  def apply(name: String): Type = fields(name)
+  def apply(name: String): Option[Type] = fields.get(name)
   // Field offset in bits
   // Note: The offset is in bits instead of bytes. Booleans may be represented
   // using a bit, and nested records may be represented in packed format.
@@ -20,7 +20,7 @@ class RecordObj(val fields: Map[String, Type]):
     .mkString(", ") + "}"
 
 class VariantObj(val variants: Map[String, Option[Type.Record]]):
-  def apply(name: String): Option[Type.Record] = variants(name)
+  def apply(name: String): Option[Option[Type.Record]] = variants.get(name)
   // Pattern to check if the variant is of a certain type
   // The first element is the offset in bits, the second element is
   // the bit pattern. offset + bit pattern length = record offset,
