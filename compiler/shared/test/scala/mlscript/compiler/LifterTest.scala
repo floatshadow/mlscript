@@ -6,8 +6,8 @@ import scala.util.control.NonFatal
 import scala.collection.mutable.StringBuilder
 import mlscript.codegen.Helpers.inspect as showStructure
 
-class DiffTestCompiler extends DiffTests {
-  import DiffTestCompiler.*
+class LifterTestCompiler extends DiffTests {
+  import LifterTestCompiler.*
   override def postProcess(mode: ModeType, basePath: List[Str], testName: Str, unit: TypingUnit): List[Str] = 
     val outputBuilder = StringBuilder()
     outputBuilder ++= "Parsed:\n"
@@ -31,10 +31,10 @@ class DiffTestCompiler extends DiffTests {
   }
 }
 
-object DiffTestCompiler {
+object LifterTestCompiler {
 
   private val pwd = os.pwd
-  private val dir = pwd/"compiler"/"shared"/"test"/"diff"
+  private val dir = pwd / "compiler" / "shared" / "test" / "diff"/"lifter"
   
   private val allFiles = os.walk(dir).filter(_.toIO.isFile)
   
