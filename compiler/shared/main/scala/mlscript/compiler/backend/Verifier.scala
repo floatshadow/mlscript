@@ -112,8 +112,8 @@ object Verifier {
             case _ => ()
           uses = uses | (args ++ List(fn)).toSet
         case Instruction.Match(value, cases) =>
-          succs = cases.values.map(_._1).toList
-          uses = uses | Set(value) | cases.values
+          succs = cases.values.toList
+          uses = uses | Set(value) | cases.keys
             .map(_._2.toSet)
             .reduce((set1, set2) => set1 | set2)
           terminated = true

@@ -66,7 +66,8 @@ object ModulePrinter {
 
   private def mkInstr(instr: WasmInstruction): Document = {
     instr match {
-      case Const(value) => s"i32.const $value"
+      case I32Const(value) => s"i32.const $value"
+      case F32Const(value) => s"f32.const $value"
       case Add => "i32.add"
       case Sub => "i32.sub"
       case Mul => "i32.mul"

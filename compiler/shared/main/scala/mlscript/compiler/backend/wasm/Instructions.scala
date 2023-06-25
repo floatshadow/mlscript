@@ -7,7 +7,8 @@ object WasmInstructions {
   abstract class WasmInstruction
 
   // Load an int32 constant to the stack
-  case class Const(value: Int) extends WasmInstruction
+  case class I32Const(value: Int) extends WasmInstruction
+  case class F32Const(value: Float) extends WasmInstruction
 
   // Numeric/logical instructions (all take i32 operands)
   case object Add  extends WasmInstruction

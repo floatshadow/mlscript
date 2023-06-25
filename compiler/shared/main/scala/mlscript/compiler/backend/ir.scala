@@ -125,7 +125,7 @@ enum Instruction:
   )
   case Match(
       val value: Operand,
-      val cases: Map[String, (BasicBlock, List[Operand])]
+      val cases: Map[(String, List[Operand]), BasicBlock]
   )
   case Return(val value: Option[Operand])
   case SetField(val obj: Operand.Var, val field: String, val value: Operand)
@@ -143,6 +143,18 @@ class BasicBlock(
     val params: List[Operand.Var],
     var instructions: ListBuffer[Instruction]
 ):
+  import Instruction._
+
+  def leaving: Option[Instruction] = instructions.find {
+    case Unreachable | Match(_, _) | Branch(_, _) | Return(_) => true
+    case _                                                    => false
+  }
+
+  def children: List[BasicBlock] = leaving match
+    case S(Branch(target, _)) => List(target)
+    case S(Match(_, cases))   => cases.values.toList
+    case _                    => Nil
+
   def printIR =
     var visited: Map[String, BasicBlock] = Map(name -> this)
     var toPrint = List(this)
@@ -153,35 +165,37 @@ class BasicBlock(
         toPrint = block :: toPrint
       else if old != Some(block) then lastWords(s"invalid ir")
     def printInstruction(inst: Instruction): String = inst match
-      case Instruction.Assignment(lhs, rhs) => s"  ${lhs} = ${rhs}"
-      case Instruction.Branch(target, args) =>
+      case Assignment(lhs, rhs) => s"  ${lhs} = ${rhs}"
+      case Branch(target, args) =>
         visitBlock(target)
         s"  br ${target.name} (${args.mkString(", ")})"
-      case Instruction.Call(Some(result), fn, args) =>
+      case Call(Some(result), fn, args) =>
         s"  $result = call ${fn} (${args.mkString(", ")})"
-      case Instruction.Call(None, fn, args) =>
+      case Call(None, fn, args) =>
         s"  call ${fn} (${args.mkString(", ")})"
-      case Instruction.Match(value, cases) =>
+      case Match(value, cases) =>
+        cases.foreach((key, value) => visitBlock(value))
         val casesStr = cases
           .map((name, value) =>
-            s"    ${name} -> ${value._1.name} (${value._2.mkString(", ")})"
+            s"    ${name._1} (${name._2.mkString(", ")}) -> ${value.name}"
           )
           .mkString("\n")
         s"  match ${value}\n${casesStr}"
-      case Instruction.Return(value) =>
+      case Return(value) =>
         "  return" + value.map(v => s" $v").getOrElse("")
-      case Instruction.SetField(obj, field, value) =>
+      case SetField(obj, field, value) =>
         s"  setfield ${obj}.${field} = ${value}"
-      case Instruction.Unreachable => s"  unreachable"
-      case Instruction.Intrinsic(Some(result), name, args) =>
+      case Unreachable => s"  unreachable"
+      case Intrinsic(Some(result), name, args) =>
         s"  $result = intrinsic ${name} (${args.mkString(", ")})"
-      case Instruction.Intrinsic(None, name, args) =>
+      case Intrinsic(None, name, args) =>
         s"  intrinsic ${name} (${args.mkString(", ")})"
 
     var buffer = new StringBuilder
     while toPrint.nonEmpty do
       val block = toPrint.head
       toPrint = toPrint.tail
+      buffer ++= s"Basic Block ${block.name}:\n"
       for (str <- block.instructions.map(printInstruction))
         buffer ++= str
         buffer += '\n'

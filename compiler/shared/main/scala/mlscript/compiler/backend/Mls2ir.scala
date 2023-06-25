@@ -2,7 +2,7 @@ package mlscript
 package compiler.backend
 
 import scala.collection.mutable.{ListBuffer, HashMap}
-import scala.collection.mutable.{Set => MutSet}
+import scala.collection.mutable.{Set => MutSet, Map => MutMap}
 import mlscript.codegen._
 import mlscript.utils.shorthands.*
 import mlscript.utils.*
@@ -17,6 +17,20 @@ class Mls2ir {
   val entryBB = BasicBlock("entry", Nil, ListBuffer())
   var bb = entryBB
 
+  def termToType(term: Term): Type = term match
+    case Var("int")    => Type.Int32
+    case Var("unit")   => Type.Unit
+    case Var("bool")   => Type.Boolean
+    case Var("string") => Type.OpaquePointer
+    case _             => ???
+
+  def termToOperand(term: Term): Operand = term match
+    case IntLit(v)  => Operand.Const(v.toInt)
+    case DecLit(v)  => Operand.Const(v.toFloat)
+    case StrLit(v)  => Operand.Const(v)
+    case UnitLit(_) => Operand.Unit
+    case _          => ???
+
   def makeCall(name: Str, fn: Operand, args: List[Operand])(implicit
       scope: Scope
   ): Operand =
@@ -27,7 +41,9 @@ class Mls2ir {
   def addTmpVar(name: Str, value: PureValue)(implicit
       scope: Scope
   ): Operand.Var =
+    scope.declareValue(name, Some(false), false) // FIXME byvaluerec, islambda
     val result: Operand.Var = Operand.Var(scope.allocateRuntimeName(name))
+    varMap += name -> result
     bb.instructions += Instruction.Assignment(result, value)
     result
 
@@ -115,7 +131,7 @@ class Mls2ir {
       )
       bb.instructions += Instruction.Match(
         tstOp,
-        Map("true" -> (trueBB, Nil), "false" -> (falseBB, Nil))
+        Map(("true", Nil) -> trueBB, ("false", Nil) -> falseBB)
       )
       bb = trueBB
       val conOp = translateTerm(con)
@@ -141,11 +157,21 @@ class Mls2ir {
   def translateTerm(term: Term)(implicit scope: Scope): Operand = term match
     case _ if term.desugaredTerm.isDefined =>
       translateTerm(term.desugaredTerm.getOrElse(die))
-    case Var(name)   => translateVar(name, false)
-    case Super()     => ??? // FIXME: need to check the semantics
-    case Lam(_, _)   => ??? // should be handled by lifter
-    case t: App      => translateApp(t)
-    case Rcd(fields) => ??? // FIXME: what representation should we use?
+    case Var(name) => translateVar(name, false)
+    case Super()   => ??? // FIXME: need to check the semantics
+    case Lam(_, _) => ??? // should be handled by lifter
+    case t: App    => translateApp(t)
+    case Rcd(fields) => // FIXME: what representation should we use?
+      val recordtpe = Type.Record(
+        RecordObj(
+          fields
+            .map((name, field) => {
+              name.name -> termToType(field.value)
+            })
+            .to(MutMap)
+        )
+      )
+      addTmpVar(PureValue.Alloc(recordtpe))
     case Sel(receiver, fieldName) =>
       val receiverOp = translateTerm(receiver)
       // FIXME: add cast
@@ -169,7 +195,7 @@ class Mls2ir {
     case Blk(stmts) =>
       val blkScope = scope.derive("Blk")
       val flattened = stmts.iterator.flatMap(_.desugared._2).toList
-      flattened.iterator.zipWithIndex.map {
+      flattened.iterator.zipWithIndex.foreach {
         case (t: Term, index) =>
           val result = translateTerm(t)(blkScope)
           if index + 1 == flattened.length then
@@ -203,11 +229,147 @@ class Mls2ir {
     case Subs(arr, idx)   => ???
     case Assign(lhs, rhs) => ??? // FIXME: we have assign???
     case Inst(bod)        => translateTerm(bod)
-    case iff: If =>
-      throw CodeGenError(s"if expression was not desugared")
-    case New(_, _)      => ??? // FIXME: need to check semantics too
-    case Forall(_, bod) => translateTerm(bod)
-    case TyApp(base, _) => translateTerm(base)
+    case iff: If          => translateIf(iff)
+    case New(_, _)        => ??? // FIXME: need to check semantics too
+    case Forall(_, bod)   => translateTerm(bod)
+    case TyApp(base, _)   => translateTerm(base)
     case _: Bind | _: Test | If(_, _) | _: Splc | _: Where =>
       throw CodeGenError(s"cannot generate code for term ${inspect(term)}")
+
+  def translateIf(term: If)(implicit scope: Scope): Operand =
+
+    def translateChildBlock(term: Term, target: BasicBlock, next: BasicBlock) =
+      bb = target
+      translateTerm(term)
+      bb.instructions += Instruction.Branch(next, Nil)
+
+    term match
+      case If(body, elze) =>
+        body match
+          case IfThen(iff, thenn) =>
+            val result = Operand.Var(scope.allocateRuntimeName)
+            val trueBB =
+              BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
+            val falseBB =
+              BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
+            val nextBB =
+              BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
+            elze match
+              case Some(term) =>
+                bb.instructions += Instruction.Match(
+                  translateTerm(iff),
+                  Map(("true", Nil) -> trueBB, ("false", Nil) -> falseBB)
+                )
+                translateChildBlock(term, falseBB, nextBB)
+              case None =>
+                bb.instructions += Instruction.Match(
+                  translateTerm(iff),
+                  Map(("true", Nil) -> trueBB, ("false", Nil) -> nextBB)
+                )
+            translateChildBlock(thenn, trueBB, nextBB)
+            bb = nextBB
+            result
+          case IfOpApp(lhs, op, IfBlock(lines)) =>
+            val parent = bb
+            val nextBB =
+              BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
+            var elseCase = false
+            var children: Map[(String, List[Operand]), BasicBlock] =
+              lines
+                .map(_ match
+                  case Left(IfThen(App(Var(typename), Tup(fields)), thenn)) =>
+                    val thenBlock = BasicBlock(
+                      scope.allocateRuntimeName(),
+                      Nil,
+                      ListBuffer()
+                    )
+                    val args = fields.map(_ match
+                      case (_, Fld(_, _, term)) => termToOperand(term)
+                      case _ => throw CodeGenError(s"unsupported if statement")
+                    )
+                    translateChildBlock(thenn, thenBlock, nextBB)
+                    (typename, args) -> thenBlock
+                  case Left(IfElse(term)) =>
+                    elseCase = true
+                    val elseBlock = BasicBlock(
+                      scope.allocateRuntimeName(),
+                      Nil,
+                      ListBuffer()
+                    )
+                    translateChildBlock(term, elseBlock, nextBB)
+                    ("else", Nil) -> elseBlock
+                  case _ => throw CodeGenError(s"unsupported if statement")
+                )
+                .toMap
+            if (!elseCase)
+              children += ("else", Nil) -> nextBB
+            parent.instructions += Instruction.Match(
+              translateTerm(lhs),
+              children
+            )
+            bb = nextBB
+            val result: Operand.Var = Operand.Var(scope.allocateRuntimeName)
+            result
+          case others => throw CodeGenError(s"unsupported if statement")
+
+  def translateTypingUnit(unit: TypingUnit)(implicit scope: Scope): Unit =
+    unit.entities.foreach { entity =>
+      entity match
+        case LetS(isRec, pat, rhs)    => ???
+        case DataDefn(body)           => ???
+        case DatatypeDefn(head, body) => ???
+        case NuTypeDef(
+              kind,
+              nme,
+              tparams,
+              params,
+              sig,
+              parents,
+              superAnnot,
+              thisAnnot,
+              body
+            ) =>
+          kind match
+            case Cls =>
+              scope.declareClass(
+                nme.name,
+                params.fields.collect { case S(variable) -> field =>
+                  variable.name
+                },
+                TypeName(nme.name),
+                Nil
+              )
+              symbolTypeMap += nme.name -> Type.TypeName(nme.name)
+            case Trt => ???
+            case Mxn => ???
+            case Als => ???
+            case Nms => ???
+          translateTypingUnit(body)
+        case term: Term =>
+          translateTerm(term) // FIXME handle return value
+        case NuFunDef(isLetRec, nme, tparams, rhs) =>
+          isLetRec match
+            case None       => ???
+            case Some(true) => ???
+            case Some(false) =>
+              rhs match
+                case Left(term) =>
+                  addTmpVar(nme.name, PureValue.Op(translateTerm(term)))
+                case Right(tpe) => ???
+        case TypeDef(
+              kind,
+              nme,
+              tparams,
+              body,
+              mthDecls,
+              mthDefs,
+              positionals
+            ) =>
+          ???
+        case Def(rec, nme, rhs, isByname) => ???
+    }
+
+  def apply(unit: TypingUnit): BasicBlock =
+    translateTypingUnit(unit)(Scope("root"))
+    entryBB
 }

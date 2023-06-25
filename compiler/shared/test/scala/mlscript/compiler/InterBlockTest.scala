@@ -77,7 +77,7 @@ class InterBlockTest extends munit.FunSuite {
           Assignment(Var("x0"), Alloc(Boolean)),
           Match(
             Var("x0"),
-            Map("true" -> (blk_1, List()), "false" -> (blk_2, List()))
+            Map(("true", Nil) -> blk_1, ("false", Nil) -> blk_2)
           )
         )
       )
@@ -119,7 +119,7 @@ class InterBlockTest extends munit.FunSuite {
           Assignment(Var("x0"), Alloc(Boolean)),
           Match(
             Var("x0"),
-            Map("true" -> (blk_1, List()), "false" -> (blk_2, List()))
+            Map(("true", Nil) -> blk_1, ("false", Nil) -> blk_2)
           )
         )
       )
