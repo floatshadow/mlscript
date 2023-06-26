@@ -97,12 +97,12 @@ def pow pow n x =
     if n > 0 then pow (n - 1) x * x
     else 1
 //│ pow: (int -> 'a -> int) -> int -> (int & 'a) -> int
-//│    = [Function: pow]
+//│    = [Function: pow2]
 
 def pow = z pow
 pow 3 4
 //│ pow: int -> int -> int
-//│    = [Function: pow2]
+//│    = [Function: pow3]
 //│ res: int
 //│    = 64
 

@@ -242,7 +242,7 @@ f 1
 res 2
 //│ res: 1 | 2
 //│ Runtime error:
-//│   TypeError: b is not a function
+//│   TypeError: b1 is not a function
 
 
 :e

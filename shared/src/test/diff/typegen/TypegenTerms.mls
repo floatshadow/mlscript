@@ -42,7 +42,7 @@ def g = rcd with { y = "yeah" }
 //│ export declare const rcd: {readonly x: 1}
 //│ export declare const res: 1
 //│ export declare const funky<a, b>: (arg: (arg1: Omit<a, "y"> & {readonly y: "nah"}) => b) => (arg2: a) => b
-//│ export declare const cool<a, b>: (arg: (arg1: Omit<a, "a" | "b"> & {readonly a: "apple", readonly b: "ball"}) => b) => (arg2: a) => b
+//│ export declare const cool<a, b>: (arg3: (arg4: Omit<a, "a" | "b"> & {readonly a: "apple", readonly b: "ball"}) => b) => (arg5: a) => b
 //│ export declare const g: {readonly x: 1, readonly y: "yeah"}
 //│ // end ts
 
@@ -56,8 +56,8 @@ def g x y = if x.b == 1 then x else x.a
 //│ g: ({a: 'a, b: number} & 'a) -> anything -> 'a
 //│ // start ts
 //│ export declare const f: (arg: int) => (arg1: string) => (arg2: bool) => int | string
-//│ export declare const fact: (arg: int) => int
-//│ export declare const g<a>: (arg: {readonly a: a, readonly b: number} & a) => (arg1: unknown) => a
+//│ export declare const fact: (arg3: int) => int
+//│ export declare const g<a>: (arg4: {readonly a: a, readonly b: number} & a) => (arg5: unknown) => a
 //│ // end ts
 
 // FIXME
@@ -101,7 +101,7 @@ def g = fun x -> fun y -> if x == y then x y else y x
 //│ g: nothing -> nothing -> nothing
 //│ // start ts
 //│ export declare const nonsense<a, b, c>: (arg: ((arg1: a) => b) & {readonly a: number} & c) => (arg2: {readonly b: number} & a) => ((arg3: unknown) => c) | b
-//│ export declare const g: (arg: never) => (arg1: never) => never
+//│ export declare const g: (arg4: never) => (arg5: never) => never
 //│ // end ts
 
 :ts
@@ -113,7 +113,7 @@ def y: "a" | "b" | ~string
 //│ // start ts
 //│ type Neg<NegatedType, FromType> = FromType extends NegatedType ? never: FromType
 //│ export declare const x: int | Neg<string, a>
-//│ export declare const y: "a" | "b" | Neg<string, a>
+//│ export declare const y: "a" | "b" | Neg<string, b>
 //│ // end ts
 
 :ts
@@ -125,7 +125,7 @@ app 2 cont
 //│ res: int
 //│ // start ts
 //│ export declare const cont: (arg: int) => int
-//│ export declare const app<a>: (arg: int) => (arg1: (arg2: int) => a) => a
+//│ export declare const app<a>: (arg1: int) => (arg2: (arg3: int) => a) => a
 //│ export declare const res: int
 //│ // end ts
 
@@ -140,9 +140,9 @@ def l: ((1, 2), (3, 4)) -> 5
 //│ l: ((1, 2,), (3, 4,),) -> 5
 //│ // start ts
 //│ export declare const g: (arg: int, arg1: int) => int
-//│ export declare const h<a>: (arg: int, arg1: readonly [(arg2: a) => int, a]) => int
-//│ export declare const k<a, b>: (arg: int, arg1: readonly [(arg2: int) => a, int]) => (arg3: int, arg4: (arg5: int) => (arg6: a) => b, arg7: int) => b
-//│ export declare const l: (arg: readonly [1, 2], arg1: readonly [3, 4]) => 5
+//│ export declare const h<a>: (arg2: int, arg3: readonly [(arg4: a) => int, a]) => int
+//│ export declare const k<a, b>: (arg5: int, arg6: readonly [(arg7: int) => a, int]) => (arg8: int, arg9: (arg10: int) => (arg11: a) => b, arg12: int) => b
+//│ export declare const l: (arg13: readonly [1, 2], arg14: readonly [3, 4]) => 5
 //│ // end ts
 
 

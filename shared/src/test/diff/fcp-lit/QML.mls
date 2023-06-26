@@ -22,7 +22,7 @@ let poly f = let y = f in (y 1, y true) in poly
 // let poly f = let y = f {forall 'a. 'a -> 'a} in (y 1, y true)
 def poly = fun (f : (forall 'a. 'a -> 'a)) -> (f 1, f true)
 //│ poly: (forall 'a. 'a -> 'a) -> (1, true,)
-//│     = [Function: poly]
+//│     = [Function: poly2]
 
 def app : ('a -> 'b) -> 'a -> 'b
 //│ app: ('a -> 'b) -> 'a -> 'b
@@ -167,7 +167,7 @@ def div a b = Math.trunc(a/b)
 
 def mod = let rec mod a b = if a < b then a else mod (a - b) b in mod
 //│ mod: int -> int -> int
-//│    = [Function: mod]
+//│    = [Function: mod1]
 
 
 // ********** SMALL ARRAY EXAMPLE **********
@@ -275,7 +275,7 @@ rec def mkSArray n = if n == 0 then sbase else sstep (mkSArray (n - 1))
 //│ int -> ExSmall
 //│   <:  mkSArray:
 //│ int -> ExSmall
-//│         = [Function: mkSArray]
+//│         = [Function: mkSArray1]
 
 mkSArray 2 (fun (xinit, xsub) -> xinit 2)
 //│ res: ??r
@@ -521,7 +521,7 @@ rec def mkArray n = if n == 0 then base else step (mkArray (n - 1))
 //│ int -> ExSig
 //│   <:  mkArray:
 //│ int -> ExSig
-//│        = [Function: mkArray]
+//│        = [Function: mkArray1]
 
 mkArray 3 (fun ((((xinit, xsub), xupdate), xfold),) -> xinit 2)
 //│ res: ??r

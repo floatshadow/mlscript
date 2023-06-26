@@ -146,7 +146,7 @@ succ' {} {} {}
 //│ ╙──      	                                ^
 //│ res: error
 //│ Runtime error:
-//│   TypeError: n is not a function
+//│   TypeError: n1 is not a function
 
 fun x -> succ' x x x x x x x x x
 //│ res: ('a -> 'a -> 'b & 'b -> 'a -> 'a -> 'a -> 'a -> 'a -> 'a -> 'c & 'a) -> 'c
@@ -497,7 +497,7 @@ type Z = forall 'a 'b. ('a -> 'b) -> ('a -> 'b)
 // :e // due to tapping
 def f x = ((x : Sid), ((x : Sid) : Z))
 //│ f: Sid -> (Sid, Z,)
-//│  = [Function: f]
+//│  = [Function: f13]
 
 // (* Ne type pas ... c'est une instance polymorphe. Interdit. *)
 // untype fun x -> (x:sid), (x:z)
@@ -615,7 +615,7 @@ succ' {} {} {}
 //│ ╙──       	                                ^^^^^^^^^
 //│ res: error
 //│ Runtime error:
-//│   TypeError: n is not a function
+//│   TypeError: n23 is not a function
 
 
 

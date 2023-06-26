@@ -91,13 +91,13 @@ box1.Map (fun x -> Box { inner = x })
 //│ ├─┬ Query 2/3
 //│ │ ├── Prelude: <empty>
 //│ │ ├── Code:
-//│ │ ├──   res = box1.Map((x) => add(x)(2));
+//│ │ ├──   res = box1.Map((x1) => add(x1)(2));
 //│ │ ├── Intermediate: Box { inner: 3 }
 //│ │ └── Reply: [success] Box { inner: 3 }
 //│ └─┬ Query 3/3
 //│   ├── Prelude: <empty>
 //│   ├── Code:
-//│   ├──   res = box1.Map((x) => new Box({ inner: x }));
+//│   ├──   res = box1.Map((x2) => new Box({ inner: x2 }));
 //│   ├── Intermediate: Box { inner: Box { inner: 1 } }
 //│   └── Reply: [success] Box { inner: Box { inner: 1 } }
 //│ res: Box[int]

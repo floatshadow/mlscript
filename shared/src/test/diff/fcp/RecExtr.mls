@@ -122,7 +122,7 @@ rec def r x = let tmp = x in x
 
 rec def x = x
 //│ x: nothing
-//│  = [Function: x]
+//│  = [Function: x5]
 
 rec def lr1 = { tail = lr1 }
 //│ lr1: 'lr1

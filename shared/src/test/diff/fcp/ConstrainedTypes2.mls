@@ -69,7 +69,7 @@ f {} {}
 //│ ╙──      	            ^^^
 //│ res: error
 //│ Runtime error:
-//│   TypeError: n is not a function
+//│   TypeError: n1 is not a function
 
 
 
@@ -162,7 +162,7 @@ test 0 1 2
 //│ ╙──       	              ^^^^^^^
 //│ res: error
 //│ Runtime error:
-//│   TypeError: n is not a function
+//│   TypeError: n4 is not a function
 
 def test extr x =
   let f n m = (n x 0)
@@ -192,6 +192,6 @@ test 0 1 2
 //│ ╙──       	               ^^^
 //│ res: error
 //│ Runtime error:
-//│   TypeError: n is not a function
+//│   TypeError: n5 is not a function
 
 

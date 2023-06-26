@@ -22,7 +22,7 @@ pawel y = (fun z -> z y z) (fun z -> z y z)
 
 def f = (fun z -> z z : (forall 'X. 'X -> 'X) -> (forall 'X. 'X -> 'X))
 //│ f: ('a -> (forall 'X. 'X -> 'X) -> (forall 'X0. 'X0 -> 'X0) & 'a) -> (forall 'X. 'X -> 'X) -> (forall 'X0. 'X0 -> 'X0)
-//│  = [Function: f]
+//│  = [Function: f1]
 
 f ((fun y -> y) : forall 'X. 'X -> 'X)
 //│ res: (forall 'X. 'X -> 'X) -> (forall 'X0. 'X0 -> 'X0)
@@ -30,7 +30,7 @@ f ((fun y -> y) : forall 'X. 'X -> 'X)
 
 def f = (fun z -> z z); f (fun y -> y)
 //│ f: ('a -> 'b & 'a) -> 'b
-//│  = [Function: f1]
+//│  = [Function: f2]
 //│ res: 'a -> 'a
 //│    = [Function (anonymous)]
 

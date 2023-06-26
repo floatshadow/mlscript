@@ -233,10 +233,10 @@ fun f(c) =
 //│ class TypingUnit8 {}
 //│ const typing_unit8 = new TypingUnit8;
 //│ // Query 1
-//│ globalThis.f = function f(c) {
+//│ globalThis.f = function f(c1) {
 //│   return ((() => {
 //│     let a;
-//│     return a = c, a instanceof F.class ? ((x) => x)(c.x) : a instanceof G ? 2 : 0;
+//│     return a = c1, a instanceof F.class ? ((x) => x)(c1.x) : a instanceof G ? 2 : 0;
 //│   })());
 //│ };
 //│ // End of generated code
@@ -339,7 +339,7 @@ fun g(x: Int) =
 //│ class TypingUnit11 {}
 //│ const typing_unit11 = new TypingUnit11;
 //│ // Query 1
-//│ globalThis.g = function g(x) {
+//│ globalThis.g = function g(x1) {
 //│   return ((() => {
 //│     const L = (() => {
 //│       class L {
@@ -351,7 +351,7 @@ fun g(x: Int) =
 //│         }
 //│         get ll() {
 //│           const y = this.#y;
-//│           return x + y;
+//│           return x1 + y;
 //│         }
 //│       }
 //│       let ctor;

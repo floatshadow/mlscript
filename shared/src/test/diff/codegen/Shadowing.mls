@@ -12,8 +12,8 @@ x =>
 //│ const typing_unit = new TypingUnit;
 //│ // Query 1
 //│ res = ((x) => (() => {
-//│   return ((x) => (() => {
-//│     return x + 1;
+//│   return ((x1) => (() => {
+//│     return x1 + 1;
 //│   })());
 //│ })());
 //│ // End of generated code

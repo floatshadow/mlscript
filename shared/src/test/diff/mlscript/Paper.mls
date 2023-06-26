@@ -64,7 +64,7 @@ def div n m = n / (m: ~0 & number)
 
 f x = div x 2
 //│ f: number -> number
-//│  = [Function: f]
+//│  = [Function: f3]
 
 :e // `:e` is used to indicate this error is expected
 g (x: int) = div 100 x

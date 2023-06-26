@@ -64,10 +64,10 @@ let lockA = Lock 20 in let lockB = Lock 30 in (Bank lockA 2000).Better(Bank lock
 //│     cash: int
 //│     constructor(fields: {lock: Lock<int>, cash: int})
 //│     readonly Potential: number
-//│     Better(arg: Bank): bool
+//│     Better(arg2: Bank): bool
 //│ }
-//│ export declare const Lock<pins>: (arg: pins) => Lock<pins>
-//│ export declare const Bank<lock, cash>: (arg: Lock<int> & lock) => (arg1: int & cash) => Omit<Bank, "cash" | "lock"> & {readonly cash: cash, readonly lock: lock}
+//│ export declare const Lock<pins>: (arg3: pins) => Lock<pins>
+//│ export declare const Bank<lock, cash>: (arg4: Lock<int> & lock) => (arg5: int & cash) => Omit<Bank, "cash" | "lock"> & {readonly cash: cash, readonly lock: lock}
 //│ export declare const res: bool
 //│ // end ts
 
@@ -106,7 +106,7 @@ def Some v = Some { value = v }
 //│     Append(arg: T): LinkedList<T>
 //│ }
 //│ export declare const None: None
-//│ export declare const Some<value>: (arg: value) => Some<value>
+//│ export declare const Some<value>: (arg1: value) => Some<value>
 //│ // end ts
 
 :ts
@@ -138,8 +138,8 @@ class LL[T]: { head: T; tail: LL[T] -> int }
 //│ export declare class LL<T> {
 //│     head: T
 //│     tail: (arg: LL<T>) => int
-//│     constructor(fields: {head: T, tail: (arg: LL<T>) => int})
-//│     Append(arg: T): LL<T>
+//│     constructor(fields: {head: T, tail: (arg1: LL<T>) => int})
+//│     Append(arg2: T): LL<T>
 //│ }
 //│ // end ts
 
@@ -164,8 +164,8 @@ class E: { x: "hello"; y: int } & A1 & B2 & D3
 //│ }
 //│ export declare class E {
 //│     y: int
-//│     x: "hello" & ((arg: int) => int)
-//│     constructor(fields: {y: int, x: "hello" & ((arg: int) => int)})
+//│     x: "hello" & ((arg1: int) => int)
+//│     constructor(fields: {y: int, x: "hello" & ((arg2: int) => int)})
 //│ }
 //│ // end ts
 

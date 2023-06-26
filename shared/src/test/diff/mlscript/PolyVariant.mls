@@ -136,7 +136,7 @@ def f = fun x -> case x._1 of {
     }
   }
 //│ f: {_1: anything, _2: A | B} -> (1 | 2 | 3 | 4)
-//│  = [Function: f2]
+//│  = [Function: f3]
 
 :e
 f ({ _1 = A{}; _2 = C{} })
@@ -186,7 +186,7 @@ def f = fun (x: {_1: A | B; _2: anything} | {_1: anything; _2: A | B}) -> case x
 //│ ║  l.168: 	  | _ -> case x._2 of {
 //│ ╙──       	              ^^^^
 //│ f: {_1: anything, _2: anything} -> (1 | 2 | 3 | 4)
-//│  = [Function: f3]
+//│  = [Function: f4]
 
 // not useful
 class Tuple[a, b]: { _1: a; _2: b }
@@ -239,7 +239,7 @@ def f = fun (x: L | R) -> case x._1 of {
 //│ ║  l.224: 	  | _ -> case x._2 of {
 //│ ╙──       	              ^^^^
 //│ f: (L | R) -> (1 | 2 | 3 | 4)
-//│  = [Function: f4]
+//│  = [Function: f5]
 
 f (L { _1 = A{}; _2 = C{} })
 //│ res: 1 | 2 | 3 | 4

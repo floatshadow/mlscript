@@ -242,8 +242,8 @@ rcd'.x'
 :js
 foo { x' } = x'
 //│ // Query 1
-//│ globalThis.foo = function foo({ "x'": x$ }) {
-//│   return x$;
+//│ globalThis.foo = function foo({ "x'": x$1 }) {
+//│   return x$1;
 //│ };
 //│ // End of generated code
 //│ foo: {x': 'a} -> 'a
@@ -315,7 +315,7 @@ trait T : {x': int}
 :js
 let f' = fun x -> x + 1 in f' 2
 //│ // Query 1
-//│ res = ((f$) => f$(2))((x) => x + 1);
+//│ res = ((f$1) => f$1(2))((x) => x + 1);
 //│ // End of generated code
 //│ res: int
 //│    = 3

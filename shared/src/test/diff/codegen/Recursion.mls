@@ -23,9 +23,9 @@ def pow1 x =
     else 1
   in go
 //│ // Query 1
-//│ globalThis.pow1 = function pow1(x) {
-//│   return (((go) => go)(function go(n) {
-//│     return n > 0 ? go(n - 1) * x : 1;
+//│ globalThis.pow1 = function pow1(x1) {
+//│   return (((go) => go)(function go(n1) {
+//│     return n1 > 0 ? go(n1 - 1) * x1 : 1;
 //│   }));
 //│ };
 //│ // End of generated code
@@ -39,8 +39,8 @@ pow1 3 4
 :js
 rec def pow2 n = { call = fun x -> if n > 0 then (pow2 (n - 1)).call x * x else 1 }
 //│ // Query 1
-//│ globalThis.pow2 = function pow2(n) {
-//│   return { call: (x) => n > 0 ? pow2(n - 1).call(x) * x : 1 };
+//│ globalThis.pow2 = function pow2(n2) {
+//│   return { call: (x2) => n2 > 0 ? pow2(n2 - 1).call(x2) * x2 : 1 };
 //│ };
 //│ // End of generated code
 //│ pow2: int -> {call: int -> int}

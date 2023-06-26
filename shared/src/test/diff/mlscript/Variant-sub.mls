@@ -19,7 +19,7 @@ f x = Some x
 flatMap f (Some 1)
 flatMap f None
 //│ f: 'v -> Some['v]
-//│  = [Function: f]
+//│  = [Function: f1]
 //│ res: Some[1]
 //│    = Some { v: 1 }
 //│ res: None | Some[nothing]

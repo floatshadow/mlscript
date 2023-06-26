@@ -48,7 +48,7 @@ def head l = l.Head
 //│ List['a] -> 'a
 //│   <:  head:
 //│ List['a] -> 'a
-//│     = [Function: head]
+//│     = [Function: head1]
 
 def tail: forall 'a. List['a] -> List['a]
 def tail l = l.Tail
@@ -57,7 +57,7 @@ def tail l = l.Tail
 //│ List['a] -> List['a]
 //│   <:  tail:
 //│ List['a] -> List['a]
-//│     = [Function: tail]
+//│     = [Function: tail1]
 
 def is_empty: forall 'a. List['a] -> bool
 def is_empty l = eq l nil
@@ -315,15 +315,15 @@ def t = fun x -> (x (x : Id), x)
 def t = fun x -> (x x, x : Id)
 def t_ = fun x -> (x x, x)
 //│ t: (Id & 'a) -> ('a, 'a,)
-//│  = [Function: t]
-//│ t: Id -> (Id, Id,)
-//│  = [Function: t1]
-//│ t: Id -> (Id, Id,)
 //│  = [Function: t2]
-//│ t: (Id & Id -> 'a & 'b) -> ('a, 'b,)
+//│ t: Id -> (Id, Id,)
 //│  = [Function: t3]
-//│ t: (Id & 'a -> 'b & 'a) -> ('b, Id,)
+//│ t: Id -> (Id, Id,)
 //│  = [Function: t4]
+//│ t: (Id & Id -> 'a & 'b) -> ('a, 'b,)
+//│  = [Function: t5]
+//│ t: (Id & 'a -> 'b & 'a) -> ('b, Id,)
+//│  = [Function: t6]
 //│ t_: ('a -> 'b & 'a) -> ('b, 'a,)
 //│   = [Function: t_]
 
@@ -811,11 +811,11 @@ def a = fun f -> f id
 //│ church_succ: ('a -> 'b -> 'c) -> ('c -> 'd & 'a) -> 'b -> 'd
 //│            = [Function: church_succ]
 //│ f: Sa -> Sid
-//│  = [Function: f]
+//│  = [Function: f12]
 //│ f_: ((forall 'a 'b. ('a -> 'b & 'a) -> 'b) -> 'c & (forall 'd 'e. ((forall 'f. anything -> 'f -> 'f) -> 'd -> anything) -> 'd -> 'e -> 'e) -> anything) -> 'c
 //│   = [Function: f_]
 //│ a: ((forall 'a. 'a -> 'a) -> 'b) -> 'b
-//│  = [Function: a]
+//│  = [Function: a2]
 
 
 // let app x y = x y
@@ -869,11 +869,11 @@ def t = let x = fun y -> y in x x
 def t = let x = (fun y -> y) : forall 'a. 'a -> 'a in x x
 def t = let x = (fun y -> y) : 'a in x x
 //│ t: 'a -> 'a
-//│  = [Function: t5]
+//│  = [Function: t11]
 //│ t: 'a -> 'a
-//│  = [Function: t6]
+//│  = [Function: t12]
 //│ t: 'a -> 'a
-//│  = [Function: t7]
+//│  = [Function: t13]
 
 
 // untype  fun x -> ( (((x:'a) : sid):'a), (x:'a) x)

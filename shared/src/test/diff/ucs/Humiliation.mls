@@ -53,7 +53,7 @@ fun f(x) =
     Pair(y, 1) then x
     _          then "nah"
 //│ f: (Pair & 'a | ~Pair) -> ("nah" | "ones" | "zeros" | 'a)
-//│  = [Function: f]
+//│  = [Function: f1]
 
 class Z()
 class O()

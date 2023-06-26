@@ -127,7 +127,7 @@ fun i(x) =
     let y = 0
     B() then "B"
 //│ i: (A | B) -> ("A" | "B")
-//│  = [Function: i]
+//│  = [Function: i1]
 
 fun inc(x) = x + 1
 //│ inc: int -> int
@@ -220,8 +220,8 @@ fun showList(xs) =
 //│ // Query 1
 //│ globalThis.showList = function showList(xs) {
 //│   return ((() => {
-//│     let a;
-//│     return (a = xs, a instanceof Nil ? "" : a instanceof Cons ? ((head) => ((tmp0) => ((tail) => tmp0 instanceof Nil ? toString(head) : cat3(toString(head), ", ", showList(tail)))(xs.tail))(xs.tail))(xs.head) : (() => {
+//│     let n;
+//│     return (n = xs, n instanceof Nil ? "" : n instanceof Cons ? ((head1) => ((tmp0) => ((tail1) => tmp0 instanceof Nil ? toString(head1) : cat3(toString(head1), ", ", showList(tail1)))(xs.tail))(xs.tail))(xs.head) : (() => {
 //│       throw new Error("non-exhaustive case expression");
 //│     })());
 //│   })());

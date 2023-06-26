@@ -134,9 +134,9 @@ def app = fun f -> fun x -> f x
 def two = fun f -> fun x -> f (f x)
 def three = fun f -> fun x -> f (f (f x))
 //│ k: 'a -> anything -> 'a
-//│  = [Function: k]
+//│  = [Function: k2]
 //│ k2: anything -> 'a -> 'a
-//│   = [Function: k2]
+//│   = [Function: k21]
 //│ app: ('a -> 'b) -> 'a -> 'b
 //│    = [Function: app]
 //│ two: ('a -> 'b & 'b -> 'c) -> 'a -> 'c
@@ -213,7 +213,7 @@ def t y = (fun h -> h (h (h (fun x -> y)))) (fun f -> fun (n: ChurchInt) -> n (f
 //│ ║  l.183: 	def t y = (fun h -> h (h (h (fun x -> y)))) (fun f -> fun (n: ChurchInt) -> n (fun v -> k2) k app (fun g -> fun x -> n (f (n (fun p -> fun s -> s (p k2) (fun f -> fun x -> f (p k2 f x))) (fun s -> s k2 k2) k) g) x)) two
 //│ ╙──       	                                                                                                                                                                            ^^^^^^^^^^^^
 //│ t: anything -> error
-//│  = [Function: t3]
+//│  = [Function: t6]
 
 t id succ 0
 //│ res: error
@@ -306,7 +306,7 @@ def t2 y = (fun h -> h (h (h (fun x -> y)))) (fun f -> fun n -> n (fun v -> k2) 
 //│ ║  l.275: 	def t y = (fun h -> h (h (h (fun x -> y)))) (fun f -> fun (n: ChurchInt) -> n (fun v -> k2) k app (fun g -> fun x -> n (f (n (fun p -> fun s -> s (p k2) (fun f -> fun x -> f (p k2 f x))) (fun s -> s k2 k2) k) g) x)) three
 //│ ╙──       	                                                                                                                                                                            ^^^^^^^^^^^^
 //│ t: anything -> error
-//│  = [Function: t4]
+//│  = [Function: t7]
 //│ ╔══[ERROR] Cyclic-looking constraint while typing application; a type annotation may be required
 //│ ║  l.276: 	def t2 y = (fun h -> h (h (h (fun x -> y)))) (fun f -> fun n -> n (fun v -> k2) k app (fun g -> fun x -> n (f (n (fun p -> fun s -> s (p k2) (fun f -> fun x -> f (p k2 f x))) (fun s -> s k2 k2) k) g) x)) three
 //│ ║         	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -350,7 +350,7 @@ t2 id succ 0
 // let t (z : 0) = let x = (fun (y: ['t > 0] 'a -> 't) -> y z y) in x x;;
 def t (z: nothing) = let x = fun (y: forall 't. 'a -> 't) -> y z y in x x
 //│ t: nothing -> nothing
-//│  = [Function: t5]
+//│  = [Function: t8]
 
 // (* Plus petit. *)
 // type tt = ['b = 0] ['c > ['a] ['d = ['t] 'a -> 't] ['e] 'd -> 'e] 'b -> 'c ;;
@@ -359,7 +359,7 @@ type Tt = forall 'b 'c. ('b & nothing) -> ('c | (forall 'a 'd 'e. ('d & (forall 
 def t (z: nothing) = let x = fun (y: forall 't. 'a -> 't) -> y z in x x
 //│ Defined type alias Tt
 //│ t: nothing -> nothing
-//│  = [Function: t6]
+//│  = [Function: t9]
 
 
 // (*

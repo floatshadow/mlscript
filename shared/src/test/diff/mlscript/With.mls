@@ -201,5 +201,5 @@ res.x
 
 def f x = (x with { a = 1 }).b
 //│ f: ({b: 'b} | ~{a: 1})\a -> 'b
-//│  = [Function: f4]
+//│  = [Function: f5]
 

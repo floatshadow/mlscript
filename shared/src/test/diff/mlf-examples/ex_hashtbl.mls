@@ -49,7 +49,7 @@ def head l = l.Head
 //│ List['a] -> 'a
 //│   <:  head:
 //│ List['a] -> 'a
-//│     = [Function: head]
+//│     = [Function: head1]
 
 def tail: forall 'a. List['a] -> List['a]
 def tail l = l.Tail
@@ -58,7 +58,7 @@ def tail l = l.Tail
 //│ List['a] -> List['a]
 //│   <:  tail:
 //│ List['a] -> List['a]
-//│     = [Function: tail]
+//│     = [Function: tail1]
 
 def is_empty: forall 'a. List['a] -> bool
 def is_empty l = eq l nil

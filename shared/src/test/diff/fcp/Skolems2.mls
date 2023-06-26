@@ -192,7 +192,7 @@ f = extrude (fun x -> extrude (fun y -> x) x)
 f 42
 //│ res: 42 | error
 //│ Runtime error:
-//│   TypeError: f(...) is not a function
+//│   TypeError: f1(...) is not a function
 //│ // Output
 //│ Hi!
 //│ [Function (anonymous)]

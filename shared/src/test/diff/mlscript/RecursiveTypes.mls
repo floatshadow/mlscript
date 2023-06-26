@@ -6,10 +6,10 @@ let rec l = fun a -> fun a -> fun a -> l in let rec r = fun a -> fun a -> r in i
 //│ // Prelude
 //│ let res;
 //│ // Query 1
-//│ res = ((l) => ((r) => true ? l : r)(function r(a) {
-//│   return (a) => r;
+//│ res = ((l) => ((r) => true ? l : r)(function r(a3) {
+//│   return (a4) => r;
 //│ }))(function l(a) {
-//│   return (a) => (a) => l;
+//│   return (a1) => (a2) => l;
 //│ });
 //│ // End of generated code
 //│ res: 'l | 'r
@@ -24,13 +24,13 @@ rec def l a = l
 //│ l: 'l
 //│   where
 //│     'l :> anything -> 'l
-//│  = [Function: l]
+//│  = [Function: l1]
 
 if true then l else l
 //│ res: 'l
 //│   where
 //│     'l :> anything -> 'l
-//│    = [Function: l]
+//│    = [Function: l1]
 
 
 
@@ -38,14 +38,8 @@ rec def l a a a = l
 //│ l: 'l
 //│   where
 //│     'l :> anything -> anything -> anything -> 'l
-//│  = [Function: l1]
+//│  = [Function: l2]
 
-
-rec def r a a = l
-//│ r: anything -> anything -> 'l
-//│   where
-//│     'l :> anything -> anything -> anything -> 'l
-//│  = [Function: r]
 
 rec def r a a = l
 //│ r: anything -> anything -> 'l
@@ -53,12 +47,18 @@ rec def r a a = l
 //│     'l :> anything -> anything -> anything -> 'l
 //│  = [Function: r1]
 
+rec def r a a = l
+//│ r: anything -> anything -> 'l
+//│   where
+//│     'l :> anything -> anything -> anything -> 'l
+//│  = [Function: r2]
+
 
 rec def r a a = r
 //│ r: 'r
 //│   where
 //│     'r :> anything -> anything -> 'r
-//│  = [Function: r2]
+//│  = [Function: r3]
 
 
 if true then l else r
@@ -66,14 +66,14 @@ if true then l else r
 //│   where
 //│     'r :> anything -> anything -> 'r
 //│     'l :> anything -> anything -> anything -> 'l
-//│    = [Function: l1]
+//│    = [Function: l2]
 
 if true then l else r
 //│ res: 'l | 'r
 //│   where
 //│     'r :> anything -> anything -> 'r
 //│     'l :> anything -> anything -> anything -> 'l
-//│    = [Function: l1]
+//│    = [Function: l2]
 
 
 
@@ -82,25 +82,25 @@ rec def r (a: bool) (a: bool) (a: bool) = r
 //│ l: 'l
 //│   where
 //│     'l :> int -> int -> 'l
-//│  = [Function: l2]
+//│  = [Function: l3]
 //│ r: 'r
 //│   where
 //│     'r :> bool -> bool -> bool -> 'r
-//│  = [Function: r3]
+//│  = [Function: r4]
 
 if true then l else r
 //│ res: 'l | 'r
 //│   where
 //│     'r :> bool -> bool -> bool -> 'r
 //│     'l :> int -> int -> 'l
-//│    = [Function: l2]
+//│    = [Function: l3]
 
 if true then l else r
 //│ res: 'l | 'r
 //│   where
 //│     'r :> bool -> bool -> bool -> 'r
 //│     'l :> int -> int -> 'l
-//│    = [Function: l2]
+//│    = [Function: l3]
 
 if true then (fun x -> add x 1) else (fun y -> not y)
 //│ res: nothing -> (bool | int)
@@ -117,25 +117,25 @@ rec def r (a: int) (a: bool) (a: bool) = r
 //│ l: 'l
 //│   where
 //│     'l :> int -> bool -> 'l
-//│  = [Function: l3]
+//│  = [Function: l4]
 //│ r: 'r
 //│   where
 //│     'r :> int -> bool -> bool -> 'r
-//│  = [Function: r4]
+//│  = [Function: r5]
 
 if true then l else r
 //│ res: 'l | 'r
 //│   where
 //│     'r :> int -> bool -> bool -> 'r
 //│     'l :> int -> bool -> 'l
-//│    = [Function: l3]
+//│    = [Function: l4]
 
 if true then l else r
 //│ res: 'l | 'r
 //│   where
 //│     'r :> int -> bool -> bool -> 'r
 //│     'l :> int -> bool -> 'l
-//│    = [Function: l3]
+//│    = [Function: l4]
 
 
 
@@ -145,12 +145,12 @@ rec def r (a: int) b c = if true then r else if true then b else c
 //│   where
 //│     'l :> int -> 'a -> 'a
 //│     'a :> 'l
-//│  = [Function: l4]
+//│  = [Function: l5]
 //│ r: 'r
 //│   where
 //│     'r :> int -> 'a -> 'a -> 'a
 //│     'a :> 'r
-//│  = [Function: r5]
+//│  = [Function: r6]
 
 if true then l else r
 //│ res: 'l | 'r
@@ -159,7 +159,7 @@ if true then l else r
 //│     'a :> 'r
 //│     'l :> int -> 'b -> 'b
 //│     'b :> 'l
-//│    = [Function: l4]
+//│    = [Function: l5]
 
 if true then l else r
 //│ res: 'l | 'r
@@ -168,7 +168,7 @@ if true then l else r
 //│     'a :> 'r
 //│     'l :> int -> 'b -> 'b
 //│     'b :> 'l
-//│    = [Function: l4]
+//│    = [Function: l5]
 
 
 
@@ -176,20 +176,20 @@ rec def l (a: int) (b: int) = l
 //│ l: 'l
 //│   where
 //│     'l :> int -> int -> 'l
-//│  = [Function: l5]
+//│  = [Function: l6]
 
 rec def r (a: int) (b: int) (c: int) = r
 //│ r: 'r
 //│   where
 //│     'r :> int -> int -> int -> 'r
-//│  = [Function: r6]
+//│  = [Function: r7]
 
 if true then l else r
 //│ res: 'l | 'r
 //│   where
 //│     'r :> int -> int -> int -> 'r
 //│     'l :> int -> int -> 'l
-//│    = [Function: l5]
+//│    = [Function: l6]
 
 
 

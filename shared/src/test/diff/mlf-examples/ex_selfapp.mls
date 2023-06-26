@@ -215,7 +215,7 @@ rec def foldr = fun k -> fun z -> fun xs ->
 def z = (fun c -> fun n -> n) : Baa
 def z_ = fun c -> fun n -> n
 //│ z: Baa
-//│  = [Function: z]
+//│  = [Function: z2]
 //│ z_: anything -> (forall 'a. 'a -> 'a)
 //│   = [Function: z_]
 
@@ -281,7 +281,7 @@ rec def k = fun x -> fun (xs: Ba) -> fun c -> fun n -> c (x + 1) (xs k z c n)
 //│ ╟── • this function:
 //│ ║  l.255: 	rec def k = fun x -> fun (xs: Ba) -> fun c -> fun n -> c (x + 1) (xs k z c n)
 //│ ╙──       	                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│  = [Function: k1]
+//│  = [Function: k3]
 
 
 rec def k_ = fun x -> fun xs -> fun c -> fun n -> c (x + 1) (xs k_ z_ c n)

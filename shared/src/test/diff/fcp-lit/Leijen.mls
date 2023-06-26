@@ -729,7 +729,7 @@ let pauto (f: forall 'a. 'a -> 'a) = f in map pauto (map pauto ids)
 // ,("\\x -> rigid (\\y -> x)", ok "forall a. a -> (forall b. b -> a)")
 f = fun x -> fun y -> x
 //│ f: 'a -> anything -> 'a
-//│  = [Function: f]
+//│  = [Function: f15]
 
 // ,("\\x -> rigid (\\y -> const x y)", ok "forall a. a -> (forall b. b -> a)")
 fun x -> fun y -> const x y

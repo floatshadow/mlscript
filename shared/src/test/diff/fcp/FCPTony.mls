@@ -149,14 +149,14 @@ def f x y = add x y
 //│   'c <: 'f
 //│   'e <: 'f -> 'b
 //│   'b <: 'd
-//│  = [Function: f]
+//│  = [Function: f2]
 
 // :ds
 f
 //│ res: 'a -> ('b -> 'c
 //│   where
 //│     'a <: (ChurchInt -> ChurchInt) -> 'b -> 'c)
-//│    = [Function: f]
+//│    = [Function: f2]
 
 :e
 f {} {}
@@ -171,7 +171,7 @@ f {} {}
 //│ ╙──       	              ^^^^^^
 //│ res: error
 //│ Runtime error:
-//│   TypeError: n is not a function
+//│   TypeError: n2 is not a function
 
 
 

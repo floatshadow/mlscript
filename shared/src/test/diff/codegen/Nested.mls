@@ -1173,7 +1173,7 @@ fun main =
 //│ globalThis.main = function main() {
 //│   return ((() => {
 //│     let f = (x) => x === 0 ? 1 : g(x - 1);
-//│     let g = (x) => f(x);
+//│     let g = (x1) => f(x1);
 //│     return f;
 //│   })());
 //│ };
@@ -1237,8 +1237,8 @@ fun mian =
 //│ // Query 1
 //│ globalThis.mian1 = function mian1() {
 //│   return ((() => {
-//│     const B = (base) => {
-//│       return (class B extends base {
+//│     const B = (base1) => {
+//│       return (class B extends base1 {
 //│         constructor(...rest) {
 //│           super(...rest);
 //│         }
@@ -1253,10 +1253,10 @@ fun mian =
 //│           this.#x = x;
 //│         }
 //│       }
-//│       let ctor;
-//│       ctor = ((x) => new A(x));
-//│       ctor.class = A;
-//│       return ctor;
+//│       let ctor1;
+//│       ctor1 = ((x) => new A(x));
+//│       ctor1.class = A;
+//│       return ctor1;
 //│     })();
 //│     const C = (() => {
 //│       class C extends B(Object) {
@@ -1264,10 +1264,10 @@ fun mian =
 //│           super();
 //│         }
 //│       }
-//│       let ins;
-//│       ins = new C();
-//│       ins.class = C;
-//│       return ins;
+//│       let ins1;
+//│       ins1 = new C();
+//│       ins1.class = C;
+//│       return ins1;
 //│     })();
 //│     return ([
 //│       A,
@@ -1291,8 +1291,8 @@ fun main(arg) =
 //│ // Query 1
 //│ globalThis.main1 = function main1(arg) {
 //│   return ((() => {
-//│     let x = arg + 1;
-//│     let foo = (y) => x + y;
+//│     let x2 = arg + 1;
+//│     let foo = (y) => x2 + y;
 //│     const C = (() => {
 //│       class C {
 //│         #u;
@@ -1308,12 +1308,12 @@ fun main(arg) =
 //│           ]);
 //│         }
 //│       }
-//│       let ctor;
-//│       ctor = ((u) => new C(u));
-//│       ctor.class = C;
-//│       return ctor;
+//│       let ctor2;
+//│       ctor2 = ((u) => new C(u));
+//│       ctor2.class = C;
+//│       return ctor2;
 //│     })();
-//│     let bar = x;
+//│     let bar = x2;
 //│     return C(123);
 //│   })());
 //│ };

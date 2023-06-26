@@ -37,9 +37,9 @@ gensym1 = let n = { mut a = 0 } in fun () -> (incr n, n)
 //│ Desugared: def gensym1: let n = {mut a: 0} in () => incr (n,), n,
 //│ AST: Def(false, gensym1, Let(false, n, Rcd(Var(a) = IntLit(0)), Lam(Tup(), Tup(_: App(Var(incr), Tup(_: Var(n))), _: Var(n)))), false)
 //│ // Query 1
-//│ globalThis.gensym1 = ((n) => () => [
-//│   incr(n),
-//│   n
+//│ globalThis.gensym1 = ((n1) => () => [
+//│   incr(n1),
+//│   n1
 //│ ])({ a: 0 });
 //│ // End of generated code
 //│ gensym1: () -> (unit, forall 'a. {mut a: 'a},)
@@ -96,8 +96,8 @@ gensym1 ()
 :js
 def f x = x
 //│ // Query 1
-//│ globalThis.f = function f(x) {
-//│   return x;
+//│ globalThis.f = function f(x1) {
+//│   return x1;
 //│ };
 //│ // End of generated code
 //│ f: 'a -> 'a

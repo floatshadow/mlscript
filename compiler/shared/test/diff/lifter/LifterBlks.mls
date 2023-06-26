@@ -185,22 +185,15 @@ fun f(x) =
 //│   fun f = (x,) => {let g = (x,) => {let h = (x,) => + (x,) (2,); (Foo$1 (h (x,), x, g,)).bar}; (Foo$1 (x, x, g,)).bar}
 //│ }
 
-<<<<<<<
-class Foo(x, y): Bar(y, x), Baz(x + y)
-//│ |#class| |Foo|(|x|,| |y|)|#:| |Bar|(|y|,| |x|)|,| |Baz|(|x| |+| |y|)|
-//│ ╔══[PARSE ERROR] Expected end of input; found comma instead
-//│ ║  l.191: 	class Foo(x, y): Bar(y, x), Baz(x + y)
-//│ ╙──       	                          ^
-//│ Parsed: {class Foo(x, y,): Bar[(y, x,)] {}}
-||||||| 534ece1a:compiler/shared/test/diff/LifterBlks.mls
-class Foo(x, y): Bar(y, x), Baz(x + y)
-//│ |#class| |Foo|(|x|,| |y|)|#:| |Bar|(|y|,| |x|)|,| |Baz|(|x| |+| |y|)|
-//│ Parsed: {class Foo(x, y,): Bar (y, x,), Baz (+ (x,) (y,),) {}}
-=======
 class Foo(x, y) extends Bar(y, x), Baz(x + y)
 //│ |#class| |Foo|(|x|,| |y|)| |#extends| |Bar|(|y|,| |x|)|,| |Baz|(|x| |+| |y|)|
 //│ Parsed: {class Foo(x, y,): Bar (y, x,), Baz (+ (x,) (y,),) {}}
->>>>>>>
+//│ Parsed:
+//│ TypingUnit(NuTypeDef(class, Foo, (), Tup(_: Var(x), _: Var(y)), (App(Var(Bar), Tup(_: Var(y), _: Var(x))), App(Var(Baz), Tup(_: App(App(Var(+), Tup(_: Var(x))), Tup(_: Var(y)))))), None, None, TypingUnit()))
+//│ Lifted:
+//│ TypingUnit {
+//│   class Foo$1(x, y,): Bar ((this).y, (this).x,), Baz (+ ((this).x,) ((this).y,),) {}
+//│ }
 
 fun foo<T, U>(x: T): string = 
   class A(y) extends B<T>, C(y: U) {

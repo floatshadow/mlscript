@@ -239,7 +239,7 @@ fun g(x, y, b) =
     Some(xv) and b then xv + b
     _ then "roll"
 //│ g: (Some & {value: int} | ~Some, Some & {value: 'value} | ~Some, ~true,) -> ("bruh" | "roll" | int | 'value)
-//│  = [Function: g]
+//│  = [Function: g1]
 
 fun foo(x, y, z) =
   if x - y > 0 then Some(x + y + z) else None()
@@ -284,7 +284,7 @@ fun f(u, v, w) =
 
 fun p(x) = if x >= 0 then Right(x) else Left(x)
 //│ p: (number & 'rightValue) -> (Left & {leftValue: 'rightValue} | Right & {rightValue: 'rightValue})
-//│  = [Function: p]
+//│  = [Function: p1]
 
 fun g(a, b) =
   if p(a) is
@@ -295,7 +295,7 @@ fun g(a, b) =
       Some(y) then x * y
       None    then x
 //│ g: (int, None | Some & {value: int},) -> int
-//│  = [Function: g1]
+//│  = [Function: g2]
 
 g(5, None())
 g(5, Some(7))
@@ -339,7 +339,7 @@ fun p(e, context) =
     Lit(IntVal(v)) then Left(v)
     Lit(BoolVal(v)) then Right(v)
 //│ p: (Lit & {value: BoolVal & {value: 'value} | IntVal & {value: 'value0}} | Var & {name: 'name}, {get: 'name -> (Some & {value: BoolVal & {value: 'value} | IntVal & {value: 'value0}})},) -> (Left & {leftValue: 'value0} | Right & {rightValue: 'value})
-//│  = [Function: p1]
+//│  = [Function: p2]
 
 class Nil()
 //│ Defined class Nil
@@ -384,4 +384,4 @@ fun g(x, y) =
   else
     0
 //│ g: (int, int,) -> int
-//│  = [Function: g2]
+//│  = [Function: g3]

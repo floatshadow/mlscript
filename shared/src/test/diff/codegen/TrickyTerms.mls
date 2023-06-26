@@ -31,9 +31,9 @@ res { x = 1 }
 :js
 def f x = case 1 of { 1 -> x }
 //│ // Query 1
-//│ globalThis.f = function f(x) {
+//│ globalThis.f = function f(x1) {
 //│   let a;
-//│   return (a = 1, a === 1 ? x : (() => {
+//│   return (a = 1, a === 1 ? x1 : (() => {
 //│     throw new Error("non-exhaustive case expression");
 //│   })());
 //│ };
@@ -65,16 +65,16 @@ def tmp tmp = tmp
 tmp (let tmp = 1 in tmp)
 let t = tmp in let tmp = 1 in t tmp
 //│ // Query 1
-//│ globalThis.tmp2 = function tmp2(tmp) {
-//│   return tmp;
+//│ globalThis.tmp3 = function tmp3(tmp2) {
+//│   return tmp2;
 //│ };
 //│ // Query 2
-//│ res = tmp2(((tmp) => tmp)(1));
+//│ res = tmp3(((tmp4) => tmp4)(1));
 //│ // Query 3
-//│ res = ((t) => ((tmp) => t(tmp))(1))(tmp2);
+//│ res = ((t) => ((tmp5) => t(tmp5))(1))(tmp3);
 //│ // End of generated code
 //│ tmp: 'a -> 'a
-//│    = [Function: tmp2]
+//│    = [Function: tmp3]
 //│ res: 1
 //│    = 1
 //│ res: 1

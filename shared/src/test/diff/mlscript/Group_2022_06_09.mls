@@ -60,7 +60,7 @@ def eval eval e = case e of {
   | Add -> eval eval e.lhs + eval eval e.rhs
   }
 //│ eval: ('a -> 'lhs -> int & 'a) -> ((Add with {lhs: 'lhs, rhs: 'lhs}) | (Lit with {n: 'n})) -> (int | 'n)
-//│     = [Function: eval1]
+//│     = [Function: eval2]
 
 eval eval! e
 //│ res: int
@@ -72,7 +72,7 @@ def evalN evalN e = case e of {
   | _ -> eval evalN e
   }
 //│ evalN: ('a -> 'e -> int & 'a -> 'lhs -> int & 'a) -> ((Add with {lhs: 'lhs, rhs: 'lhs}) | (Lit with {n: 'n}) | (Neg with {e: 'e})) -> (int | 'n)
-//│      = [Function: evalN]
+//│      = [Function: evalN1]
 
 evalN eval! e
 //│ res: int
@@ -109,7 +109,7 @@ def evalN evalN k e = case e of {
   | _ -> k e
   }
 //│ evalN: ('a -> 'b -> 'e -> int & 'a) -> ('c -> 'd & 'b) -> ((Neg with {e: 'e}) | 'c & ~#Neg) -> (int | 'd)
-//│      = [Function: evalN1]
+//│      = [Function: evalN3]
 
 
 // * Note that these `evalComposed` types could be simplified further
@@ -119,13 +119,13 @@ def evalComposed evalComposed = evalN evalN! (fun e -> eval evalComposed e)
 //│ evalComposed: ('a -> 'rhs -> int & 'a) -> ((Add with {lhs: 'rhs, rhs: 'rhs}) | (Lit with {n: 'n}) | (Neg with {e: 'b})) -> (int | 'n)
 //│   where
 //│     'b <: (Add with {lhs: 'rhs, rhs: 'rhs}) | Lit | (Neg with {e: 'b})
-//│             = [Function: evalComposed]
+//│             = [Function: evalComposed1]
 
 def evalComposed evalComposed = evalN evalN! (eval evalComposed)
 //│ evalComposed: ('a -> 'lhs -> int & 'a) -> ((Add with {lhs: 'lhs, rhs: 'lhs}) | (Lit with {n: 'n}) | (Neg with {e: 'b})) -> (int | 'n)
 //│   where
 //│     'b <: (Add with {lhs: 'lhs, rhs: 'lhs}) | Lit | (Neg with {e: 'b})
-//│             = [Function: evalComposed1]
+//│             = [Function: evalComposed3]
 
 
 // * NOTE: This inferred type is a good example

@@ -20,9 +20,9 @@ c = Class{x = 1}
 :js
 def useCls c = case c of { Class -> c.x | int -> "oops" }
 //│ // Query 1
-//│ globalThis.useCls = function useCls(c) {
+//│ globalThis.useCls = function useCls(c1) {
 //│   let a;
-//│   return (a = c, a instanceof Class ? c.x : Number.isInteger(a) ? "oops" : (() => {
+//│   return (a = c1, a instanceof Class ? c1.x : Number.isInteger(a) ? "oops" : (() => {
 //│     throw new Error("non-exhaustive case expression");
 //│   })());
 //│ };
@@ -249,8 +249,8 @@ oo = Oops 2
 :js
 case oo of { Oops -> 1 }
 //│ // Query 1
-//│ let a;
-//│ res = (a = oo, Oops.is(a) ? 1 : (() => {
+//│ let e;
+//│ res = (e = oo, Oops.is(e) ? 1 : (() => {
 //│   throw new Error("non-exhaustive case expression");
 //│ })());
 //│ // End of generated code

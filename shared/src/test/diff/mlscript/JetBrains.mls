@@ -20,7 +20,7 @@ def eval eval x = case x of {
   | Add -> eval eval x.lhs + eval eval x.rhs
   }
 //│ eval: ('a -> 'lhs -> int & 'a) -> ((Add with {lhs: 'lhs, rhs: 'lhs}) | (Lit with {val: 'val})) -> (int | 'val)
-//│     = [Function: eval1]
+//│     = [Function: eval2]
 
 eval eval!
 //│ res: ((Add with {lhs: 'a, rhs: 'a}) | (Lit with {val: 'val})) -> (int | 'val)
@@ -42,7 +42,7 @@ def evalN evalN x = case x of {
   | _ -> eval evalN x
   }
 //│ evalN: ('a -> 'underlying -> int & 'a -> 'lhs -> int & 'a) -> ((Add with {lhs: 'lhs, rhs: 'lhs}) | (Lit with {val: 'val}) | (Neg with {underlying: 'underlying})) -> (int | 'val)
-//│      = [Function: evalN]
+//│      = [Function: evalN1]
 
 evalN evalN!
 //│ res: ((Add with {lhs: 'a, rhs: 'a}) | (Lit with {val: 'val}) | (Neg with {underlying: 'a})) -> (int | 'val)

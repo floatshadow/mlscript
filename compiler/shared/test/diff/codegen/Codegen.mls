@@ -12,17 +12,12 @@ let x = 1
 //│ x
 //│   = 1
 
-let x = {field1:int, field2:int}
+let x = {field1: 0, field2: 1}
 //│ IR:
-//│ Basic Block entry:
-//│   a = alloc {field1: i32, field2: i32}
-//│   x1 = a
-//│ 
-//│ WASM:
-//│ Ir2wasm failed: scala.NotImplementedError: an implementation is missing
-//│ let x: {field1: Int, field2: Int}
-//│ Code generation encountered an error:
-//│   type alias int is not a valid expression
+//│ Mls2ir failed: scala.NotImplementedError: an implementation is missing
+//│ let x: {field1: 0, field2: 1}
+//│ x
+//│   = { field1: 0, field2: 1 }
 
 if true then 1 else 0
 let x = 3
@@ -47,7 +42,7 @@ let x = 3
 //│ x
 //│   = 3
 
-class IntLit(head:int)
+class IntLit(head: Int)
 let l = IntLit(2)
 if l is
     IntLit(0) then
@@ -86,40 +81,8 @@ let y = 1
 //│ 
 //│ WASM:
 //│ Ir2wasm failed: scala.NotImplementedError: an implementation is missing
-//│ ╔══[ERROR] Type mismatch in application:
-//│ ║  l.51: 	let l = IntLit(2)
-//│ ║        	        ^^^^^^^^^
-//│ ╟── integer literal of type `2` is not an instance of type `int`
-//│ ║  l.51: 	let l = IntLit(2)
-//│ ║        	               ^
-//│ ╟── Note: constraint arises from type reference:
-//│ ║  l.50: 	class IntLit(head:int)
-//│ ╙──      	                  ^^^
-//│ ╔══[ERROR] Type mismatch in `case` expression:
-//│ ║  l.53: 	    IntLit(0) then
-//│ ║        	           ^^^^^^^
-//│ ║  l.54: 	        let x = 0
-//│ ║        	^^^^^^^^^^^^^^^^^
-//│ ║  l.55: 	    IntLit(1) then
-//│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.56: 	        let x = 1
-//│ ║        	^^^^^^^^^^^^^^^^^
-//│ ║  l.57: 	    IntLit(2) then
-//│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.58: 	        let x = 2
-//│ ║        	^^^^^^^^^^^^^^^^^
-//│ ║  l.59: 	    else
-//│ ║        	^^^^^^^^
-//│ ║  l.60: 	        let x = 3
-//│ ║        	^^^^^^^^^^^^^^^^^
-//│ ╟── type `int` is not an instance of `Object`
-//│ ║  l.50: 	class IntLit(head:int)
-//│ ║        	                  ^^^
-//│ ╟── but it flows into integer literal with expected type `Object`
-//│ ║  l.53: 	    IntLit(0) then
-//│ ╙──      	           ^
-//│ class IntLit(head: int)
-//│ let l: IntLit | error
+//│ class IntLit(head: Int)
+//│ let l: IntLit
 //│ let y: 1
 //│ undefined
 //│ l

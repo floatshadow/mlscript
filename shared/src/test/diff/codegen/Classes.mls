@@ -143,7 +143,7 @@ mb2.Get
 //│ // Query 3
 //│ res = mb1.Get;
 //│ // Query 4
-//│ globalThis.mb2 = mb1.Map((x) => x * 3);
+//│ globalThis.mb2 = mb1.Map((x1) => x1 * 3);
 //│ // Query 5
 //│ res = mb2.Get;
 //│ // End of generated code
@@ -163,9 +163,9 @@ mb2.Get
 mb.(MyBox.Map) (fun x -> x * 3)
 MyBox.Map mb (fun x -> x * 3)
 //│ // Query 1
-//│ res = mb1["MyBox.Map"]((x) => x * 3);
+//│ res = mb1["MyBox.Map"]((x2) => x2 * 3);
 //│ // Query 2
-//│ res = MyBox1.Map(mb1)((x) => x * 3);
+//│ res = MyBox1.Map(mb1)((x3) => x3 * 3);
 //│ // End of generated code
 //│ res: Box[int] & {info: string}
 //│ Runtime error:
