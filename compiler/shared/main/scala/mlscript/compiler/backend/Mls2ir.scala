@@ -323,6 +323,7 @@ class Mls2ir {
               nme,
               tparams,
               params,
+              ctor, // TODO handle
               sig,
               parents,
               superAnnot,
@@ -333,7 +334,7 @@ class Mls2ir {
             case Cls =>
               scope.declareClass(
                 nme.name,
-                params.fields.collect { case S(variable) -> field =>
+                params.getOrElse(Tup(Nil)).fields.collect { case S(variable) -> field =>
                   variable.name
                 },
                 TypeName(nme.name),
@@ -343,7 +344,7 @@ class Mls2ir {
             case Trt => ???
             case Mxn => ???
             case Als => ???
-            case Nms => ???
+            case Mod => ???
           translateTypingUnit(body)
         case term: Term =>
           translateTerm(term) // FIXME handle return value

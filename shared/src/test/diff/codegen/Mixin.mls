@@ -4,34 +4,37 @@
 :js
 :ShowRepl
 class Add<E>(lhs: E, rhs: E)
-class Lit(n: int)
+class Lit(n: Int)
 //│ class Add[E](lhs: E, rhs: E)
-//│ class Lit(n: int)
+//│ class Lit(n: Int)
 //│ // Prelude
 //│ let res;
-//│ let typing_unit = {
-//│   cache: {},
+//│ class TypingUnit {
+//│   #Add;
+//│   #Lit;
+//│   constructor() {
+//│   }
 //│   get Add() {
-//│     const cache = this.cache;
-//│     if (this.cache.Add === undefined) {
+//│     const outer = this;
+//│     if (this.#Add === undefined) {
 //│       class Add {
 //│         #lhs;
-//│         #rhs;
 //│         get lhs() { return this.#lhs; }
+//│         #rhs;
 //│         get rhs() { return this.#rhs; }
 //│         constructor(lhs, rhs) {
 //│           this.#lhs = lhs;
 //│           this.#rhs = rhs;
 //│         }
 //│       };
-//│       this.cache.Add = ((lhs, rhs) => new Add(lhs, rhs));
-//│       this.cache.Add["class"] = Add;
+//│       this.#Add = ((lhs, rhs) => Object.freeze(new Add(lhs, rhs)));
+//│       this.#Add.class = Add;
 //│     }
-//│     return this.cache.Add;
-//│   },
+//│     return this.#Add;
+//│   }
 //│   get Lit() {
-//│     const cache = this.cache;
-//│     if (this.cache.Lit === undefined) {
+//│     const outer = this;
+//│     if (this.#Lit === undefined) {
 //│       class Lit {
 //│         #n;
 //│         get n() { return this.#n; }
@@ -39,12 +42,13 @@ class Lit(n: int)
 //│           this.#n = n;
 //│         }
 //│       };
-//│       this.cache.Lit = ((n) => new Lit(n));
-//│       this.cache.Lit["class"] = Lit;
+//│       this.#Lit = ((n) => Object.freeze(new Lit(n)));
+//│       this.#Lit.class = Lit;
 //│     }
-//│     return this.cache.Lit;
+//│     return this.#Lit;
 //│   }
-//│ };
+//│ }
+//│ const typing_unit = new TypingUnit;
 //│ globalThis.Add = typing_unit.Add;
 //│ globalThis.Lit = typing_unit.Lit;
 //│ // End of generated code
@@ -52,29 +56,32 @@ class Lit(n: int)
 //│ ├─┬ Prelude
 //│ │ ├── Code
 //│ │ │   let res;
-//│ │ │   let typing_unit = {
-//│ │ │     cache: {},
+//│ │ │   class TypingUnit {
+//│ │ │     #Add;
+//│ │ │     #Lit;
+//│ │ │     constructor() {
+//│ │ │     }
 //│ │ │     get Add() {
-//│ │ │       const cache = this.cache;
-//│ │ │       if (this.cache.Add === undefined) {
+//│ │ │       const outer = this;
+//│ │ │       if (this.#Add === undefined) {
 //│ │ │         class Add {
 //│ │ │           #lhs;
-//│ │ │           #rhs;
 //│ │ │           get lhs() { return this.#lhs; }
+//│ │ │           #rhs;
 //│ │ │           get rhs() { return this.#rhs; }
 //│ │ │           constructor(lhs, rhs) {
 //│ │ │             this.#lhs = lhs;
 //│ │ │             this.#rhs = rhs;
 //│ │ │           }
 //│ │ │         };
-//│ │ │         this.cache.Add = ((lhs, rhs) => new Add(lhs, rhs));
-//│ │ │         this.cache.Add["class"] = Add;
+//│ │ │         this.#Add = ((lhs, rhs) => Object.freeze(new Add(lhs, rhs)));
+//│ │ │         this.#Add.class = Add;
 //│ │ │       }
-//│ │ │       return this.cache.Add;
-//│ │ │     },
+//│ │ │       return this.#Add;
+//│ │ │     }
 //│ │ │     get Lit() {
-//│ │ │       const cache = this.cache;
-//│ │ │       if (this.cache.Lit === undefined) {
+//│ │ │       const outer = this;
+//│ │ │       if (this.#Lit === undefined) {
 //│ │ │         class Lit {
 //│ │ │           #n;
 //│ │ │           get n() { return this.#n; }
@@ -82,12 +89,13 @@ class Lit(n: int)
 //│ │ │             this.#n = n;
 //│ │ │           }
 //│ │ │         };
-//│ │ │         this.cache.Lit = ((n) => new Lit(n));
-//│ │ │         this.cache.Lit["class"] = Lit;
+//│ │ │         this.#Lit = ((n) => Object.freeze(new Lit(n)));
+//│ │ │         this.#Lit.class = Lit;
 //│ │ │       }
-//│ │ │       return this.cache.Lit;
+//│ │ │       return this.#Lit;
 //│ │ │     }
-//│ │ │   };
+//│ │ │   }
+//│ │ │   const typing_unit = new TypingUnit;
 //│ │ │   globalThis.Add = typing_unit.Add;
 //│ │ │   globalThis.Lit = typing_unit.Lit;
 //│ │ └── Reply
@@ -99,17 +107,19 @@ class Lit(n: int)
 mixin EvalBase {
   fun eval(e) =
     if e is
-      Lit(n) then n: int
+      Lit(n) then n: Int
       Add(l, r) then this.eval(l) + this.eval(r)
 }
 //│ mixin EvalBase() {
-//│   this: {eval: 'lhs -> int}
-//│   fun eval: (Add['lhs] | Lit) -> int
+//│   this: {eval: 'lhs -> Int}
+//│   fun eval: (Add['lhs] | Lit) -> Int
 //│ }
 //│ // Prelude
-//│ let typing_unit1 = {
-//│   cache: {},
+//│ class TypingUnit1 {
+//│   constructor() {
+//│   }
 //│   EvalBase(base) {
+//│     const outer = this;
 //│     return (class EvalBase extends base {
 //│       constructor(...rest) {
 //│         super(...rest);
@@ -118,22 +128,25 @@ mixin EvalBase {
 //│         const self = this;
 //│         return ((() => {
 //│           let a;
-//│           return (a = e, a instanceof Lit["class"] ? ((n) => n)(e.n) : a instanceof Add["class"] ? ((l) => ((r) => self.eval(l) + self.eval(r))(e.rhs))(e.lhs) : (() => {
+//│           return (a = e, a instanceof Lit.class ? ((n) => n)(e.n) : a instanceof Add.class ? ((l) => ((r) => self.eval(l) + self.eval(r))(e.rhs))(e.lhs) : (() => {
 //│             throw new Error("non-exhaustive case expression");
 //│           })());
 //│         })());
 //│       }
 //│     });
 //│   }
-//│ };
-//│ globalThis.EvalBase = typing_unit1.EvalBase;
+//│ }
+//│ const typing_unit1 = new TypingUnit1;
+//│ globalThis.EvalBase = ((base) => typing_unit1.EvalBase(base));
 //│ // End of generated code
-//│ ┌ Block at Mixin.mls:99
+//│ ┌ Block at Mixin.mls:107
 //│ ├─┬ Prelude
 //│ │ ├── Code
-//│ │ │   let typing_unit1 = {
-//│ │ │     cache: {},
+//│ │ │   class TypingUnit1 {
+//│ │ │     constructor() {
+//│ │ │     }
 //│ │ │     EvalBase(base) {
+//│ │ │       const outer = this;
 //│ │ │       return (class EvalBase extends base {
 //│ │ │         constructor(...rest) {
 //│ │ │           super(...rest);
@@ -142,17 +155,18 @@ mixin EvalBase {
 //│ │ │           const self = this;
 //│ │ │           return ((() => {
 //│ │ │             let a;
-//│ │ │             return (a = e, a instanceof Lit["class"] ? ((n) => n)(e.n) : a instanceof Add["class"] ? ((l) => ((r) => self.eval(l) + self.eval(r))(e.rhs))(e.lhs) : (() => {
+//│ │ │             return (a = e, a instanceof Lit.class ? ((n) => n)(e.n) : a instanceof Add.class ? ((l) => ((r) => self.eval(l) + self.eval(r))(e.rhs))(e.lhs) : (() => {
 //│ │ │               throw new Error("non-exhaustive case expression");
 //│ │ │             })());
 //│ │ │           })());
 //│ │ │         }
 //│ │ │       });
 //│ │ │     }
-//│ │ │   };
-//│ │ │   globalThis.EvalBase = typing_unit1.EvalBase;
+//│ │ │   }
+//│ │ │   const typing_unit1 = new TypingUnit1;
+//│ │ │   globalThis.EvalBase = ((base) => typing_unit1.EvalBase(base));
 //│ │ └── Reply
-//│ │     [Function: EvalBase]
+//│ │     [Function (anonymous)]
 //│ └── No queries
 
 :js
@@ -160,11 +174,13 @@ mixin EvalBase {
 class Neg<A>(expr: A)
 //│ class Neg[A](expr: A)
 //│ // Prelude
-//│ let typing_unit2 = {
-//│   cache: {},
+//│ class TypingUnit2 {
+//│   #Neg;
+//│   constructor() {
+//│   }
 //│   get Neg() {
-//│     const cache = this.cache;
-//│     if (this.cache.Neg === undefined) {
+//│     const outer = this;
+//│     if (this.#Neg === undefined) {
 //│       class Neg {
 //│         #expr;
 //│         get expr() { return this.#expr; }
@@ -172,22 +188,25 @@ class Neg<A>(expr: A)
 //│           this.#expr = expr;
 //│         }
 //│       };
-//│       this.cache.Neg = ((expr) => new Neg(expr));
-//│       this.cache.Neg["class"] = Neg;
+//│       this.#Neg = ((expr) => Object.freeze(new Neg(expr)));
+//│       this.#Neg.class = Neg;
 //│     }
-//│     return this.cache.Neg;
+//│     return this.#Neg;
 //│   }
-//│ };
+//│ }
+//│ const typing_unit2 = new TypingUnit2;
 //│ globalThis.Neg = typing_unit2.Neg;
 //│ // End of generated code
-//│ ┌ Block at Mixin.mls:160
+//│ ┌ Block at Mixin.mls:174
 //│ ├─┬ Prelude
 //│ │ ├── Code
-//│ │ │   let typing_unit2 = {
-//│ │ │     cache: {},
+//│ │ │   class TypingUnit2 {
+//│ │ │     #Neg;
+//│ │ │     constructor() {
+//│ │ │     }
 //│ │ │     get Neg() {
-//│ │ │       const cache = this.cache;
-//│ │ │       if (this.cache.Neg === undefined) {
+//│ │ │       const outer = this;
+//│ │ │       if (this.#Neg === undefined) {
 //│ │ │         class Neg {
 //│ │ │           #expr;
 //│ │ │           get expr() { return this.#expr; }
@@ -195,12 +214,13 @@ class Neg<A>(expr: A)
 //│ │ │             this.#expr = expr;
 //│ │ │           }
 //│ │ │         };
-//│ │ │         this.cache.Neg = ((expr) => new Neg(expr));
-//│ │ │         this.cache.Neg["class"] = Neg;
+//│ │ │         this.#Neg = ((expr) => Object.freeze(new Neg(expr)));
+//│ │ │         this.#Neg.class = Neg;
 //│ │ │       }
-//│ │ │       return this.cache.Neg;
+//│ │ │       return this.#Neg;
 //│ │ │     }
-//│ │ │   };
+//│ │ │   }
+//│ │ │   const typing_unit2 = new TypingUnit2;
 //│ │ │   globalThis.Neg = typing_unit2.Neg;
 //│ │ └── Reply
 //│ │     [Function (anonymous)] { class: [class Neg] }
@@ -215,13 +235,15 @@ mixin EvalNeg {
 }
 //│ mixin EvalNeg() {
 //│   super: {eval: 'a -> 'b}
-//│   this: {eval: 'expr -> int}
-//│   fun eval: (Neg['expr] | 'a & ~#Neg) -> (int | 'b)
+//│   this: {eval: 'expr -> Int}
+//│   fun eval: (Neg['expr] | Object & 'a & ~#Neg) -> (Int | 'b)
 //│ }
 //│ // Prelude
-//│ let typing_unit3 = {
-//│   cache: {},
+//│ class TypingUnit3 {
+//│   constructor() {
+//│   }
 //│   EvalNeg(base) {
+//│     const outer = this;
 //│     return (class EvalNeg extends base {
 //│       constructor(...rest) {
 //│         super(...rest);
@@ -229,20 +251,23 @@ mixin EvalNeg {
 //│       eval(e) {
 //│         const self = this;
 //│         return ((() => {
-//│           return e instanceof Neg["class"] ? ((d) => 0 - self.eval(d))(e.expr) : super.eval(e);
+//│           return e instanceof Neg.class ? ((d) => 0 - self.eval(d))(e.expr) : super.eval(e);
 //│         })());
 //│       }
 //│     });
 //│   }
-//│ };
-//│ globalThis.EvalNeg = typing_unit3.EvalNeg;
+//│ }
+//│ const typing_unit3 = new TypingUnit3;
+//│ globalThis.EvalNeg = ((base) => typing_unit3.EvalNeg(base));
 //│ // End of generated code
-//│ ┌ Block at Mixin.mls:211
+//│ ┌ Block at Mixin.mls:231
 //│ ├─┬ Prelude
 //│ │ ├── Code
-//│ │ │   let typing_unit3 = {
-//│ │ │     cache: {},
+//│ │ │   class TypingUnit3 {
+//│ │ │     constructor() {
+//│ │ │     }
 //│ │ │     EvalNeg(base) {
+//│ │ │       const outer = this;
 //│ │ │       return (class EvalNeg extends base {
 //│ │ │         constructor(...rest) {
 //│ │ │           super(...rest);
@@ -250,15 +275,16 @@ mixin EvalNeg {
 //│ │ │         eval(e) {
 //│ │ │           const self = this;
 //│ │ │           return ((() => {
-//│ │ │             return e instanceof Neg["class"] ? ((d) => 0 - self.eval(d))(e.expr) : super.eval(e);
+//│ │ │             return e instanceof Neg.class ? ((d) => 0 - self.eval(d))(e.expr) : super.eval(e);
 //│ │ │           })());
 //│ │ │         }
 //│ │ │       });
 //│ │ │     }
-//│ │ │   };
-//│ │ │   globalThis.EvalNeg = typing_unit3.EvalNeg;
+//│ │ │   }
+//│ │ │   const typing_unit3 = new TypingUnit3;
+//│ │ │   globalThis.EvalNeg = ((base) => typing_unit3.EvalNeg(base));
 //│ │ └── Reply
-//│ │     [Function: EvalNeg]
+//│ │     [Function (anonymous)]
 //│ └── No queries
 
 :js
@@ -269,14 +295,16 @@ mixin EvalNegNeg {
     else super.eval(e)
 }
 //│ mixin EvalNegNeg() {
-//│   super: {eval: (Neg['A] | 'a) -> 'b}
+//│   super: {eval: (Neg[nothing] | 'a) -> 'b}
 //│   this: {eval: 'expr -> 'b}
-//│   fun eval: (Neg['A & (~#Neg | Neg['expr])] | 'a & ~#Neg) -> 'b
+//│   fun eval: (Neg[Neg['expr] | Object & ~#Neg] | Object & 'a & ~#Neg) -> 'b
 //│ }
 //│ // Prelude
-//│ let typing_unit4 = {
-//│   cache: {},
+//│ class TypingUnit4 {
+//│   constructor() {
+//│   }
 //│   EvalNegNeg(base) {
+//│     const outer = this;
 //│     return (class EvalNegNeg extends base {
 //│       constructor(...rest) {
 //│         super(...rest);
@@ -284,20 +312,23 @@ mixin EvalNegNeg {
 //│       eval(e) {
 //│         const self = this;
 //│         return ((() => {
-//│           return e instanceof Neg["class"] ? ((tmp0) => tmp0 instanceof Neg["class"] ? ((d) => self.eval(d))(tmp0.expr) : super.eval(e))(e.expr) : super.eval(e);
+//│           return e instanceof Neg.class ? ((tmp0) => tmp0 instanceof Neg.class ? ((d) => self.eval(d))(tmp0.expr) : super.eval(e))(e.expr) : super.eval(e);
 //│         })());
 //│       }
 //│     });
 //│   }
-//│ };
-//│ globalThis.EvalNegNeg = typing_unit4.EvalNegNeg;
+//│ }
+//│ const typing_unit4 = new TypingUnit4;
+//│ globalThis.EvalNegNeg = ((base) => typing_unit4.EvalNegNeg(base));
 //│ // End of generated code
-//│ ┌ Block at Mixin.mls:266
+//│ ┌ Block at Mixin.mls:292
 //│ ├─┬ Prelude
 //│ │ ├── Code
-//│ │ │   let typing_unit4 = {
-//│ │ │     cache: {},
+//│ │ │   class TypingUnit4 {
+//│ │ │     constructor() {
+//│ │ │     }
 //│ │ │     EvalNegNeg(base) {
+//│ │ │       const outer = this;
 //│ │ │       return (class EvalNegNeg extends base {
 //│ │ │         constructor(...rest) {
 //│ │ │           super(...rest);
@@ -305,61 +336,72 @@ mixin EvalNegNeg {
 //│ │ │         eval(e) {
 //│ │ │           const self = this;
 //│ │ │           return ((() => {
-//│ │ │             return e instanceof Neg["class"] ? ((tmp0) => tmp0 instanceof Neg["class"] ? ((d) => self.eval(d))(tmp0.expr) : super.eval(e))(e.expr) : super.eval(e);
+//│ │ │             return e instanceof Neg.class ? ((tmp0) => tmp0 instanceof Neg.class ? ((d) => self.eval(d))(tmp0.expr) : super.eval(e))(e.expr) : super.eval(e);
 //│ │ │           })());
 //│ │ │         }
 //│ │ │       });
 //│ │ │     }
-//│ │ │   };
-//│ │ │   globalThis.EvalNegNeg = typing_unit4.EvalNegNeg;
+//│ │ │   }
+//│ │ │   const typing_unit4 = new TypingUnit4;
+//│ │ │   globalThis.EvalNegNeg = ((base) => typing_unit4.EvalNegNeg(base));
 //│ │ └── Reply
-//│ │     [Function: EvalNegNeg]
+//│ │     [Function (anonymous)]
 //│ └── No queries
 
 :js
 :ShowRepl
 module TestLang extends EvalBase, EvalNeg, EvalNegNeg
-//│ module TestLang() {
-//│   fun eval: 'A -> int
+//│ module TestLang {
+//│   fun eval: 'a -> Int
 //│ }
 //│ where
-//│   'A <: Add['A] | Lit | Neg['A & (~#Neg | Neg['A])]
+//│   'a <: Neg['A] | Object & 'b & ~#Neg
+//│   'A <: Neg['a & 'A] | Neg['A] & ~#Neg | Object & 'b & ~#Neg
+//│   'b <: Add['a] | Lit | Neg['a]
 //│ // Prelude
-//│ let typing_unit5 = {
-//│   cache: {},
+//│ class TypingUnit5 {
+//│   #TestLang;
+//│   constructor() {
+//│   }
 //│   get TestLang() {
-//│     if (this.cache.TestLang === undefined) {
+//│     const outer = this;
+//│     if (this.#TestLang === undefined) {
 //│       class TestLang extends EvalNegNeg(EvalNeg(EvalBase(Object))) {
 //│         constructor() {
 //│           super();
 //│         }
 //│       }
-//│       this.cache.TestLang = new TestLang();
-//│       this.cache.TestLang["class"] = TestLang;
+//│       this.#TestLang = new TestLang();
+//│       this.#TestLang.class = TestLang;
 //│     }
-//│     return this.cache.TestLang;
+//│     return this.#TestLang;
 //│   }
-//│ };
+//│ }
+//│ const typing_unit5 = new TypingUnit5;
 //│ globalThis.TestLang = typing_unit5.TestLang;
 //│ // End of generated code
-//│ ┌ Block at Mixin.mls:321
+//│ ┌ Block at Mixin.mls:353
 //│ ├─┬ Prelude
 //│ │ ├── Code
-//│ │ │   let typing_unit5 = {
-//│ │ │     cache: {},
+//│ │ │   class TypingUnit5 {
+//│ │ │     #TestLang;
+//│ │ │     constructor() {
+//│ │ │     }
 //│ │ │     get TestLang() {
-//│ │ │       if (this.cache.TestLang === undefined) {
+//│ │ │       const outer = this;
+//│ │ │       if (this.#TestLang === undefined) {
 //│ │ │         class TestLang extends EvalNegNeg(EvalNeg(EvalBase(Object))) {
 //│ │ │           constructor() {
 //│ │ │             super();
 //│ │ │           }
 //│ │ │         }
-//│ │ │         this.cache.TestLang = new TestLang();
-//│ │ │         this.cache.TestLang["class"] = TestLang;
+//│ │ │         this.#TestLang = new TestLang();
+//│ │ │         this.#TestLang.class = TestLang;
 //│ │ │       }
-//│ │ │       return this.cache.TestLang;
+//│ │ │       return this.#TestLang;
 //│ │ │     }
-//│ │ │   };
+//│ │ │   }
+//│ │ │   const typing_unit5 = new TypingUnit5;
 //│ │ │   globalThis.TestLang = typing_unit5.TestLang;
 //│ │ └── Reply
 //│ │     TestLang { class: [Function: TestLang] }
@@ -372,30 +414,34 @@ fun mk(n) = if n is
   1 then Neg(mk(n))
   _ then Add(mk(n), mk(n))
 TestLang.eval(mk(0))
-//│ fun mk: forall 'E. number -> 'E
-//│ int
+//│ fun mk: forall 'E. Object -> 'E
+//│ Int
 //│ where
 //│   'E :> Add['E] | Lit | Neg['E]
 //│ // Prelude
-//│ let typing_unit6 = { cache: {} };
+//│ class TypingUnit6 {}
+//│ const typing_unit6 = new TypingUnit6;
 //│ // Query 1
 //│ globalThis.mk = function mk(n) {
-//│   return n == 0 === true ? Lit(0) : n == 1 === true ? Neg(mk(n)) : Add(mk(n), mk(n));
+//│   let a;
+//│   return a = n, a === 0 ? Lit(0) : a === 1 ? Neg(mk(n)) : Add(mk(n), mk(n));
 //│ };
 //│ // Query 2
 //│ res = TestLang.eval(mk(0));
 //│ // End of generated code
-//│ ┌ Block at Mixin.mls:370
+//│ ┌ Block at Mixin.mls:412
 //│ ├─┬ Prelude
 //│ │ ├── Code
-//│ │ │   let typing_unit6 = { cache: {} };
+//│ │ │   class TypingUnit6 {}
+//│ │ │   const typing_unit6 = new TypingUnit6;
 //│ │ └── Reply
 //│ │     undefined
 //│ ├─┬ Query 1/2
 //│ │ ├── Prelude: <empty>
 //│ │ ├── Code:
 //│ │ ├──   globalThis.mk = function mk(n) {
-//│ │ ├──     return n == 0 === true ? Lit(0) : n == 1 === true ? Neg(mk(n)) : Add(mk(n), mk(n));
+//│ │ ├──     let a;
+//│ │ ├──     return a = n, a === 0 ? Lit(0) : a === 1 ? Neg(mk(n)) : Add(mk(n), mk(n));
 //│ │ ├──   };
 //│ │ ├── Intermediate: [Function: mk]
 //│ │ └── Reply: [success] [Function: mk]
@@ -409,45 +455,42 @@ TestLang.eval(mk(0))
 //│     = [Function: mk]
 
 
-class Foo(x: int)
-//│ class Foo(x: int)
+class Foo(x: Int)
+//│ class Foo(x: Int)
+
+class Bar(x: Int, y: Int) extends Foo(x + y)
+//│ class Bar(x: Int, y: Int) extends Foo
 
 
-:e
-class Bar(x: int, y: int) extends Foo(x + y)
-//│ ╔══[ERROR] Class inheritance is not supported yet (use mixins)
-//│ ║  l.417: 	class Bar(x: int, y: int) extends Foo(x + y)
-//│ ╙──       	                                  ^^^^^^^^^^
-//│ class Bar(x: int, y: int)
-
-
-mixin AA(a: int) {
+mixin AA(a: Int) {
 }
-//│ mixin AA(a: int)
+//│ mixin AA(a: Int)
 
 mixin BB {}
 //│ mixin BB()
 
 
-class C(x: int) extends BB
-//│ class C(x: int)
+class C(x: Int) extends BB
+//│ class C(x: Int)
 
-class D(x: int) extends AA(x)
-//│ class D(x: int)
+class D(x: Int) extends AA(x)
+//│ class D(x: Int)
 
-class E(x: int) extends BB, AA(x)
-//│ class E(x: int)
+class E(x: Int) extends BB, AA(x)
+//│ class E(x: Int)
 
 :js
-mixin Fooo(x: int) { fun f = [x, this.x] }
-//│ mixin Fooo(x: int) {
+mixin Fooo(x: Int) { fun f = [x, this.x] }
+//│ mixin Fooo(x: Int) {
 //│   this: {x: 'x}
-//│   fun f: (int, 'x,)
+//│   fun f: (Int, 'x,)
 //│ }
 //│ // Prelude
-//│ let typing_unit14 = {
-//│   cache: {},
+//│ class TypingUnit14 {
+//│   constructor() {
+//│   }
 //│   Fooo(base) {
+//│     const outer = this;
 //│     return (class Fooo extends base {
 //│       #x;
 //│       get x() { return this.#x; }
@@ -465,17 +508,20 @@ mixin Fooo(x: int) { fun f = [x, this.x] }
 //│       }
 //│     });
 //│   }
-//│ };
-//│ globalThis.Fooo = typing_unit14.Fooo;
+//│ }
+//│ const typing_unit14 = new TypingUnit14;
+//│ globalThis.Fooo = ((base) => typing_unit14.Fooo(base));
 //│ // End of generated code
 
 :js
-mixin Bazz(y: int)
-//│ mixin Bazz(y: int)
+mixin Bazz(y: Int)
+//│ mixin Bazz(y: Int)
 //│ // Prelude
-//│ let typing_unit15 = {
-//│   cache: {},
+//│ class TypingUnit15 {
+//│   constructor() {
+//│   }
 //│   Bazz(base) {
+//│     const outer = this;
 //│     return (class Bazz extends base {
 //│       #y;
 //│       get y() { return this.#y; }
@@ -485,31 +531,36 @@ mixin Bazz(y: int)
 //│       }
 //│     });
 //│   }
-//│ };
-//│ globalThis.Bazz = typing_unit15.Bazz;
+//│ }
+//│ const typing_unit15 = new TypingUnit15;
+//│ globalThis.Bazz = ((base) => typing_unit15.Bazz(base));
 //│ // End of generated code
 
 :js
 module Barr extends Fooo(0), Bazz(1)
-//│ module Barr() {
-//│   fun f: (int, 0,)
+//│ module Barr {
+//│   fun f: (Int, 0,)
 //│ }
 //│ // Prelude
-//│ let typing_unit16 = {
-//│   cache: {},
+//│ class TypingUnit16 {
+//│   #Barr;
+//│   constructor() {
+//│   }
 //│   get Barr() {
-//│     if (this.cache.Barr === undefined) {
+//│     const outer = this;
+//│     if (this.#Barr === undefined) {
 //│       class Barr extends Bazz(Fooo(Object)) {
 //│         constructor() {
 //│           super(1, 0);
 //│         }
 //│       }
-//│       this.cache.Barr = new Barr();
-//│       this.cache.Barr["class"] = Barr;
+//│       this.#Barr = new Barr();
+//│       this.#Barr.class = Barr;
 //│     }
-//│     return this.cache.Barr;
+//│     return this.#Barr;
 //│   }
-//│ };
+//│ }
+//│ const typing_unit16 = new TypingUnit16;
 //│ globalThis.Barr = typing_unit16.Barr;
 //│ // End of generated code
 
@@ -529,7 +580,7 @@ mixin Base {
   fun x = y
 }
 //│ ╔══[ERROR] identifier not found: y
-//│ ║  l.529: 	  fun x = y
+//│ ║  l.580: 	  fun x = y
 //│ ╙──       	          ^
 //│ mixin Base() {
 //│   fun x: error
@@ -540,39 +591,43 @@ mixin Base {
 
 :re
 module Test extends Base
-//│ module Test() {
+//│ module Test {
 //│   fun x: error
 //│ }
 //│ Runtime error:
 //│   ReferenceError: Base is not defined
 
 
-mixin MA(a: int)
-mixin MB(b1: int, b2: int)
-mixin MC(c: int)
-//│ mixin MA(a: int)
-//│ mixin MB(b1: int, b2: int)
-//│ mixin MC(c: int)
+mixin MA(a: Int)
+mixin MB(b1: Int, b2: Int)
+mixin MC(c: Int)
+//│ mixin MA(a: Int)
+//│ mixin MB(b1: Int, b2: Int)
+//│ mixin MC(c: Int)
 
 :js
 module MM extends MA(1), MB(2, 3), MC(4)
-//│ module MM()
+//│ module MM
 //│ // Prelude
-//│ let typing_unit22 = {
-//│   cache: {},
+//│ class TypingUnit22 {
+//│   #MM;
+//│   constructor() {
+//│   }
 //│   get MM() {
-//│     if (this.cache.MM === undefined) {
+//│     const outer = this;
+//│     if (this.#MM === undefined) {
 //│       class MM extends MC(MB(MA(Object))) {
 //│         constructor() {
 //│           super(4, 2, 3, 1);
 //│         }
 //│       }
-//│       this.cache.MM = new MM();
-//│       this.cache.MM["class"] = MM;
+//│       this.#MM = new MM();
+//│       this.#MM.class = MM;
 //│     }
-//│     return this.cache.MM;
+//│     return this.#MM;
 //│   }
-//│ };
+//│ }
+//│ const typing_unit22 = new TypingUnit22;
 //│ globalThis.MM = typing_unit22.MM;
 //│ // End of generated code
 

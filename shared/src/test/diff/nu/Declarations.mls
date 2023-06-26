@@ -2,22 +2,26 @@
 
 
 
-declare fun console: nothing
-//│ fun console: nothing
+declare fun btoa: nothing
+declare fun atob: nothing
+//│ fun btoa: nothing
+//│ fun atob: nothing
 
-console.error("hello")
+let str = btoa("hello")
+atob(str)
+//│ let str: nothing
 //│ nothing
+//│ str
+//│     = 'aGVsbG8='
 //│ res
-//│     = undefined
-//│ // Output
-//│ hello
+//│     = 'hello'
 
 
 declare module console {
-  fun error: string -> unit
+  fun error: Str -> unit
 }
-//│ module console() {
-//│   fun error: string -> unit
+//│ declare module console {
+//│   fun error: Str -> unit
 //│ }
 
 console.error("hello")
@@ -29,31 +33,32 @@ console.error("hello")
 
 :e
 console.log("hello")
-//│ ╔══[ERROR] Module `console` does not contain member `log`
-//│ ║  l.31: 	console.log("hello")
+//│ ╔══[ERROR] Type `console` does not contain member `log`
+//│ ║  l.35: 	console.log("hello")
 //│ ╙──      	       ^^^^
 //│ error
 //│ res
 //│     = undefined
 
 
+
 declare module Foo {
-  fun foo: int
+  fun foo: Int
 }
-//│ module Foo() {
-//│   fun foo: int
+//│ declare module Foo {
+//│   fun foo: Int
 //│ }
 
 :re
 Foo.foo
-//│ int
+//│ Int
 //│ res
 //│ Runtime error:
 //│   ReferenceError: Foo is not defined
 
 
-declare type A = int 
-//│ type A = int
+declare type A = Int
+//│ type A = Int
 
 42 : A
 //│ A
@@ -62,14 +67,62 @@ declare type A = int
 
 
 
+declare class Sanitizer {
+  fun sanitizeFor(element: Str, input: Str): Str
+}
+//│ declare class Sanitizer {
+//│   fun sanitizeFor: (element: Str, input: Str,) -> Str
+//│ }
+
+:re
+let s = Sanitizer()
+//│ let s: Sanitizer
+//│ s
+//│ Runtime error:
+//│   ReferenceError: Sanitizer is not defined
+
+
+
+// * TODO allow Buffer2 to be named Buffer...
+// :d
+declare module Buffer {
+  class Buffer2 {
+    val length: Int
+  }
+  fun bar: Int
+  fun from(a: Array[Int]): Buffer2 = from(a)
+  // fun from1(a: Array[Int]): this.Buffer2 = from1(a) // FIXME
+  // fun from2(a: Array[Int]): Buffer.Buffer2 = from2(a) // FIXME
+}
+//│ declare module Buffer {
+//│   class Buffer2 {
+//│     let length: Int
+//│   }
+//│   fun bar: Int
+//│   fun from: (a: Array[Int],) -> Buffer2
+//│ }
+
+let b = Buffer.from([0, 1, 2])
+//│ let b: Buffer2
+//│ b
+//│   = <Buffer 00 01 02>
+
+b.length
+//│ Int
+//│ res
+//│     = 3
+
+
+
+
 :pe
 declare 42
 //│ ╔══[PARSE ERROR] Unexpected literal token after modifier
-//│ ║  l.66: 	declare 42
-//│ ╙──      	        ^^
+//│ ║  l.119: 	declare 42
+//│ ╙──       	        ^^
 //│ ╔══[PARSE ERROR] Unexpected literal token after modifier
-//│ ║  l.66: 	declare 42
-//│ ╙──      	        ^^
+//│ ║  l.119: 	declare 42
+//│ ╙──       	        ^^
 //│ 42
 //│ res
 //│     = 42

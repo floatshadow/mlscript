@@ -43,17 +43,20 @@ final case class MethodDef[RHS <: Term \/ Type](
   val children: Ls[Located] = nme :: body :: Nil
 }
 
-sealed trait NameRef extends Located { val name: Str }
+sealed trait NameRef extends Located { val name: Str; def toVar: Var }
 
-sealed abstract class DeclKind(val str: Str)
+sealed abstract class OuterKind(val str: Str)
+case object Block extends OuterKind("block")
+sealed abstract class DeclKind(str: Str) extends OuterKind(str)
 case object Val extends DeclKind("value")
 sealed abstract class TypeDefKind(str: Str) extends DeclKind(str)
 sealed trait ObjDefKind
-case object Cls extends TypeDefKind("class") with ObjDefKind
+sealed trait ClsLikeKind extends ObjDefKind
+case object Cls extends TypeDefKind("class") with ClsLikeKind
 case object Trt extends TypeDefKind("trait") with ObjDefKind
 case object Mxn extends TypeDefKind("mixin")
 case object Als extends TypeDefKind("type alias")
-case object Nms extends TypeDefKind("module") with ObjDefKind
+case object Mod extends TypeDefKind("module") with ClsLikeKind
 
 sealed abstract class Term                                           extends Terms with TermImpl
 sealed abstract class Lit                                            extends SimpleTerm with LitImpl
@@ -64,7 +67,7 @@ final case class Tup(fields: Ls[Opt[Var] -> Fld])                    extends Ter
 final case class Rcd(fields: Ls[Var -> Fld])                         extends Term
 final case class Sel(receiver: Term, fieldName: Var)                 extends Term
 final case class Let(isRec: Bool, name: Var, rhs: Term, body: Term)  extends Term
-final case class Blk(stmts: Ls[Statement])                           extends Term with BlkImpl
+final case class Blk(stmts: Ls[Statement])                           extends Term with BlkImpl with Outer
 final case class Bra(rcd: Bool, trm: Term)                           extends Term
 final case class Asc(trm: Term, ty: Type)                            extends Term
 final case class Bind(lhs: Term, rhs: Term)                          extends Term
@@ -81,6 +84,7 @@ final case class Where(body: Term, where: Ls[Statement])             extends Ter
 final case class Forall(params: Ls[TypeVar], body: Term)             extends Term
 final case class Inst(body: Term)                                    extends Term
 final case class Super()                                             extends Term
+final case class Eqn(lhs: Var, rhs: Term)                            extends Term // equations such as x = y, notably used in constructors; TODO: make lhs a Term
 
 sealed abstract class IfBody extends IfBodyImpl
 // final case class IfTerm(expr: Term) extends IfBody // rm?
@@ -109,9 +113,10 @@ trait IdentifiedTerm
 sealed abstract class SimpleTerm extends Term with IdentifiedTerm with SimpleTermImpl
 
 sealed trait Statement extends StatementImpl
-final case class LetS(isRec: Bool, pat: Term, rhs: Term)  extends Statement
-final case class DataDefn(body: Term)                     extends Statement
-final case class DatatypeDefn(head: Term, body: Term)     extends Statement
+final case class LetS(isRec: Bool, pat: Term, rhs: Term) extends Statement
+final case class DataDefn(body: Term)                    extends Statement
+final case class DatatypeDefn(head: Term, body: Term)    extends Statement
+final case class Constructor(params: Tup, body: Blk)    extends Statement // constructor(...) { ... }
 
 sealed trait DesugaredStatement extends Statement with DesugaredStatementImpl
 
@@ -176,26 +181,33 @@ final case class Signature(members: Ls[NuDecl], result: Opt[Type]) extends TypeL
 
 sealed abstract class NuDecl extends TypeLike with Statement with NuDeclImpl
 
+sealed trait Outer { def kind: OuterKind }
+
 final case class NuTypeDef(
   kind: TypeDefKind,
   nme: TypeName,
   tparams: Ls[(Opt[VarianceInfo], TypeName)],
-  params: Tup, // the specialized parameters for that type
+  params: Opt[Tup], // the specialized parameters for that type
+  ctor: Opt[Constructor],
   sig: Opt[Type],
   parents: Ls[Term],
   superAnnot: Opt[Type],
   thisAnnot: Opt[Type],
   body: TypingUnit
-)(val declareLoc: Opt[Loc]) extends NuDecl with Statement
+)(val declareLoc: Opt[Loc], val abstractLoc: Opt[Loc])
+  extends NuDecl with Statement with Outer {
+    def isPlainJSClass: Bool = params.isEmpty
+  }
 
 final case class NuFunDef(
   isLetRec: Opt[Bool], // None means it's a `fun`, which is always recursive; Some means it's a `let`
   nme: Var,
   tparams: Ls[TypeName],
   rhs: Term \/ Type,
-)(val declareLoc: Opt[Loc]) extends NuDecl with DesugaredStatement {
+)(val declareLoc: Opt[Loc], val signature: Opt[NuFunDef], val outer: Opt[Outer]) extends NuDecl with DesugaredStatement {
   val body: Located = rhs.fold(identity, identity)
   def kind: DeclKind = Val
+  val abstractLoc: Opt[Loc] = None
 }
 
 

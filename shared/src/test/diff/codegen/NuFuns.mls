@@ -5,10 +5,11 @@
 fun foo =
   fun bar(x) = x + 1
   bar(10)
-//│ fun foo: int
+//│ fun foo: Int
 //│ // Prelude
 //│ let res;
-//│ let typing_unit = { cache: {} };
+//│ class TypingUnit {}
+//│ const typing_unit = new TypingUnit;
 //│ // Query 1
 //│ globalThis.foo = function foo() {
 //│   return ((() => {
@@ -18,13 +19,45 @@ fun foo =
 //│ };
 //│ // End of generated code
 
-
-// TODO
 fun foo =
-  class C(a: int) { fun bar(x) = a + x + 1 }
+  class C(a: Int) { fun bar(x) = a + x + 1 }
   C(100).bar(10)
-//│ fun foo: int
-//│ Code generation encountered an error:
-//│   unsupported definitions in blocks
+foo
+//│ fun foo: Int
+//│ Int
+//│ res
+//│     = [Function: foo1]
 
+
+// FIXME: returns a thunk
+fun main =
+  log("Hello")
+main
+//│ fun main: undefined
+//│ undefined
+//│ res
+//│     = [Function: main]
+
+fun main =
+  log("Hello")
+//│ fun main: undefined
+
+main
+//│ undefined
+//│ res
+//│     = undefined
+//│ // Output
+//│ Hello
+
+
+fun main =
+  mixin B { log(1) }
+  log(0)
+  module M extends B
+  log(2)
+main
+//│ fun main: undefined
+//│ undefined
+//│ res
+//│     = [Function: main2]
 
