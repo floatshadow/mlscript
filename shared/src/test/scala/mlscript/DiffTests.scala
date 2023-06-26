@@ -48,8 +48,10 @@ class DiffTests
 {
   
   
-  /**  Hook for dependent projects, like the monomorphizer. */
-  def postProcess(mode: ModeType, basePath: Ls[Str], testName: Str, unit: TypingUnit): Ls[Str] = Nil
+  /**  Hooks for dependent projects, like the monomorphizer. */
+  def postParse(output: String => Unit, mode: ModeType, basePath: Ls[Str], testName: Str, unit: TypingUnit): Ls[Str] = Nil
+  def postType(output: String => Unit, mode: ModeType, basePath: Ls[Str], testName: Str, unit: TypingUnit, typer: Typer)
+        (tpd: typer.TypedTypingUnit): Ls[Str] = Nil
   
   
   private val inParallel = isInstanceOf[ParallelTestExecution]
@@ -414,7 +416,7 @@ class DiffTests
             if (parseOnly)
               output("Parsed: " + res.showDbg)
             
-            postProcess(mode, basePath, testName, res).foreach(output)
+            postParse(output, mode, basePath, testName, res).foreach(output)
             
             if (parseOnly)
               Success(Pgrm(Nil), 0)
@@ -498,7 +500,8 @@ class DiffTests
             val (typeDefs, stmts, newDefsResults) = if (newDefs) {
               
               val vars: Map[Str, typer.SimpleType] = Map.empty
-              val tpd = typer.typeTypingUnit(TypingUnit(p.tops), N)(ctx, raise, vars)
+              val unit = TypingUnit(p.tops)
+              val tpd = typer.typeTypingUnit(unit, N)(ctx, raise, vars)
               
               def showTTU(ttu: typer.TypedTypingUnit, ind: Int): Unit = {
                 val indStr = "  " * ind
@@ -586,6 +589,7 @@ class DiffTests
               // val exp = typer.expandType(modTpe)(ctx)
               // FirstClassDefn()
               
+              postType(output, mode, basePath, testName, unit, typer)(tpd).foreach(output)
               
               // (Nil, Nil, N)
               (Nil, Nil, S(p.tops.collect {

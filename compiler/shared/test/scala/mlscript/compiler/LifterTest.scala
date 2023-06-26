@@ -8,7 +8,7 @@ import mlscript.codegen.Helpers.inspect as showStructure
 
 class LifterTestCompiler extends DiffTests {
   import LifterTestCompiler.*
-  override def postProcess(mode: ModeType, basePath: List[Str], testName: Str, unit: TypingUnit): List[Str] = 
+  override def postParse(output: String => Unit, mode: ModeType, basePath: List[Str], testName: Str, unit: TypingUnit): List[Str] = 
     val outputBuilder = StringBuilder()
     outputBuilder ++= "Parsed:\n"
     outputBuilder ++= showStructure(unit)

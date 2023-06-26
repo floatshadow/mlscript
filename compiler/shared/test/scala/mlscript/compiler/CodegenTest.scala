@@ -10,23 +10,19 @@ import mlscript.compiler.backend.Ir2wasm
 
 class CodegenTestCompiler extends DiffTests {
   import CodegenTestCompiler.*
-  override def postProcess(
+  override def postType(
+      output: String => Unit,
       mode: ModeType,
       basePath: List[Str],
       testName: Str,
-      unit: TypingUnit
-  ): List[Str] =
+      unit: TypingUnit,
+      typer: Typer,
+  )(tpd: typer.TypedTypingUnit): List[Str] =
     val outputBuilder = StringBuilder()
-    outputBuilder ++= "IR:\n"
-    try
-      val ir = new Mls2ir().apply(unit)
-      outputBuilder ++= ir.printIR
-      outputBuilder ++= "\nWASM:\n"
-      try
-        val wasm = new Ir2wasm().translate(ir)
-        outputBuilder ++= wasm.toString
-      catch err => outputBuilder ++= "Ir2wasm failed: " ++ err.toString()
-    catch err => outputBuilder ++= "Mls2ir failed: " ++ err.toString()
+    val ir = new Mls2ir().apply(unit)
+    output(s"IR:\n${ir.printIR}")
+    val wasm = new Ir2wasm().translate(ir)
+    output(s"\nWASM:\n${wasm}")
     outputBuilder.toString().linesIterator.toList
 
   override protected lazy val files = allFiles.filter { file =>
