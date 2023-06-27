@@ -64,11 +64,11 @@ class Ir2wasm {
         case Nil =>
           instrToWasm(source.instructions.toList)(Map(), LocalsHandler(0)) <:>
             (source.leaving match
-              case S(Branch(target, args)) => doBranch(source, target)
-              case S(Match(value, cases))  => ??? // TODO
-              case S(Return(value))        => ??? // TODO
-              case S(Unreachable)          => Code(List(WasmUnreachable))
-              case _                       => Code(List(Comment("TODO")))
+              case S(Branch(target, args))         => doBranch(source, target)
+              case S(Match(value, cases, default)) => ??? // TODO
+              case S(Return(value))                => ??? // TODO
+              case S(Unreachable) => Code(List(WasmUnreachable))
+              case _              => Code(List(Comment("TODO")))
             )
 
     def doBranch(source: BasicBlock, target: BasicBlock)(implicit

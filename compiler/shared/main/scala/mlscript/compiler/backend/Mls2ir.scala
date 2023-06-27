@@ -131,7 +131,8 @@ class Mls2ir {
       )
       bb.instructions += Instruction.Match(
         tstOp,
-        Map(("true", Nil) -> trueBB, ("false", Nil) -> falseBB)
+        Map(IntLit(1) -> (trueBB, Nil)),
+        (falseBB, Nil)
       )
       bb = trueBB
       val conOp = translateTerm(con)
@@ -258,13 +259,15 @@ class Mls2ir {
               case Some(term) =>
                 bb.instructions += Instruction.Match(
                   translateTerm(iff),
-                  Map(("true", Nil) -> trueBB, ("false", Nil) -> falseBB)
+                  Map(IntLit(1) -> (trueBB, Nil)),
+                  (falseBB, Nil)
                 )
                 translateChildBlock(term, falseBB, nextBB)
               case None =>
                 bb.instructions += Instruction.Match(
                   translateTerm(iff),
-                  Map(("true", Nil) -> trueBB, ("false", Nil) -> nextBB)
+                  Map(IntLit(1) -> (trueBB, Nil)),
+                  (nextBB, Nil)
                 )
             translateChildBlock(thenn, trueBB, nextBB)
             bb = nextBB
@@ -273,39 +276,35 @@ class Mls2ir {
             val parent = bb
             val nextBB =
               BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
-            var elseCase = false
-            var children: Map[(String, List[Operand]), BasicBlock] =
-              lines
-                .map(_ match
-                  case Left(IfThen(App(Var(typename), Tup(fields)), thenn)) =>
-                    val thenBlock = BasicBlock(
-                      scope.allocateRuntimeName(),
-                      Nil,
-                      ListBuffer()
-                    )
-                    val args = fields.map(_ match
-                      case (_, Fld(_, _, term)) => termToOperand(term)
-                      case _ => throw CodeGenError(s"unsupported if statement")
-                    )
-                    translateChildBlock(thenn, thenBlock, nextBB)
-                    (typename, args) -> thenBlock
-                  case Left(IfElse(term)) =>
-                    elseCase = true
-                    val elseBlock = BasicBlock(
-                      scope.allocateRuntimeName(),
-                      Nil,
-                      ListBuffer()
-                    )
-                    translateChildBlock(term, elseBlock, nextBB)
-                    ("else", Nil) -> elseBlock
+            var default = (nextBB, Nil)
+            var children = MutMap.empty[SimpleTerm, (BasicBlock, List[Operand])]
+            lines.foreach(_ match
+              case Left(IfThen(App(Var(name), Tup(fields)), thenn)) =>
+                val thenBlock = BasicBlock(
+                  scope.allocateRuntimeName(),
+                  Nil,
+                  ListBuffer()
+                )
+                val args = fields.map(_ match
+                  case (_, Fld(_, _, term)) => termToOperand(term)
                   case _ => throw CodeGenError(s"unsupported if statement")
                 )
-                .toMap
-            if (!elseCase)
-              children += ("else", Nil) -> nextBB
+                translateChildBlock(thenn, thenBlock, nextBB)
+                children += Var(name) -> (thenBlock, args)
+              case Left(IfElse(term)) =>
+                val elseBlock = BasicBlock(
+                  scope.allocateRuntimeName(),
+                  Nil,
+                  ListBuffer()
+                )
+                default = (elseBlock, Nil)
+                translateChildBlock(term, elseBlock, nextBB)
+              case _ => throw CodeGenError(s"unsupported if statement")
+            )
             parent.instructions += Instruction.Match(
               translateTerm(lhs),
-              children
+              children.toMap,
+              default
             )
             bb = nextBB
             val result: Operand.Var = Operand.Var(scope.allocateRuntimeName)
@@ -334,8 +333,9 @@ class Mls2ir {
             case Cls =>
               scope.declareClass(
                 nme.name,
-                params.getOrElse(Tup(Nil)).fields.collect { case S(variable) -> field =>
-                  variable.name
+                params.getOrElse(Tup(Nil)).fields.collect {
+                  case S(variable) -> field =>
+                    variable.name
                 },
                 TypeName(nme.name),
                 Nil

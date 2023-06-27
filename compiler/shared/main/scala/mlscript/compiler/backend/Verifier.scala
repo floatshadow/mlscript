@@ -111,9 +111,9 @@ object Verifier {
               ctx += operand -> tpe
             case _ => ()
           uses = uses | (args ++ List(fn)).toSet
-        case Instruction.Match(value, cases) =>
-          succs = cases.values.toList
-          uses = uses | Set(value) | cases.keys
+        case Instruction.Match(value, cases, default) =>
+          succs = cases.values.map(_._1).toList :+ default._1
+          uses = uses | Set(value) | default._2.toSet | cases.values
             .map(_._2.toSet)
             .reduce((set1, set2) => set1 | set2)
           terminated = true

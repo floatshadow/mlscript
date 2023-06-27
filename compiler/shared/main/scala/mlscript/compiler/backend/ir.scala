@@ -5,6 +5,7 @@ import mlscript.utils.lastWords
 import scala.collection.mutable.ListBuffer
 import scala.collection.immutable
 import mlscript.utils.shorthands.*
+import mlscript.SimpleTerm
 
 enum Operand:
   case Const(val value: Boolean | Int | Float | String)
@@ -125,7 +126,8 @@ enum Instruction:
   )
   case Match(
       val value: Operand,
-      val cases: Map[(String, List[Operand]), BasicBlock]
+      val cases: Map[SimpleTerm, (BasicBlock, List[Operand])],
+      val default: (BasicBlock, List[Operand])
   )
   case Return(val value: Option[Operand])
   case SetField(val obj: Operand.Var, val field: String, val value: Operand)
@@ -146,14 +148,15 @@ class BasicBlock(
   import Instruction._
 
   def leaving: Option[Instruction] = instructions.find {
-    case Unreachable | Match(_, _) | Branch(_, _) | Return(_) => true
-    case _                                                    => false
+    case Unreachable | Match(_, _, _) | Branch(_, _) | Return(_) => true
+    case _                                                       => false
   }
 
   def children: List[BasicBlock] = leaving match
     case S(Branch(target, _)) => List(target)
-    case S(Match(_, cases))   => cases.values.toList
-    case _                    => Nil
+    case S(Match(_, cases, default)) =>
+      cases.values.map(_._1).toList :+ default._1
+    case _ => Nil
 
   def printIR =
     var visited: Map[String, BasicBlock] = Map(name -> this)
@@ -173,14 +176,17 @@ class BasicBlock(
         s"  $result = call ${fn} (${args.mkString(", ")})"
       case Call(None, fn, args) =>
         s"  call ${fn} (${args.mkString(", ")})"
-      case Match(value, cases) =>
-        cases.foreach((key, value) => visitBlock(value))
+      case Match(value, cases, default) =>
+        cases.foreach((key, value) => visitBlock(value._1))
+        visitBlock(default._1)
         val casesStr = cases
-          .map((name, value) =>
-            s"    ${name._1} (${name._2.mkString(", ")}) -> ${value.name}"
+          .map((key, value) =>
+            s"    ${key} -> ${value._1.name} (${value._2.mkString(", ")})"
           )
           .mkString("\n")
-        s"  match ${value}\n${casesStr}"
+        val defaultStr =
+          s"    _ -> ${default._1.name} (${default._2.mkString(", ")})"
+        s"  match ${value}\n${casesStr}\n${defaultStr}"
       case Return(value) =>
         "  return" + value.map(v => s" $v").getOrElse("")
       case SetField(obj, field, value) =>
