@@ -160,12 +160,12 @@ class BasicBlock(
 
   def printIR =
     var visited: Map[String, BasicBlock] = Map(name -> this)
-    var toPrint = List(this)
+    var toPrint = ListBuffer(this)
     def visitBlock(block: BasicBlock) =
       val old = visited.get(block.name)
       if old.isEmpty then
         visited += (block.name -> block)
-        toPrint = block :: toPrint
+        toPrint += block
       else if old != Some(block) then lastWords(s"invalid ir")
     def printInstruction(inst: Instruction): String = inst match
       case Assignment(lhs, rhs) => s"  ${lhs} = ${rhs}"
@@ -201,7 +201,7 @@ class BasicBlock(
     while toPrint.nonEmpty do
       val block = toPrint.head
       toPrint = toPrint.tail
-      buffer ++= s"Basic Block ${block.name}:\n"
+      buffer ++= s"Basic Block ${block.name} (${block.params.mkString(", ")}):\n"
       for (str <- block.instructions.map(printInstruction))
         buffer ++= str
         buffer += '\n'

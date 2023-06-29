@@ -1,6 +1,7 @@
 package mlscript
 package compiler.backend
 
+import scala.annotation.tailrec
 import scala.collection.mutable.{ListBuffer, HashMap}
 import scala.collection.mutable.{Set => MutSet, Map => MutMap}
 import mlscript.codegen._
@@ -18,10 +19,10 @@ class Mls2ir {
   var bb = entryBB
 
   def termToType(term: Term): Type = term match
-    case Var("int")    => Type.Int32
-    case Var("unit")   => Type.Unit
-    case Var("bool")   => Type.Boolean
-    case Var("string") => Type.OpaquePointer
+    case Var("Int")    => Type.Int32
+    case Var("Unit")   => Type.Unit
+    case Var("Bool")   => Type.Boolean
+    case Var("String") => Type.OpaquePointer
     case _             => ???
 
   def termToOperand(term: Term): Operand = term match
@@ -153,7 +154,87 @@ class Mls2ir {
       makeCall("app_result", callee, arguments)
     case _ => throw CodeGenError(s"ill-formed application ${inspect(term)}")
 
-  def translateCase(term: CaseOf): Operand = ???
+  def translateCase(
+      caseOf: CaseOf,
+      defaultElse: Option[(BasicBlock, List[Operand])],
+      defaultJoin: Option[(BasicBlock, List[Operand])]
+  )(implicit scope: Scope): Operand =
+    val parent = bb
+    val result: Operand.Var =
+      Operand.Var(scope.allocateRuntimeName("result"))
+    val joinBB = defaultJoin
+      .map(_._1)
+      .getOrElse(
+        BasicBlock(scope.allocateRuntimeName(), List(result), ListBuffer())
+      )
+    var elseBranch = defaultElse.getOrElse((joinBB, Nil))
+    var childern = MutMap.empty[SimpleTerm, (BasicBlock, List[Operand])]
+
+    @tailrec
+    def flatten(
+        branch: CaseBranches,
+        acc: List[(Option[SimpleTerm], Term)] = Nil
+    ): List[(Option[SimpleTerm], Term)] = branch match
+      case Case(pat, body, rest) => flatten(rest, acc :+ (Some(pat), body))
+      case Wildcard(body)        => (None, body) :: acc
+      case NoCases               => acc
+
+    @tailrec
+    def translateChild(term: Term, target: BasicBlock, next: BasicBlock)(
+        implicit scope: Scope
+    ): Unit =
+      val currentBB = bb
+      bb = target
+      term match
+        case Let(false, Var(name), value, body) =>
+          val letScope = scope.derive("Let")
+          val runtimeName = letScope.declareParameter(name)
+          val lhs: Operand.Var = Operand.Var(runtimeName)
+          varMap += runtimeName -> lhs
+          bb.instructions += Instruction.Assignment(
+            lhs,
+            PureValue.Op(translateTerm(value)(letScope))
+          )
+          translateChild(body, target, next)(letScope)
+        case caseOf: CaseOf =>
+          translateCase(
+            caseOf,
+            S(defaultElse.getOrElse(elseBranch)),
+            S((joinBB, Nil))
+          )
+        case _ =>
+          val ifResult: Operand.Var = Operand.Var(scope.allocateRuntimeName)
+          target.instructions += Instruction.Assignment(
+            ifResult,
+            PureValue.Op(translateTerm(term))
+          )
+          target.instructions += Instruction.Branch(
+            joinBB,
+            List(ifResult)
+          )
+          bb = currentBB
+
+    flatten(caseOf.cases).foreach(_ match
+      case (S(pat), body) =>
+        val thenBB = BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
+        translateChild(body, thenBB, joinBB)
+        childern += pat -> (thenBB, Nil)
+      case (N, body) =>
+        defaultElse match
+          case N =>
+            val elseBB =
+              BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
+            elseBranch = (elseBB, Nil)
+            translateChild(body, elseBB, joinBB)
+          case S(_) => ()
+    )
+    parent.instructions += Instruction.Match(
+      translateTerm(caseOf.trm),
+      childern.toMap,
+      defaultElse.getOrElse(elseBranch)
+    )
+    bb = joinBB
+    result
 
   def translateTerm(term: Term)(implicit scope: Scope): Operand = term match
     case _ if term.desugaredTerm.isDefined =>
@@ -200,7 +281,7 @@ class Mls2ir {
         case (t: Term, index) =>
           val result = translateTerm(t)(blkScope)
           if index + 1 == flattened.length then
-            bb.instructions += Instruction.Return(Some(result))
+            bb.instructions += Instruction.Return(S(result))
           else result
         case (NuFunDef(isLetRec, Var(nme), _, L(rhs)), _) =>
           val result = translateTerm(rhs)(blkScope)
@@ -215,7 +296,7 @@ class Mls2ir {
           throw CodeGenError("unsupported definitions in blocks")
       }
       Operand.Unit
-    case c: CaseOf => translateCase(c)
+    case c: CaseOf => translateCase(c, None, None)
     case IntLit(value) =>
       if value.isValidInt then Operand.Const(value.toInt)
       else throw CodeGenError(s"integer literal $value is too large")
@@ -230,86 +311,12 @@ class Mls2ir {
     case Subs(arr, idx)   => ???
     case Assign(lhs, rhs) => ??? // FIXME: we have assign???
     case Inst(bod)        => translateTerm(bod)
-    case iff: If          => translateIf(iff)
-    case New(_, _)        => ??? // FIXME: need to check semantics too
-    case Forall(_, bod)   => translateTerm(bod)
-    case TyApp(base, _)   => translateTerm(base)
+    case iff: If   => throw CodeGenError(s"if expression was not desugared")
+    case New(_, _) => ??? // FIXME: need to check semantics too
+    case Forall(_, bod) => translateTerm(bod)
+    case TyApp(base, _) => translateTerm(base)
     case _: Bind | _: Test | If(_, _) | _: Splc | _: Where =>
       throw CodeGenError(s"cannot generate code for term ${inspect(term)}")
-
-  def translateIf(term: If)(implicit scope: Scope): Operand =
-
-    def translateChildBlock(term: Term, target: BasicBlock, next: BasicBlock) =
-      bb = target
-      translateTerm(term)
-      bb.instructions += Instruction.Branch(next, Nil)
-
-    term match
-      case If(body, elze) =>
-        body match
-          case IfThen(iff, thenn) =>
-            val result = Operand.Var(scope.allocateRuntimeName)
-            val trueBB =
-              BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
-            val falseBB =
-              BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
-            val nextBB =
-              BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
-            elze match
-              case Some(term) =>
-                bb.instructions += Instruction.Match(
-                  translateTerm(iff),
-                  Map(IntLit(1) -> (trueBB, Nil)),
-                  (falseBB, Nil)
-                )
-                translateChildBlock(term, falseBB, nextBB)
-              case None =>
-                bb.instructions += Instruction.Match(
-                  translateTerm(iff),
-                  Map(IntLit(1) -> (trueBB, Nil)),
-                  (nextBB, Nil)
-                )
-            translateChildBlock(thenn, trueBB, nextBB)
-            bb = nextBB
-            result
-          case IfOpApp(lhs, op, IfBlock(lines)) =>
-            val parent = bb
-            val nextBB =
-              BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
-            var default = (nextBB, Nil)
-            var children = MutMap.empty[SimpleTerm, (BasicBlock, List[Operand])]
-            lines.foreach(_ match
-              case Left(IfThen(App(Var(name), Tup(fields)), thenn)) =>
-                val thenBlock = BasicBlock(
-                  scope.allocateRuntimeName(),
-                  Nil,
-                  ListBuffer()
-                )
-                val args = fields.map(_ match
-                  case (_, Fld(_, _, term)) => termToOperand(term)
-                  case _ => throw CodeGenError(s"unsupported if statement")
-                )
-                translateChildBlock(thenn, thenBlock, nextBB)
-                children += Var(name) -> (thenBlock, args)
-              case Left(IfElse(term)) =>
-                val elseBlock = BasicBlock(
-                  scope.allocateRuntimeName(),
-                  Nil,
-                  ListBuffer()
-                )
-                default = (elseBlock, Nil)
-                translateChildBlock(term, elseBlock, nextBB)
-              case _ => throw CodeGenError(s"unsupported if statement")
-            )
-            parent.instructions += Instruction.Match(
-              translateTerm(lhs),
-              children.toMap,
-              default
-            )
-            bb = nextBB
-            val result: Operand.Var = Operand.Var(scope.allocateRuntimeName)
-            result
-          case others => throw CodeGenError(s"unsupported if statement")
 
   def translateTypingUnit(unit: TypingUnit)(implicit scope: Scope): Unit =
     unit.entities.foreach { entity =>

@@ -1,0 +1,320 @@
+:NewParser
+:NewDefs
+
+// FIXME
+let x = if true then 1 else 0
+//│ let x: 0 | 1
+//│ IR:
+//│ Basic Block entry ():
+//│   match true
+//│     true -> d ()
+//│     _ -> b ()
+//│ Basic Block d ():
+//│   e = 1
+//│   br a (e)
+//│ Basic Block b ():
+//│   c = 0
+//│   br a (c)
+//│ Basic Block a (result):
+//│   x1 = result
+//│ 
+//│ /!!!\ Uncaught error: scala.NotImplementedError: an implementation is missing
+
+// FIXME
+let x = if true&&false then 1 else 0
+if (x+1==0) then 1 else 0
+let y = 3
+//│ let x: 0 | 1
+//│ let y: 3
+//│ 0 | 1
+//│ IR:
+//│ Basic Block entry ():
+//│   f = And true, false
+//│   match f
+//│     true -> d ()
+//│     _ -> b ()
+//│ Basic Block d ():
+//│   e = 1
+//│   br a (e)
+//│ Basic Block b ():
+//│   c = 0
+//│   br a (c)
+//│ Basic Block a (result):
+//│   x1 = result
+//│   l = Add x1, 1
+//│   m = Eq l, 0
+//│   match m
+//│     true -> j ()
+//│     _ -> h ()
+//│ Basic Block j ():
+//│   k = 1
+//│   br g (k)
+//│ Basic Block h ():
+//│   i = 0
+//│   br g (i)
+//│ Basic Block g (result):
+//│   y1 = 3
+//│ 
+//│ /!!!\ Uncaught error: scala.NotImplementedError: an implementation is missing
+
+// FIXME
+class IntLit(head: Int)
+let l = IntLit(2)
+let x = if l is
+    IntLit(0) then 0
+    IntLit(1) then 1
+    IntLit(2) then 2
+    else 3
+//│ class IntLit(head: Int)
+//│ let l: IntLit
+//│ let x: 0 | 1 | 2 | 3
+//│ IR:
+//│ Basic Block entry ():
+//│   new_IntLit1 = alloc IntLit
+//│   app_result = call new_IntLit1 (2)
+//│   l1 = app_result
+//│   match l1
+//│     IntLit -> d ()
+//│     _ -> b ()
+//│ Basic Block d ():
+//│   e = getfield l1, head
+//│   tmp0 = e
+//│   match tmp0
+//│     1 -> h ()
+//│     0 -> f ()
+//│     2 -> j ()
+//│     _ -> b ()
+//│ Basic Block b ():
+//│   c = 3
+//│   br a (c)
+//│ Basic Block h ():
+//│   i = 1
+//│   br a (i)
+//│ Basic Block f ():
+//│   g = 0
+//│   br a (g)
+//│ Basic Block j ():
+//│   k = 2
+//│   br a (k)
+//│ Basic Block a (result):
+//│   x1 = result
+//│ 
+//│ /!!!\ Uncaught error: scala.NotImplementedError: an implementation is missing
+
+// FIXME
+class Position(x: Int, y: Int)
+let pos = Position(2,3)
+let length = if pos is
+    Position(3,4) then 5
+    Position(4,3) then 5
+    Position(5,12) then 13
+    Position(12,5) then 13
+    else 0
+//│ class Position(x: Int, y: Int)
+//│ let pos: Position
+//│ let length: 0 | 13 | 5
+//│ IR:
+//│ Basic Block entry ():
+//│   new_Position1 = alloc Position
+//│   app_result = call new_Position1 (2, 3)
+//│   pos1 = app_result
+//│   match pos1
+//│     Position -> d ()
+//│     _ -> b ()
+//│ Basic Block d ():
+//│   e = getfield pos1, x
+//│   tmp1 = e
+//│   f = getfield pos1, y
+//│   tmp2 = f
+//│   match tmp1
+//│     5 -> m ()
+//│     12 -> p ()
+//│     4 -> j ()
+//│     3 -> g ()
+//│     _ -> b ()
+//│ Basic Block b ():
+//│   c = 0
+//│   br a (c)
+//│ Basic Block m ():
+//│   match tmp2
+//│     12 -> n ()
+//│     _ -> b ()
+//│ Basic Block p ():
+//│   match tmp2
+//│     5 -> q ()
+//│     _ -> b ()
+//│ Basic Block j ():
+//│   match tmp2
+//│     3 -> k ()
+//│     _ -> b ()
+//│ Basic Block g ():
+//│   match tmp2
+//│     4 -> h ()
+//│     _ -> b ()
+//│ Basic Block a (result):
+//│   length1 = result
+//│ Basic Block n ():
+//│   o = 13
+//│   br a (o)
+//│ Basic Block q ():
+//│   r = 13
+//│   br a (r)
+//│ Basic Block k ():
+//│   l = 5
+//│   br a (l)
+//│ Basic Block h ():
+//│   i = 5
+//│   br a (i)
+//│ 
+//│ /!!!\ Uncaught error: scala.NotImplementedError: an implementation is missing
+
+// FIXME
+class One(x1:Int)
+class Two(x1:Int,x2:Int) extends One(x1)
+class Three(x1:Int,x2:Int,x3:Int) extends One(x1)
+class Four(x1:Int,x2:Int,x3:Int,x4:Int) extends One(x1)
+let result = if Three(1,2,3) is
+    Two(0,0) then 0
+    Two(1,2) then 2
+    Three(0,0,0) then 0
+    Three(1,2,3) then 3
+    Four(0,0,0,0) then 0
+    Four(1,2,3,4) then 4
+    true then -1
+    false then -1
+    else -1
+//│ class One(x1: Int)
+//│ class Two(x1: Int, x2: Int) extends One
+//│ class Three(x1: Int, x2: Int, x3: Int) extends One
+//│ class Four(x1: Int, x2: Int, x3: Int, x4: Int) extends One
+//│ let result: -1 | 0 | 2 | 3 | 4
+//│ IR:
+//│ Basic Block entry ():
+//│   new_Three1 = alloc Three
+//│   app_result = call new_Three1 (1, 2, 3)
+//│   tmp3 = app_result
+//│   match tmp3
+//│     Three -> m ()
+//│     true -> ao ()
+//│     Two -> d ()
+//│     false -> aq ()
+//│     Four -> y ()
+//│     _ -> b ()
+//│ Basic Block m ():
+//│   n = getfield tmp3, x1
+//│   tmp41 = n
+//│   o = getfield tmp3, x2
+//│   tmp51 = o
+//│   p = getfield tmp3, x3
+//│   tmp6 = p
+//│   match tmp41
+//│     1 -> u ()
+//│     0 -> q ()
+//│     _ -> b ()
+//│ Basic Block ao ():
+//│   new_Three2 = alloc Three
+//│   app_result = call new_Three2 (1, 2, 3)
+//│   tmp31 = app_result
+//│   ap = -1
+//│   br a (ap)
+//│ Basic Block d ():
+//│   e = getfield tmp3, x1
+//│   tmp4 = e
+//│   f = getfield tmp3, x2
+//│   tmp5 = f
+//│   match tmp4
+//│     1 -> j ()
+//│     0 -> g ()
+//│     _ -> b ()
+//│ Basic Block aq ():
+//│   new_Three3 = alloc Three
+//│   app_result = call new_Three3 (1, 2, 3)
+//│   tmp32 = app_result
+//│   ar = -1
+//│   br a (ar)
+//│ Basic Block y ():
+//│   z = getfield tmp3, x1
+//│   tmp42 = z
+//│   ab = getfield tmp3, x2
+//│   tmp52 = ab
+//│   ac = getfield tmp3, x3
+//│   tmp61 = ac
+//│   ad = getfield tmp3, x4
+//│   tmp7 = ad
+//│   match tmp42
+//│     1 -> aj ()
+//│     0 -> ae ()
+//│     _ -> b ()
+//│ Basic Block b ():
+//│   c = -1
+//│   br a (c)
+//│ Basic Block u ():
+//│   match tmp51
+//│     2 -> v ()
+//│     _ -> b ()
+//│ Basic Block q ():
+//│   match tmp51
+//│     0 -> r ()
+//│     _ -> b ()
+//│ Basic Block a (result):
+//│   result1 = result
+//│ Basic Block j ():
+//│   match tmp5
+//│     2 -> k ()
+//│     _ -> b ()
+//│ Basic Block g ():
+//│   match tmp5
+//│     0 -> h ()
+//│     _ -> b ()
+//│ Basic Block aj ():
+//│   match tmp52
+//│     2 -> ak ()
+//│     _ -> b ()
+//│ Basic Block ae ():
+//│   match tmp52
+//│     0 -> af ()
+//│     _ -> b ()
+//│ Basic Block v ():
+//│   match tmp6
+//│     3 -> w ()
+//│     _ -> b ()
+//│ Basic Block r ():
+//│   match tmp6
+//│     0 -> s ()
+//│     _ -> b ()
+//│ Basic Block k ():
+//│   l = 2
+//│   br a (l)
+//│ Basic Block h ():
+//│   i = 0
+//│   br a (i)
+//│ Basic Block ak ():
+//│   match tmp61
+//│     3 -> al ()
+//│     _ -> b ()
+//│ Basic Block af ():
+//│   match tmp61
+//│     0 -> ag ()
+//│     _ -> b ()
+//│ Basic Block w ():
+//│   x = 3
+//│   br a (x)
+//│ Basic Block s ():
+//│   t = 0
+//│   br a (t)
+//│ Basic Block al ():
+//│   match tmp7
+//│     4 -> am ()
+//│     _ -> b ()
+//│ Basic Block ag ():
+//│   match tmp7
+//│     0 -> ah ()
+//│     _ -> b ()
+//│ Basic Block am ():
+//│   an = 4
+//│   br a (an)
+//│ Basic Block ah ():
+//│   ai = 0
+//│   br a (ai)
+//│ 
+//│ /!!!\ Uncaught error: scala.NotImplementedError: an implementation is missing

@@ -79,6 +79,7 @@ class Scope(name: Str, enclosing: Opt[Scope], runtimeSymbols: HashSet[Str]) {
     name = c.mkString
     if !hasRuntimeName(name)
   } yield {
+    runtimeSymbols.add(name)
     name
   }
 
