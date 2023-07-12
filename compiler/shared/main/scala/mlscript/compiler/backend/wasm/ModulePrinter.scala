@@ -12,13 +12,16 @@ object ModulePrinter {
   private def mkMod(mod: Module): Document = stack(
     "(module ",
     Indented(Stacked(mod.imports map mkImport)),
+    Indented(Raw(s"(memory $$memory 1)")),
     Indented("(global (mut i32) i32.const 0) " * mod.globals),
     Indented(Stacked(mod.functions map mkFun)),
+    Indented(Raw("(start $main)")),
     ")"
   )
 
-  private def mkImport(s: String): Document =
-    line(List("(import ", s, ")"))
+  private def mkImport(s: String): Document = s match
+    case "log" => line(List(Raw("(func $log (import \"console\" \"log\") (param i32))")))
+    case _ => line(List("(import ", s, ")"))
 
   private def mkFun(fh: Function): Document = {
     val name = fh.name
@@ -32,11 +35,9 @@ object ModulePrinter {
       ))
     }
     val resultDoc: Document = if (isMain) "" else "(result i32) "
-    val localsDoc: Document =
-      if (fh.locals > 0)
-        "(local " <:> Lined(List.fill(fh.locals)(Raw("i32")), " ") <:> ")"
-      else
-        ""
+    val localsDoc: Document = Indented(line(
+      fh.locals.map((name, tpe) => Raw(s"(local $$$name i32)")).toList
+    ))
 
     stack(
       exportDoc,
@@ -55,7 +56,7 @@ object ModulePrinter {
       case End =>
         Unindented(mkInstr(h)) ::
         (mkCode(t) map Unindented.apply)
-      case If_void | If_i32 | Block(_) | Loop(_) =>
+      case If_void | If_i32 | Block(_,_) | Loop(_) =>
         mkInstr(h) ::
         (mkCode(t) map Indented.apply)
       case _ =>
@@ -83,15 +84,16 @@ object ModulePrinter {
       case If_void => "if"
       case If_i32 => "if (result i32)"
       case Else => "else"
-      case Block(label) => s"block $$${label.getOrElse("")}"
-      case Loop(label) => s"loop $$${label.getOrElse("")}"
-      case Br(label)=> s"br $label"
+      case Block(label,_) => s"block $$$label"
+      case Loop(label) => s"loop $$$label"
+      case Br(label)=> s"br $$$label"
+      case BrTable(layer) => s"br_table ${(layer to 0 by -1).mkString(" ")}"
       case Return => "ret"
       case End => "end"
       case Call(name) => s"call $$$name"
       case Unreachable => "unreachable"
-      case GetLocal(index) => s"local.get $index"
-      case SetLocal(index) => s"local.set $index"
+      case GetLocal(name) => s"local.get $$$name"
+      case SetLocal(name) => s"local.set $$$name"
       case GetGlobal(index) => s"global.get $index"
       case SetGlobal(index) => s"global.set $index"
       case Store => "i32.store"

@@ -83,4 +83,17 @@ object algorithms {
     val mergedNodes = nodes.filter(node => edges.count(_._2 == node) > 1)
     nodes.map(node => node -> mergedNodes.contains(node)).toMap
   }
+
+  def getImDomChild[A](edges: List[(A, A)], nodes: List[A]): Map[A, List[A]] = {
+    val imdom = getImmediateDominator(edges, nodes)
+    val childMap = imdom
+      .collect { case (k, Some(v)) =>
+        k -> v
+      }
+      .groupMap(_._2)(_._1)
+      .view
+      .mapValues(_.toList)
+      .toMap
+    nodes.map(node => node -> childMap.getOrElse(node, Nil)).toMap
+  }
 }

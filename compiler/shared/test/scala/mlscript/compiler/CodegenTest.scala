@@ -7,6 +7,8 @@ import scala.collection.mutable.StringBuilder
 import mlscript.codegen.Helpers.inspect as showStructure
 import compiler.backend.Mls2ir
 import mlscript.compiler.backend.Ir2wasm
+import mlscript.compiler.backend.wasm.CodePrinter
+import mlscript.compiler.backend.wasm.ModulePrinter
 
 class CodegenTestCompiler extends DiffTests {
   import CodegenTestCompiler.*
@@ -16,13 +18,14 @@ class CodegenTestCompiler extends DiffTests {
       basePath: List[Str],
       testName: Str,
       unit: TypingUnit,
-      typer: Typer,
+      typer: Typer
   )(tpd: typer.TypedTypingUnit): List[Str] =
     val outputBuilder = StringBuilder()
-    val ir = new Mls2ir().apply(unit)
+    val (ir, imports, symbolTypeMap) = new Mls2ir().apply(unit)
     output(s"IR:\n${ir.printIR}")
-    val wasm = new Ir2wasm().translate(ir)
-    output(s"\nWASM:\n${wasm}")
+    val wasmModule = new Ir2wasm().translate(ir, testName, imports, symbolTypeMap)
+    output(s"\nWASM:\n${ModulePrinter(wasmModule)}\n")
+    CodePrinter(wasmModule)
     outputBuilder.toString().linesIterator.toList
 
   override protected lazy val files = allFiles.filter { file =>
@@ -34,7 +37,7 @@ class CodegenTestCompiler extends DiffTests {
 object CodegenTestCompiler {
 
   private val pwd = os.pwd
-  private val dir = pwd / "compiler" / "shared" / "test" / "diff"/"codegen"
+  private val dir = pwd / "compiler" / "shared" / "test" / "diff" / "codegen"
 
   private val allFiles = os.walk(dir).filter(_.toIO.isFile)
 

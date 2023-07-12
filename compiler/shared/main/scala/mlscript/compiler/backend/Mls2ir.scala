@@ -12,17 +12,19 @@ import mlscript.Term
 
 class Mls2ir {
   val visitedSymbols = MutSet[RuntimeSymbol]()
-  val symbolTypeMap = HashMap[Str, Type]()
+  val symbolTypeMap = HashMap[Str, Type.TypeName]()
   val scope = Scope("root")
   val varMap = HashMap[Str, Operand.Var]()
   val entryBB = BasicBlock("entry", Nil, ListBuffer())
   var bb = entryBB
+  var imports = ListBuffer.empty[String]
 
   def termToType(term: Term): Type = term match
     case Var("Int")    => Type.Int32
     case Var("Unit")   => Type.Unit
     case Var("Bool")   => Type.Boolean
     case Var("String") => Type.OpaquePointer
+    case Var(tpe)      => symbolTypeMap.getOrElse(tpe, ???)
     case _             => ???
 
   def termToOperand(term: Term): Operand = term match
@@ -59,6 +61,10 @@ class Mls2ir {
         name match
           case "true"  => Operand.Const(true)
           case "false" => Operand.Const(false)
+          case "log" =>
+            if (!imports.contains("log"))
+              imports += name
+            Operand.Var("log")
           case _ => ??? // TODO: How should we deal with the remaining builtins?
       case S(sym: StubValueSymbol) =>
         if sym.accessible then varMap(sym.runtimeName)
@@ -101,7 +107,8 @@ class Mls2ir {
             PureValue.Alloc(symbolTypeMap(sym.runtimeName))
           )
         else ??? // FIXME: lifter should handle lambda?
-      case S(sym: TraitSymbol) => ??? // unimplemented for now
+      case S(sym: TraitSymbol)    => ??? // unimplemented for now
+      case S(sym: CapturedSymbol) => ??? // unimplemented for now
       case N => throw CodeGenError(s"unresolved symbol ${name}")
 
   def translateApp(term: App)(implicit scope: Scope): Operand = term match
@@ -145,13 +152,30 @@ class Mls2ir {
       result
     case App(App(App(Var("if"), tst), con), alt) => die
     case App(trm, Tup(args)) =>
-      val callee = trm match
-        case Var(nme) => translateVar(nme, true)
-        case _        => translateTerm(trm)
-      val arguments = args map { case (_, Fld(_, _, arg)) =>
-        translateTerm(arg)
-      }
-      makeCall("app_result", callee, arguments)
+      trm match
+        case Var(nme) =>
+          if (symbolTypeMap.keys.exists(_ == nme))
+            val arguments = args.zipWithIndex.map {
+              case ((_, Fld(_, _, arg)), idx) =>
+                (symbolTypeMap(nme).args(idx)._1, translateTerm(arg))
+            }
+            val result: Operand.Var =
+              Operand.Var(scope.allocateRuntimeName())
+            bb.instructions += Instruction.Assignment(
+              result,
+              PureValue.Alloc(symbolTypeMap(nme))
+            )
+            arguments.foreach((argName, term) =>
+              bb.instructions += Instruction.SetField(result, argName, term)
+            )
+            result
+          else
+            val callee = translateVar(nme, true)
+            val arguments = args map { case (_, Fld(_, _, arg)) =>
+              translateTerm(arg)
+            }
+            makeCall("app_result", callee, arguments)
+        case _ => ???
     case _ => throw CodeGenError(s"ill-formed application ${inspect(term)}")
 
   def translateCase(
@@ -161,7 +185,7 @@ class Mls2ir {
   )(implicit scope: Scope): Operand =
     val parent = bb
     val result: Operand.Var =
-      Operand.Var(scope.allocateRuntimeName("result"))
+      Operand.Var(scope.allocateRuntimeName())
     val joinBB = defaultJoin
       .map(_._1)
       .getOrElse(
@@ -265,6 +289,7 @@ class Mls2ir {
         s"recursive non-function definition $name is not supported"
       )
     case Let(false, Var(name), value, body) =>
+      // FIXME repeated Let in "if $num is (then ...)* else ..."
       val letScope = scope.derive("Let")
       val runtimeName = letScope.declareParameter(name)
       val lhs: Operand.Var = Operand.Var(runtimeName)
@@ -315,6 +340,7 @@ class Mls2ir {
     case New(_, _) => ??? // FIXME: need to check semantics too
     case Forall(_, bod) => translateTerm(bod)
     case TyApp(base, _) => translateTerm(base)
+    case Eqn(_, _)      => ??? // unimplemented for now
     case _: Bind | _: Test | If(_, _) | _: Splc | _: Where =>
       throw CodeGenError(s"cannot generate code for term ${inspect(term)}")
 
@@ -347,7 +373,11 @@ class Mls2ir {
                 TypeName(nme.name),
                 Nil
               )
-              symbolTypeMap += nme.name -> Type.TypeName(nme.name)
+              val symbolParams = params.get.fields.map {
+                case (name, Fld(_, _, tpe)) =>
+                  (name.map(_.name).get, termToType(tpe))
+              }
+              symbolTypeMap += nme.name -> Type.TypeName(nme.name, symbolParams)
             case Trt => ???
             case Mxn => ???
             case Als => ???
@@ -375,9 +405,18 @@ class Mls2ir {
             ) =>
           ???
         case Def(rec, nme, rhs, isByname) => ???
+        case Constructor(params, body)    => ???
     }
 
-  def apply(unit: TypingUnit): BasicBlock =
+  def apply(
+      unit: TypingUnit
+  ): (BasicBlock, List[String], Map[String, (Type, Int)]) =
     translateTypingUnit(unit)(Scope("root"))
-    entryBB
+    (
+      entryBB,
+      imports.toList,
+      symbolTypeMap.toIterable.zipWithIndex
+        .map((map, idx) => map._1 -> (map._2, idx))
+        .toMap
+    )
 }

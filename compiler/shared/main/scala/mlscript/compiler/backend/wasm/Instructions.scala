@@ -29,16 +29,17 @@ object WasmInstructions {
   case object If_i32  extends WasmInstruction // Marks the beginning of an if-block (with implicit 'then'). Must leave an i32 on the stack
   case object Else    extends WasmInstruction // Marks the end of the implicit 'then' of an if-block
   case object End     extends WasmInstruction // Marks the end of an if-then-else or block
-  case class Loop(label: Option[String])  extends WasmInstruction // A block of instructions with a label at the beginning
-  case class Block(label: Option[String]) extends WasmInstruction // A block of instructions with a label at the end
-  case class Br(label: Int)    extends WasmInstruction // Jump to "label", which MUST be the label of an enclosing structure
+  case class Loop(label: String)  extends WasmInstruction // A block of instructions with a label at the beginning
+  case class Block(label: String, args:List[String]) extends WasmInstruction // A block of instructions with a label at the end
+  case class Br(label: String)    extends WasmInstruction // Jump to "label", which MUST be the label of an enclosing structure
+  case class BrTable(layer: Int)  extends WasmInstruction
   case class Call(name: String)   extends WasmInstruction
   case object Return              extends WasmInstruction
   case object Unreachable         extends WasmInstruction // Always fails the program
 
   // Locals (parameters, local variables)
-  case class GetLocal(index: Int) extends WasmInstruction
-  case class SetLocal(index: Int) extends WasmInstruction
+  case class GetLocal(index: String) extends WasmInstruction
+  case class SetLocal(index: String) extends WasmInstruction
 
   // Global variables
   case class GetGlobal(index: Int) extends WasmInstruction
