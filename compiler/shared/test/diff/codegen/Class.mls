@@ -1,0 +1,139 @@
+:NewParser
+:NewDefs
+
+class One(first: Int)
+let x = One(101)
+class Two(first: Int, second: Int)
+let y = Two(201,202)
+//│ class One(first: Int)
+//│ let x: One
+//│ class Two(first: Int, second: Int)
+//│ let y: Two
+//│ IR:
+//│ Basic Block entry ():
+//│   a = alloc One
+//│   setfield a.first = 101
+//│   x1 = a
+//│   b = alloc Two
+//│   setfield b.first = 201
+//│   setfield b.second = 202
+//│   y1 = b
+//│ 
+//│ 
+//│ WASM:
+//│ (module 
+//│ 
+//│   (memory $memory 1)
+//│   (global (mut i32) i32.const 0) 
+//│   (export "main" (func $main))
+//│   (func $main (local $a i32)(local $b i32)(local $y1 i32)(local $x1 i32)
+//│     global.get 0
+//│     local.set $a
+//│     global.get 0
+//│     i32.const 0
+//│     i32.store
+//│     global.get 0
+//│     i32.const 8
+//│     i32.add
+//│     global.set 0
+//│     local.get $a
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 101
+//│     i32.store
+//│     local.get $a
+//│     local.set $x1
+//│     global.get 0
+//│     local.set $b
+//│     global.get 0
+//│     i32.const 1
+//│     i32.store
+//│     global.get 0
+//│     i32.const 12
+//│     i32.add
+//│     global.set 0
+//│     local.get $b
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 201
+//│     i32.store
+//│     local.get $b
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 202
+//│     i32.store
+//│     local.get $b
+//│     local.set $y1
+//│   )
+//│   (start $main)
+//│ )
+//│ 
+//│ x
+//│   = One {}
+//│ y
+//│   = Two {}
+
+class Inside(value:Int)
+class Outside(value:Int,inside:Inside)
+let x = Outside(99,Inside(98))
+//│ class Inside(value: Int)
+//│ class Outside(value: Int, inside: Inside)
+//│ let x: Outside
+//│ IR:
+//│ Basic Block entry ():
+//│   a = alloc Inside
+//│   setfield a.value = 98
+//│   b = alloc Outside
+//│   setfield b.value = 99
+//│   setfield b.inside = a
+//│   x1 = b
+//│ 
+//│ 
+//│ WASM:
+//│ (module 
+//│ 
+//│   (memory $memory 1)
+//│   (global (mut i32) i32.const 0) 
+//│   (export "main" (func $main))
+//│   (func $main (local $a i32)(local $b i32)(local $x1 i32)
+//│     global.get 0
+//│     local.set $a
+//│     global.get 0
+//│     i32.const 0
+//│     i32.store
+//│     global.get 0
+//│     i32.const 8
+//│     i32.add
+//│     global.set 0
+//│     local.get $a
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 98
+//│     i32.store
+//│     global.get 0
+//│     local.set $b
+//│     global.get 0
+//│     i32.const 1
+//│     i32.store
+//│     global.get 0
+//│     i32.const 12
+//│     i32.add
+//│     global.set 0
+//│     local.get $b
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 99
+//│     i32.store
+//│     local.get $b
+//│     i32.const 4
+//│     i32.add
+//│     local.get $a
+//│     i32.store
+//│     local.get $b
+//│     local.set $x1
+//│   )
+//│   (start $main)
+//│ )
+//│ 
+//│ x
+//│   = Outside {}

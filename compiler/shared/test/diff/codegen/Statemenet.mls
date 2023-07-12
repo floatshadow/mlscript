@@ -1,0 +1,146 @@
+:NewParser
+:NewDefs
+
+let x1 = 1
+let x2 = x1
+log(5 + 5)
+log(5 - 5)
+log(5 * 5)
+log(5 / 5)
+log(5 % 5)
+5 == 5
+5 < 5
+5 <= 5
+log(-99)
+//│ let x1: 1
+//│ let x2: 1
+//│ undefined
+//│ IR:
+//│ Basic Block entry ():
+//│   x11 = 1
+//│   x21 = x11
+//│   a = Add 5, 5
+//│   app_result = call log (a)
+//│   b = Sub 5, 5
+//│   app_result = call log (b)
+//│   c = Mul 5, 5
+//│   app_result = call log (c)
+//│   d = Div 5, 5
+//│   app_result = call log (d)
+//│   e = Rem 5, 5
+//│   app_result = call log (e)
+//│   f = Eq 5, 5
+//│   g = Lt 5, 5
+//│   h = Le 5, 5
+//│   app_result = call log (-99)
+//│ 
+//│ 
+//│ WASM:
+//│ (module 
+//│   (func $log (import "console" "log") (param i32))
+//│   (memory $memory 1)
+//│   (global (mut i32) i32.const 0) 
+//│   (export "main" (func $main))
+//│   (func $main (local $e i32)(local $app_result i32)(local $f i32)(local $a i32)(local $b i32)(local $g i32)(local $x11 i32)(local $c i32)(local $h i32)(local $x21 i32)(local $d i32)
+//│     i32.const 1
+//│     local.set $x11
+//│     local.get $x11
+//│     local.set $x21
+//│     i32.const 5
+//│     i32.const 5
+//│     i32.add
+//│     local.set $a
+//│     local.get $a
+//│     call $log
+//│     i32.const 0
+//│     local.set $app_result
+//│     i32.const 5
+//│     i32.const 5
+//│     i32.sub
+//│     local.set $b
+//│     local.get $b
+//│     call $log
+//│     i32.const 0
+//│     local.set $app_result
+//│     i32.const 5
+//│     i32.const 5
+//│     i32.mul
+//│     local.set $c
+//│     local.get $c
+//│     call $log
+//│     i32.const 0
+//│     local.set $app_result
+//│     i32.const 5
+//│     i32.const 5
+//│     i32.div_s
+//│     local.set $d
+//│     local.get $d
+//│     call $log
+//│     i32.const 0
+//│     local.set $app_result
+//│     i32.const 5
+//│     i32.const 5
+//│     i32.rem_s
+//│     local.set $e
+//│     local.get $e
+//│     call $log
+//│     i32.const 0
+//│     local.set $app_result
+//│     i32.const 5
+//│     i32.const 5
+//│     i32.eq
+//│     local.set $f
+//│     i32.const 5
+//│     i32.const 5
+//│     i32.lt_s
+//│     local.set $g
+//│     i32.const 5
+//│     i32.const 5
+//│     i32.le_s
+//│     local.set $h
+//│     i32.const -99
+//│     call $log
+//│     i32.const 0
+//│     local.set $app_result
+//│   )
+//│   (start $main)
+//│ )
+//│ 
+//│ x1
+//│    = 1
+//│ x2
+//│    = 1
+//│ res
+//│     = undefined
+//│ // Output
+//│ 10
+//│ res
+//│     = undefined
+//│ // Output
+//│ 0
+//│ res
+//│     = undefined
+//│ // Output
+//│ 25
+//│ res
+//│     = undefined
+//│ // Output
+//│ 1
+//│ res
+//│     = undefined
+//│ // Output
+//│ 0
+//│ res
+//│     = true
+//│ res
+//│     = false
+//│ res
+//│     = true
+//│ res
+//│     = undefined
+//│ // Output
+//│ -99
+
+// true && true
+// true || true
+// let y = x
