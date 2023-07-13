@@ -35,7 +35,7 @@
     i32.const 201
     i32.store
     local.get $b
-    i32.const 4
+    i32.const 8
     i32.add
     i32.const 202
     i32.store

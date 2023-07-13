@@ -197,12 +197,12 @@ class Ir2wasm {
             SetLocal(result.get.name) <:>
             instrToWasm(instrs.tail)
         case S(SetField(obj, field, value)) =>
-          val tpe = lh.getType(obj.name)
-          val offset = tpe match
-            case Type.TypeName(name, _) => (symbolTypeMap(name)._2 + 1) * 4
+          val offset = lh.getType(obj.name) match
+            case Type.TypeName(_, args) => 
+              (args.indexWhere(_._1 == field)+1)*4
             case _                      => ???
           GetLocal(obj.name) <:>
-            I32Const(4) <:>
+            I32Const(offset) <:>
             Add <:>
             operandToWasm(value) <:>
             Store <:>

@@ -19,21 +19,6 @@ class Mls2ir {
   var bb = entryBB
   var imports = ListBuffer.empty[String]
 
-  def termToType(term: Term): Type = term match
-    case Var("Int")    => Type.Int32
-    case Var("Unit")   => Type.Unit
-    case Var("Bool")   => Type.Boolean
-    case Var("String") => Type.OpaquePointer
-    case Var(tpe)      => symbolTypeMap.getOrElse(tpe, ???)
-    case _             => ???
-
-  def termToOperand(term: Term): Operand = term match
-    case IntLit(v)  => Operand.Const(v.toInt)
-    case DecLit(v)  => Operand.Const(v.toFloat)
-    case StrLit(v)  => Operand.Const(v)
-    case UnitLit(_) => Operand.Unit
-    case _          => ???
-
   def makeCall(name: Str, fn: Operand, args: List[Operand])(implicit
       scope: Scope
   ): Operand =
@@ -180,7 +165,6 @@ class Mls2ir {
 
   def translateCase(
       caseOf: CaseOf,
-      defaultElse: Option[(BasicBlock, List[Operand])],
       defaultJoin: Option[(BasicBlock, List[Operand])]
   )(implicit scope: Scope): Operand =
     val parent = bb
@@ -191,7 +175,7 @@ class Mls2ir {
       .getOrElse(
         BasicBlock(scope.allocateRuntimeName(), List(result), ListBuffer())
       )
-    var elseBranch = defaultElse.getOrElse((joinBB, Nil))
+    var elseBranch = (joinBB, Nil)
     var childern = MutMap.empty[SimpleTerm, (BasicBlock, List[Operand])]
 
     @tailrec
@@ -223,7 +207,6 @@ class Mls2ir {
         case caseOf: CaseOf =>
           translateCase(
             caseOf,
-            S(defaultElse.getOrElse(elseBranch)),
             S((joinBB, Nil))
           )
         case _ =>
@@ -244,18 +227,15 @@ class Mls2ir {
         translateChild(body, thenBB, joinBB)
         childern += pat -> (thenBB, Nil)
       case (N, body) =>
-        defaultElse match
-          case N =>
-            val elseBB =
-              BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
-            elseBranch = (elseBB, Nil)
-            translateChild(body, elseBB, joinBB)
-          case S(_) => ()
+        val elseBB =
+          BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
+        elseBranch = (elseBB, Nil)
+        translateChild(body, elseBB, joinBB)
     )
     parent.instructions += Instruction.Match(
       translateTerm(caseOf.trm),
       childern.toMap,
-      defaultElse.getOrElse(elseBranch)
+      elseBranch
     )
     bb = joinBB
     result
@@ -267,17 +247,7 @@ class Mls2ir {
     case Super()   => ??? // FIXME: need to check the semantics
     case Lam(_, _) => ??? // should be handled by lifter
     case t: App    => translateApp(t)
-    case Rcd(fields) => // FIXME: what representation should we use?
-      val recordtpe = Type.Record(
-        RecordObj(
-          fields
-            .map((name, field) => {
-              name.name -> termToType(field.value)
-            })
-            .to(MutMap)
-        )
-      )
-      addTmpVar(PureValue.Alloc(recordtpe))
+    case Rcd(_)    => ??? // FIXME: what representation should we use?
     case Sel(receiver, fieldName) =>
       val receiverOp = translateTerm(receiver)
       // FIXME: add cast
@@ -321,7 +291,7 @@ class Mls2ir {
           throw CodeGenError("unsupported definitions in blocks")
       }
       Operand.Unit
-    case c: CaseOf => translateCase(c, None, None)
+    case c: CaseOf => translateCase(c, None)
     case IntLit(value) =>
       if value.isValidInt then Operand.Const(value.toInt)
       else throw CodeGenError(s"integer literal $value is too large")
@@ -375,7 +345,17 @@ class Mls2ir {
               )
               val symbolParams = params.get.fields.map {
                 case (name, Fld(_, _, tpe)) =>
-                  (name.map(_.name).get, termToType(tpe))
+                  (
+                    name.map(_.name).get,
+                    // TODO handle type
+                    tpe match
+                      case Var("Int")    => Type.Int32
+                      case Var("Unit")   => Type.Unit
+                      case Var("Bool")   => Type.Boolean
+                      case Var("String") => Type.OpaquePointer
+                      case Var(tpe)      => symbolTypeMap.getOrElse(tpe, ???)
+                      case _             => ???
+                  )
               }
               symbolTypeMap += nme.name -> Type.TypeName(nme.name, symbolParams)
             case Trt => ???

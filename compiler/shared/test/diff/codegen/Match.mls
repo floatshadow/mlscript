@@ -460,7 +460,6 @@ if x is
 //│ // Output
 //│ 30
 
-//TODO
 class IntLit(value:Int)
 let l = IntLit(100)
 if l is
@@ -483,26 +482,30 @@ if l is
 //│   g = getfield l1, value
 //│   tmp1 = g
 //│   match tmp1
-//│     100 -> i ()
-//│     101 -> k ()
-//│     102 -> n ()
-//│     _ -> d ()
+//│     100 -> k ()
+//│     101 -> n ()
+//│     102 -> p ()
+//│     _ -> i ()
 //│ Basic Block d ():
 //│   app_result = call log (103)
 //│   e = app_result
 //│   br c (e)
-//│ Basic Block i ():
-//│   app_result = call log (100)
-//│   j = app_result
-//│   br c (j)
 //│ Basic Block k ():
-//│   app_result = call log (101)
+//│   app_result = call log (100)
 //│   m = app_result
 //│   br c (m)
 //│ Basic Block n ():
-//│   app_result = call log (102)
+//│   app_result = call log (101)
 //│   o = app_result
 //│   br c (o)
+//│ Basic Block p ():
+//│   app_result = call log (102)
+//│   q = app_result
+//│   br c (q)
+//│ Basic Block i ():
+//│   app_result = call log (103)
+//│   j = app_result
+//│   br c (j)
 //│ Basic Block c (b):
 //│ 
 //│ 
@@ -512,111 +515,109 @@ if l is
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $a i32)(local $m i32)(local $b i32)(local $g i32)(local $tmp1 i32)(local $o i32)(local $e i32)(local $l1 i32)(local $j i32)(local $app_result i32)
+//│   (func $main (local $a i32)(local $m i32)(local $g i32)(local $tmp1 i32)(local $o i32)(local $e i32)(local $l1 i32)(local $j i32)(local $app_result i32)(local $q i32)(local $b i32)
 //│     block $entry
-//│       block $entry
-//│         global.get 0
-//│         local.set $a
-//│         global.get 0
-//│         i32.const 0
-//│         i32.store
-//│         global.get 0
-//│         i32.const 8
-//│         i32.add
-//│         global.set 0
-//│         local.get $a
+//│       global.get 0
+//│       local.set $a
+//│       global.get 0
+//│       i32.const 0
+//│       i32.store
+//│       global.get 0
+//│       i32.const 8
+//│       i32.add
+//│       global.set 0
+//│       local.get $a
+//│       i32.const 4
+//│       i32.add
+//│       i32.const 100
+//│       i32.store
+//│       local.get $a
+//│       local.set $l1
+//│       local.get $l1
+//│       i32.load
+//│       i32.const 0
+//│       i32.eq
+//│       if
+//│         local.get $l1
 //│         i32.const 4
 //│         i32.add
-//│         i32.const 100
-//│         i32.store
-//│         local.get $a
-//│         local.set $l1
-//│         local.get $l1
 //│         i32.load
-//│         i32.const 0
-//│         i32.eq
-//│         if
-//│           local.get $l1
-//│           i32.const 4
-//│           i32.add
-//│           i32.load
-//│           local.set $g
-//│           local.get $g
-//│           local.set $tmp1
-//│           block $d
-//│             block $i
-//│               block $k
-//│                 block $n
-//│                   block $Match_tmp1
-//│                     local.get $tmp1
-//│                     i32.const 100
-//│                     i32.eq
-//│                     i32.const 1
-//│                     i32.mul
-//│                     local.get $tmp1
-//│                     i32.const 101
-//│                     i32.eq
-//│                     i32.const 2
-//│                     i32.mul
-//│                     i32.add
-//│                     local.get $tmp1
-//│                     i32.const 102
-//│                     i32.eq
-//│                     i32.const 3
-//│                     i32.mul
-//│                     i32.add
-//│                     br_table 3 2 1 0
-//│                   end
+//│         local.set $g
+//│         local.get $g
+//│         local.set $tmp1
+//│         block $i
+//│           block $k
+//│             block $n
+//│               block $p
+//│                 block $Match_tmp1
+//│                   local.get $tmp1
+//│                   i32.const 100
+//│                   i32.eq
+//│                   i32.const 1
+//│                   i32.mul
+//│                   local.get $tmp1
+//│                   i32.const 101
+//│                   i32.eq
+//│                   i32.const 2
+//│                   i32.mul
+//│                   i32.add
+//│                   local.get $tmp1
 //│                   i32.const 102
-//│                   call $log
-//│                   i32.const 0
-//│                   local.set $app_result
-//│                   local.get $app_result
-//│                   local.set $o
-//│                   local.get $o
-//│                   local.set $b
-//│                   br $d
+//│                   i32.eq
+//│                   i32.const 3
+//│                   i32.mul
+//│                   i32.add
+//│                   br_table 3 2 1 0
 //│                 end
-//│                 i32.const 101
+//│                 i32.const 102
 //│                 call $log
 //│                 i32.const 0
 //│                 local.set $app_result
 //│                 local.get $app_result
-//│                 local.set $m
-//│                 local.get $m
+//│                 local.set $q
+//│                 local.get $q
 //│                 local.set $b
-//│                 br $d
+//│                 br $i
 //│               end
-//│               i32.const 100
+//│               i32.const 101
 //│               call $log
 //│               i32.const 0
 //│               local.set $app_result
 //│               local.get $app_result
-//│               local.set $j
-//│               local.get $j
+//│               local.set $o
+//│               local.get $o
 //│               local.set $b
-//│               br $d
+//│               br $i
 //│             end
-//│             i32.const 103
+//│             i32.const 100
 //│             call $log
 //│             i32.const 0
 //│             local.set $app_result
 //│             local.get $app_result
-//│             local.set $e
-//│             local.get $e
+//│             local.set $m
+//│             local.get $m
 //│             local.set $b
+//│             br $i
 //│           end
-//│         else
+//│           i32.const 103
+//│           call $log
+//│           i32.const 0
+//│           local.set $app_result
+//│           local.get $app_result
+//│           local.set $j
+//│           local.get $j
+//│           local.set $b
 //│         end
+//│       else
+//│         i32.const 103
+//│         call $log
+//│         i32.const 0
+//│         local.set $app_result
+//│         local.get $app_result
+//│         local.set $e
+//│         local.get $e
+//│         local.set $b
 //│       end
-//│       i32.const 103
-//│       call $log
-//│       i32.const 0
-//│       local.set $app_result
-//│       local.get $app_result
-//│       local.set $e
-//│       local.get $e
-//│       local.set $b
 //│     end
 //│   )
 //│   (start $main)
@@ -629,22 +630,6 @@ if l is
 //│ // Output
 //│ 100
 
-class A(x: Int)
-class B()
-class C()
-let x = A(1)
-let res = if x is
-    A(x) and x is
-        0 then log(0)
-        1 then
-          log(1)
-          3
-    B() then log(20)
-    C() then log(30)
-    else log(40)
-log(res)
-
-//TODO
 class Position(x: Int, y: Int)
 let pos = Position(5,12)
 let length = if pos is
@@ -652,7 +637,7 @@ let length = if pos is
     Position(4,3) then log(5)
     Position(5,12) then log(13)
     Position(12,5) then log(13)
-    else log(0)
+    else log(1)
 //│ class Position(x: Int, y: Int)
 //│ let pos: Position
 //│ let length: undefined
@@ -671,49 +656,69 @@ let length = if pos is
 //│   h = getfield pos1, y
 //│   tmp3 = h
 //│   match tmp2
-//│     5 -> r ()
-//│     12 -> v ()
-//│     4 -> n ()
-//│     3 -> j ()
-//│     _ -> d ()
+//│     5 -> x ()
+//│     12 -> ae ()
+//│     4 -> r ()
+//│     3 -> l ()
+//│     _ -> j ()
 //│ Basic Block d ():
-//│   app_result = call log (0)
+//│   app_result = call log (1)
 //│   e = app_result
 //│   br c (e)
+//│ Basic Block x ():
+//│   match tmp3
+//│     12 -> ac ()
+//│     _ -> z ()
+//│ Basic Block ae ():
+//│   match tmp3
+//│     5 -> ai ()
+//│     _ -> ag ()
 //│ Basic Block r ():
 //│   match tmp3
-//│     12 -> t ()
-//│     _ -> d ()
-//│ Basic Block v ():
+//│     3 -> v ()
+//│     _ -> t ()
+//│ Basic Block l ():
 //│   match tmp3
-//│     5 -> x ()
-//│     _ -> d ()
-//│ Basic Block n ():
-//│   match tmp3
-//│     3 -> p ()
-//│     _ -> d ()
+//│     4 -> p ()
+//│     _ -> n ()
 //│ Basic Block j ():
-//│   match tmp3
-//│     4 -> l ()
-//│     _ -> d ()
+//│   app_result = call log (1)
+//│   k = app_result
+//│   br c (k)
 //│ Basic Block c (b):
 //│   length1 = b
-//│ Basic Block t ():
+//│ Basic Block ac ():
 //│   app_result = call log (13)
+//│   ad = app_result
+//│   br c (ad)
+//│ Basic Block z ():
+//│   app_result = call log (1)
+//│   ab = app_result
+//│   br c (ab)
+//│ Basic Block ai ():
+//│   app_result = call log (13)
+//│   aj = app_result
+//│   br c (aj)
+//│ Basic Block ag ():
+//│   app_result = call log (1)
+//│   ah = app_result
+//│   br c (ah)
+//│ Basic Block v ():
+//│   app_result = call log (5)
+//│   w = app_result
+//│   br c (w)
+//│ Basic Block t ():
+//│   app_result = call log (1)
 //│   u = app_result
 //│   br c (u)
-//│ Basic Block x ():
-//│   app_result = call log (13)
-//│   y = app_result
-//│   br c (y)
 //│ Basic Block p ():
 //│   app_result = call log (5)
 //│   q = app_result
 //│   br c (q)
-//│ Basic Block l ():
-//│   app_result = call log (5)
-//│   m = app_result
-//│   br c (m)
+//│ Basic Block n ():
+//│   app_result = call log (1)
+//│   o = app_result
+//│   br c (o)
 //│ 
 //│ 
 //│ WASM:
@@ -722,98 +727,81 @@ let length = if pos is
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $e i32)(local $tmp2 i32)(local $length1 i32)(local $u i32)(local $tmp3 i32)(local $m i32)(local $g i32)(local $h i32)(local $app_result i32)(local $y i32)(local $a i32)(local $pos1 i32)(local $q i32)(local $b i32)
+//│   (func $main (local $e i32)(local $tmp2 i32)(local $app_result i32)(local $length1 i32)(local $u i32)(local $ah i32)(local $g i32)(local $ad i32)(local $h i32)(local $w i32)(local $k i32)(local $aj i32)(local $o i32)(local $a i32)(local $pos1 i32)(local $ab i32)(local $tmp3 i32)(local $q i32)(local $b i32)
 //│     block $entry
-//│       block $entry
-//│         global.get 0
-//│         local.set $a
-//│         global.get 0
-//│         i32.const 0
-//│         i32.store
-//│         global.get 0
-//│         i32.const 12
-//│         i32.add
-//│         global.set 0
-//│         local.get $a
-//│         i32.const 4
-//│         i32.add
-//│         i32.const 5
-//│         i32.store
-//│         local.get $a
-//│         i32.const 4
-//│         i32.add
-//│         i32.const 12
-//│         i32.store
-//│         local.get $a
-//│         local.set $pos1
+//│       global.get 0
+//│       local.set $a
+//│       global.get 0
+//│       i32.const 0
+//│       i32.store
+//│       global.get 0
+//│       i32.const 12
+//│       i32.add
+//│       global.set 0
+//│       local.get $a
+//│       i32.const 4
+//│       i32.add
+//│       i32.const 5
+//│       i32.store
+//│       local.get $a
+//│       i32.const 8
+//│       i32.add
+//│       i32.const 12
+//│       i32.store
+//│       local.get $a
+//│       local.set $pos1
+//│       local.get $pos1
+//│       i32.load
+//│       i32.const 0
+//│       i32.eq
+//│       if
 //│         local.get $pos1
+//│         i32.const 4
+//│         i32.add
 //│         i32.load
-//│         i32.const 0
-//│         i32.eq
-//│         if
-//│           local.get $pos1
-//│           i32.const 4
-//│           i32.add
-//│           i32.load
-//│           local.set $g
-//│           local.get $g
-//│           local.set $tmp2
-//│           local.get $pos1
-//│           i32.const 8
-//│           i32.add
-//│           i32.load
-//│           local.set $h
-//│           local.get $h
-//│           local.set $tmp3
-//│           block $d
-//│             block $r
-//│               block $v
-//│                 block $n
-//│                   block $j
-//│                     block $Match_tmp2
-//│                       local.get $tmp2
-//│                       i32.const 5
-//│                       i32.eq
-//│                       i32.const 1
-//│                       i32.mul
-//│                       local.get $tmp2
-//│                       i32.const 12
-//│                       i32.eq
-//│                       i32.const 2
-//│                       i32.mul
-//│                       i32.add
-//│                       local.get $tmp2
-//│                       i32.const 4
-//│                       i32.eq
-//│                       i32.const 3
-//│                       i32.mul
-//│                       i32.add
-//│                       local.get $tmp2
-//│                       i32.const 3
-//│                       i32.eq
-//│                       i32.const 4
-//│                       i32.mul
-//│                       i32.add
-//│                       br_table 4 3 2 1 0
-//│                     end
-//│                     local.get $tmp3
+//│         local.set $g
+//│         local.get $g
+//│         local.set $tmp2
+//│         local.get $pos1
+//│         i32.const 8
+//│         i32.add
+//│         i32.load
+//│         local.set $h
+//│         local.get $h
+//│         local.set $tmp3
+//│         block $j
+//│           block $x
+//│             block $ae
+//│               block $r
+//│                 block $l
+//│                   block $Match_tmp2
+//│                     local.get $tmp2
+//│                     i32.const 5
+//│                     i32.eq
+//│                     i32.const 1
+//│                     i32.mul
+//│                     local.get $tmp2
+//│                     i32.const 12
+//│                     i32.eq
+//│                     i32.const 2
+//│                     i32.mul
+//│                     i32.add
+//│                     local.get $tmp2
 //│                     i32.const 4
 //│                     i32.eq
-//│                     if
-//│                       i32.const 5
-//│                       call $log
-//│                       i32.const 0
-//│                       local.set $app_result
-//│                       local.get $app_result
-//│                       local.set $m
-//│                       local.get $m
-//│                       local.set $b
-//│                     else
-//│                     end
-//│                     br $d
+//│                     i32.const 3
+//│                     i32.mul
+//│                     i32.add
+//│                     local.get $tmp2
+//│                     i32.const 3
+//│                     i32.eq
+//│                     i32.const 4
+//│                     i32.mul
+//│                     i32.add
+//│                     br_table 4 3 2 1 0
 //│                   end
 //│                   local.get $tmp3
-//│                   i32.const 3
+//│                   i32.const 4
 //│                   i32.eq
 //│                   if
 //│                     i32.const 5
@@ -825,27 +813,43 @@ let length = if pos is
 //│                     local.get $q
 //│                     local.set $b
 //│                   else
+//│                     i32.const 1
+//│                     call $log
+//│                     i32.const 0
+//│                     local.set $app_result
+//│                     local.get $app_result
+//│                     local.set $o
+//│                     local.get $o
+//│                     local.set $b
 //│                   end
-//│                   br $d
+//│                   br $j
 //│                 end
 //│                 local.get $tmp3
-//│                 i32.const 5
+//│                 i32.const 3
 //│                 i32.eq
 //│                 if
-//│                   i32.const 13
+//│                   i32.const 5
 //│                   call $log
 //│                   i32.const 0
 //│                   local.set $app_result
 //│                   local.get $app_result
-//│                   local.set $y
-//│                   local.get $y
+//│                   local.set $w
+//│                   local.get $w
 //│                   local.set $b
 //│                 else
+//│                   i32.const 1
+//│                   call $log
+//│                   i32.const 0
+//│                   local.set $app_result
+//│                   local.get $app_result
+//│                   local.set $u
+//│                   local.get $u
+//│                   local.set $b
 //│                 end
-//│                 br $d
+//│                 br $j
 //│               end
 //│               local.get $tmp3
-//│               i32.const 12
+//│               i32.const 5
 //│               i32.eq
 //│               if
 //│                 i32.const 13
@@ -853,36 +857,67 @@ let length = if pos is
 //│                 i32.const 0
 //│                 local.set $app_result
 //│                 local.get $app_result
-//│                 local.set $u
-//│                 local.get $u
+//│                 local.set $aj
+//│                 local.get $aj
 //│                 local.set $b
 //│               else
+//│                 i32.const 1
+//│                 call $log
+//│                 i32.const 0
+//│                 local.set $app_result
+//│                 local.get $app_result
+//│                 local.set $ah
+//│                 local.get $ah
+//│                 local.set $b
 //│               end
-//│               br $d
+//│               br $j
 //│             end
-//│             i32.const 0
-//│             call $log
-//│             i32.const 0
-//│             local.set $app_result
-//│             local.get $app_result
-//│             local.set $e
-//│             local.get $e
-//│             local.set $b
+//│             local.get $tmp3
+//│             i32.const 12
+//│             i32.eq
+//│             if
+//│               i32.const 13
+//│               call $log
+//│               i32.const 0
+//│               local.set $app_result
+//│               local.get $app_result
+//│               local.set $ad
+//│               local.get $ad
+//│               local.set $b
+//│             else
+//│               i32.const 1
+//│               call $log
+//│               i32.const 0
+//│               local.set $app_result
+//│               local.get $app_result
+//│               local.set $ab
+//│               local.get $ab
+//│               local.set $b
+//│             end
+//│             br $j
 //│           end
-//│         else
+//│           i32.const 1
+//│           call $log
+//│           i32.const 0
+//│           local.set $app_result
+//│           local.get $app_result
+//│           local.set $k
+//│           local.get $k
+//│           local.set $b
 //│         end
+//│       else
+//│         i32.const 1
+//│         call $log
+//│         i32.const 0
+//│         local.set $app_result
+//│         local.get $app_result
+//│         local.set $e
+//│         local.get $e
+//│         local.set $b
 //│       end
-//│       local.get $b
-//│       local.set $length1
 //│     end
-//│     i32.const 0
-//│     call $log
-//│     i32.const 0
-//│     local.set $app_result
-//│     local.get $app_result
-//│     local.set $e
-//│     local.get $e
-//│     local.set $b
+//│     local.get $b
+//│     local.set $length1
 //│   )
 //│   (start $main)
 //│ )
@@ -894,7 +929,6 @@ let length = if pos is
 //│ // Output
 //│ 13
 
-//TODO
 let x = 1
 if x is
     1 then 
@@ -1022,7 +1056,6 @@ if x is
 //│ // Output
 //│ 10
 
-//TODO
 class One(x1:Int)
 class Two(x1:Int,x2:Int) extends One(x1)
 class Three(x1:Int,x2:Int,x3:Int) extends One(x1)
@@ -1048,121 +1081,181 @@ let result = if Three(1,2,3) is
 //│   setfield a.x3 = 3
 //│   tmp4 = a
 //│   match tmp4
-//│     Three -> r ()
-//│     Four -> aj ()
+//│     Three -> x ()
+//│     Four -> az ()
 //│     Two -> f ()
 //│     _ -> d ()
-//│ Basic Block r ():
-//│   s = getfield tmp4, x1
-//│   tmp51 = s
-//│   t = getfield tmp4, x2
-//│   tmp61 = t
-//│   u = getfield tmp4, x3
-//│   tmp7 = u
+//│ Basic Block x ():
+//│   y = getfield tmp4, x1
+//│   tmp51 = y
+//│   z = getfield tmp4, x2
+//│   tmp61 = z
+//│   ab = getfield tmp4, x3
+//│   tmp7 = ab
 //│   match tmp51
-//│     1 -> ad ()
-//│     0 -> w ()
-//│     _ -> d ()
-//│ Basic Block aj ():
-//│   ak = getfield tmp4, x1
-//│   tmp52 = ak
-//│   al = getfield tmp4, x2
-//│   tmp62 = al
-//│   am = getfield tmp4, x3
-//│   tmp71 = am
-//│   an = getfield tmp4, x4
-//│   tmp8 = an
+//│     1 -> ap ()
+//│     0 -> af ()
+//│     _ -> ad ()
+//│ Basic Block az ():
+//│   bc = getfield tmp4, x1
+//│   tmp52 = bc
+//│   bd = getfield tmp4, x2
+//│   tmp62 = bd
+//│   be = getfield tmp4, x3
+//│   tmp71 = be
+//│   bf = getfield tmp4, x4
+//│   tmp8 = bf
 //│   match tmp52
-//│     1 -> ax ()
-//│     0 -> ap ()
-//│     _ -> d ()
+//│     1 -> bx ()
+//│     0 -> bj ()
+//│     _ -> bh ()
 //│ Basic Block f ():
 //│   g = getfield tmp4, x1
 //│   tmp5 = g
 //│   h = getfield tmp4, x2
 //│   tmp6 = h
 //│   match tmp5
-//│     1 -> n ()
-//│     0 -> j ()
-//│     _ -> d ()
+//│     1 -> r ()
+//│     0 -> l ()
+//│     _ -> j ()
 //│ Basic Block d ():
 //│   app_result = call log (6)
 //│   e = app_result
 //│   br c (e)
-//│ Basic Block ad ():
-//│   match tmp61
-//│     2 -> af ()
-//│     _ -> d ()
-//│ Basic Block w ():
-//│   match tmp61
-//│     0 -> y ()
-//│     _ -> d ()
-//│ Basic Block ax ():
-//│   match tmp62
-//│     2 -> az ()
-//│     _ -> d ()
 //│ Basic Block ap ():
+//│   match tmp61
+//│     2 -> at ()
+//│     _ -> ar ()
+//│ Basic Block af ():
+//│   match tmp61
+//│     0 -> aj ()
+//│     _ -> ah ()
+//│ Basic Block ad ():
+//│   app_result = call log (6)
+//│   ae = app_result
+//│   br c (ae)
+//│ Basic Block bx ():
 //│   match tmp62
-//│     0 -> ar ()
-//│     _ -> d ()
-//│ Basic Block n ():
+//│     2 -> ce ()
+//│     _ -> bz ()
+//│ Basic Block bj ():
+//│   match tmp62
+//│     0 -> bn ()
+//│     _ -> bl ()
+//│ Basic Block bh ():
+//│   app_result = call log (6)
+//│   bi = app_result
+//│   br c (bi)
+//│ Basic Block r ():
 //│   match tmp6
-//│     2 -> p ()
-//│     _ -> d ()
+//│     2 -> v ()
+//│     _ -> t ()
+//│ Basic Block l ():
+//│   match tmp6
+//│     0 -> p ()
+//│     _ -> n ()
 //│ Basic Block j ():
-//│   match tmp6
-//│     0 -> l ()
-//│     _ -> d ()
+//│   app_result = call log (6)
+//│   k = app_result
+//│   br c (k)
 //│ Basic Block c (b):
 //│   result1 = b
-//│ Basic Block af ():
+//│ Basic Block at ():
 //│   match tmp7
-//│     3 -> ah ()
-//│     _ -> d ()
-//│ Basic Block y ():
-//│   match tmp7
-//│     0 -> ab ()
-//│     _ -> d ()
-//│ Basic Block az ():
-//│   match tmp71
-//│     3 -> bd ()
-//│     _ -> d ()
+//│     3 -> ax ()
+//│     _ -> av ()
 //│ Basic Block ar ():
-//│   match tmp71
-//│     0 -> at ()
-//│     _ -> d ()
-//│ Basic Block p ():
-//│   app_result = call log (1)
-//│   q = app_result
-//│   br c (q)
-//│ Basic Block l ():
-//│   app_result = call log (0)
-//│   m = app_result
-//│   br c (m)
+//│   app_result = call log (6)
+//│   as = app_result
+//│   br c (as)
+//│ Basic Block aj ():
+//│   match tmp7
+//│     0 -> an ()
+//│     _ -> al ()
 //│ Basic Block ah ():
-//│   app_result = call log (3)
+//│   app_result = call log (6)
 //│   ai = app_result
 //│   br c (ai)
-//│ Basic Block ab ():
-//│   app_result = call log (2)
-//│   ac = app_result
-//│   br c (ac)
-//│ Basic Block bd ():
-//│   match tmp8
-//│     4 -> bf ()
-//│     _ -> d ()
-//│ Basic Block at ():
-//│   match tmp8
-//│     0 -> av ()
-//│     _ -> d ()
-//│ Basic Block bf ():
-//│   app_result = call log (5)
-//│   bg = app_result
-//│   br c (bg)
+//│ Basic Block ce ():
+//│   match tmp71
+//│     3 -> ci ()
+//│     _ -> cg ()
+//│ Basic Block bz ():
+//│   app_result = call log (6)
+//│   cd = app_result
+//│   br c (cd)
+//│ Basic Block bn ():
+//│   match tmp71
+//│     0 -> br ()
+//│     _ -> bp ()
+//│ Basic Block bl ():
+//│   app_result = call log (6)
+//│   bm = app_result
+//│   br c (bm)
+//│ Basic Block v ():
+//│   app_result = call log (1)
+//│   w = app_result
+//│   br c (w)
+//│ Basic Block t ():
+//│   app_result = call log (6)
+//│   u = app_result
+//│   br c (u)
+//│ Basic Block p ():
+//│   app_result = call log (0)
+//│   q = app_result
+//│   br c (q)
+//│ Basic Block n ():
+//│   app_result = call log (6)
+//│   o = app_result
+//│   br c (o)
+//│ Basic Block ax ():
+//│   app_result = call log (3)
+//│   ay = app_result
+//│   br c (ay)
 //│ Basic Block av ():
-//│   app_result = call log (4)
+//│   app_result = call log (6)
 //│   aw = app_result
 //│   br c (aw)
+//│ Basic Block an ():
+//│   app_result = call log (2)
+//│   ao = app_result
+//│   br c (ao)
+//│ Basic Block al ():
+//│   app_result = call log (6)
+//│   am = app_result
+//│   br c (am)
+//│ Basic Block ci ():
+//│   match tmp8
+//│     4 -> cm ()
+//│     _ -> ck ()
+//│ Basic Block cg ():
+//│   app_result = call log (6)
+//│   ch = app_result
+//│   br c (ch)
+//│ Basic Block br ():
+//│   match tmp8
+//│     0 -> bv ()
+//│     _ -> bt ()
+//│ Basic Block bp ():
+//│   app_result = call log (6)
+//│   bq = app_result
+//│   br c (bq)
+//│ Basic Block cm ():
+//│   app_result = call log (5)
+//│   cn = app_result
+//│   br c (cn)
+//│ Basic Block ck ():
+//│   app_result = call log (6)
+//│   cl = app_result
+//│   br c (cl)
+//│ Basic Block bv ():
+//│   app_result = call log (4)
+//│   bw = app_result
+//│   br c (bw)
+//│ Basic Block bt ():
+//│   app_result = call log (6)
+//│   bu = app_result
+//│   br c (bu)
 //│ 
 //│ 
 //│ WASM:
@@ -1171,114 +1264,97 @@ let result = if Three(1,2,3) is
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $e i32)(local $s i32)(local $tmp6 i32)(local $am i32)(local $t i32)(local $u i32)(local $a i32)(local $g i32)(local $tmp52 i32)(local $ak i32)(local $an i32)(local $h i32)(local $tmp8 i32)(local $tmp61 i32)(local $tmp5 i32)(local $tmp71 i32)(local $app_result i32)(local $m i32)(local $bg i32)(local $aw i32)(local $al i32)(local $tmp7 i32)(local $q i32)(local $ac i32)(local $b i32)(local $tmp62 i32)(local $tmp4 i32)(local $ai i32)(local $tmp51 i32)(local $result1 i32)
+//│   (func $main (local $e i32)(local $ae i32)(local $am i32)(local $bw i32)(local $ao i32)(local $g i32)(local $tmp52 i32)(local $tmp6 i32)(local $bf i32)(local $tmp71 i32)(local $app_result i32)(local $y i32)(local $bq i32)(local $u i32)(local $cd i32)(local $bc i32)(local $a i32)(local $ab i32)(local $as i32)(local $bi i32)(local $cn i32)(local $aw i32)(local $tmp7 i32)(local $bm i32)(local $ch i32)(local $q i32)(local $bu i32)(local $bd i32)(local $b i32)(local $tmp62 i32)(local $tmp4 i32)(local $ai i32)(local $be i32)(local $h i32)(local $w i32)(local $tmp8 i32)(local $tmp51 i32)(local $result1 i32)(local $k i32)(local $tmp61 i32)(local $cl i32)(local $ay i32)(local $tmp5 i32)(local $o i32)(local $z i32)
 //│     block $entry
-//│       block $entry
-//│         global.get 0
-//│         local.set $a
-//│         global.get 0
-//│         i32.const 3
-//│         i32.store
-//│         global.get 0
-//│         i32.const 16
-//│         i32.add
-//│         global.set 0
-//│         local.get $a
-//│         i32.const 4
-//│         i32.add
-//│         i32.const 1
-//│         i32.store
-//│         local.get $a
-//│         i32.const 4
-//│         i32.add
-//│         i32.const 2
-//│         i32.store
-//│         local.get $a
-//│         i32.const 4
-//│         i32.add
-//│         i32.const 3
-//│         i32.store
-//│         local.get $a
-//│         local.set $tmp4
-//│         block $d
-//│           block $r
-//│             block $aj
-//│               block $f
-//│                 block $Match_tmp4
-//│                   local.get $tmp4
-//│                   i32.load
-//│                   i32.const 3
-//│                   i32.eq
-//│                   i32.const 1
-//│                   i32.mul
-//│                   local.get $tmp4
-//│                   i32.load
-//│                   i32.const 1
-//│                   i32.eq
-//│                   i32.const 2
-//│                   i32.mul
-//│                   i32.add
-//│                   local.get $tmp4
-//│                   i32.load
-//│                   i32.const 2
-//│                   i32.eq
-//│                   i32.const 3
-//│                   i32.mul
-//│                   i32.add
-//│                   br_table 3 2 1 0
-//│                 end
+//│       global.get 0
+//│       local.set $a
+//│       global.get 0
+//│       i32.const 3
+//│       i32.store
+//│       global.get 0
+//│       i32.const 16
+//│       i32.add
+//│       global.set 0
+//│       local.get $a
+//│       i32.const 4
+//│       i32.add
+//│       i32.const 1
+//│       i32.store
+//│       local.get $a
+//│       i32.const 8
+//│       i32.add
+//│       i32.const 2
+//│       i32.store
+//│       local.get $a
+//│       i32.const 12
+//│       i32.add
+//│       i32.const 3
+//│       i32.store
+//│       local.get $a
+//│       local.set $tmp4
+//│       block $d
+//│         block $x
+//│           block $az
+//│             block $f
+//│               block $Match_tmp4
 //│                 local.get $tmp4
-//│                 i32.const 4
-//│                 i32.add
 //│                 i32.load
-//│                 local.set $g
-//│                 local.get $g
-//│                 local.set $tmp5
+//│                 i32.const 3
+//│                 i32.eq
+//│                 i32.const 1
+//│                 i32.mul
 //│                 local.get $tmp4
-//│                 i32.const 8
-//│                 i32.add
 //│                 i32.load
-//│                 local.set $h
-//│                 local.get $h
-//│                 local.set $tmp6
-//│                 block $d
-//│                   block $n
-//│                     block $j
-//│                       block $Match_tmp5
-//│                         local.get $tmp5
-//│                         i32.const 1
-//│                         i32.eq
-//│                         i32.const 1
-//│                         i32.mul
-//│                         local.get $tmp5
-//│                         i32.const 0
-//│                         i32.eq
-//│                         i32.const 2
-//│                         i32.mul
-//│                         i32.add
-//│                         br_table 2 1 0
-//│                       end
-//│                       local.get $tmp6
+//│                 i32.const 1
+//│                 i32.eq
+//│                 i32.const 2
+//│                 i32.mul
+//│                 i32.add
+//│                 local.get $tmp4
+//│                 i32.load
+//│                 i32.const 2
+//│                 i32.eq
+//│                 i32.const 3
+//│                 i32.mul
+//│                 i32.add
+//│                 br_table 3 2 1 0
+//│               end
+//│               local.get $tmp4
+//│               i32.const 4
+//│               i32.add
+//│               i32.load
+//│               local.set $g
+//│               local.get $g
+//│               local.set $tmp5
+//│               local.get $tmp4
+//│               i32.const 8
+//│               i32.add
+//│               i32.load
+//│               local.set $h
+//│               local.get $h
+//│               local.set $tmp6
+//│               block $j
+//│                 block $r
+//│                   block $l
+//│                     block $Match_tmp5
+//│                       local.get $tmp5
+//│                       i32.const 1
+//│                       i32.eq
+//│                       i32.const 1
+//│                       i32.mul
+//│                       local.get $tmp5
 //│                       i32.const 0
 //│                       i32.eq
-//│                       if
-//│                         i32.const 0
-//│                         call $log
-//│                         i32.const 0
-//│                         local.set $app_result
-//│                         local.get $app_result
-//│                         local.set $m
-//│                         local.get $m
-//│                         local.set $b
-//│                       else
-//│                       end
-//│                       br $d
+//│                       i32.const 2
+//│                       i32.mul
+//│                       i32.add
+//│                       br_table 2 1 0
 //│                     end
 //│                     local.get $tmp6
-//│                     i32.const 2
+//│                     i32.const 0
 //│                     i32.eq
 //│                     if
-//│                       i32.const 1
+//│                       i32.const 0
 //│                       call $log
 //│                       i32.const 0
 //│                       local.set $app_result
@@ -1287,128 +1363,48 @@ let result = if Three(1,2,3) is
 //│                       local.get $q
 //│                       local.set $b
 //│                     else
-//│                     end
-//│                     br $d
-//│                   end
-//│                   i32.const 6
-//│                   call $log
-//│                   i32.const 0
-//│                   local.set $app_result
-//│                   local.get $app_result
-//│                   local.set $e
-//│                   local.get $e
-//│                   local.set $b
-//│                 end
-//│                 br $d
-//│               end
-//│               local.get $tmp4
-//│               i32.const 4
-//│               i32.add
-//│               i32.load
-//│               local.set $ak
-//│               local.get $ak
-//│               local.set $tmp52
-//│               local.get $tmp4
-//│               i32.const 8
-//│               i32.add
-//│               i32.load
-//│               local.set $al
-//│               local.get $al
-//│               local.set $tmp62
-//│               local.get $tmp4
-//│               i32.const 12
-//│               i32.add
-//│               i32.load
-//│               local.set $am
-//│               local.get $am
-//│               local.set $tmp71
-//│               local.get $tmp4
-//│               i32.const 0
-//│               i32.add
-//│               i32.load
-//│               local.set $an
-//│               local.get $an
-//│               local.set $tmp8
-//│               block $d
-//│                 block $ax
-//│                   block $ap
-//│                     block $Match_tmp52
-//│                       local.get $tmp52
-//│                       i32.const 1
-//│                       i32.eq
-//│                       i32.const 1
-//│                       i32.mul
-//│                       local.get $tmp52
+//│                       i32.const 6
+//│                       call $log
 //│                       i32.const 0
-//│                       i32.eq
-//│                       i32.const 2
-//│                       i32.mul
-//│                       i32.add
-//│                       br_table 2 1 0
+//│                       local.set $app_result
+//│                       local.get $app_result
+//│                       local.set $o
+//│                       local.get $o
+//│                       local.set $b
 //│                     end
-//│                     local.get $tmp62
-//│                     i32.const 0
-//│                     i32.eq
-//│                     if
-//│                       local.get $tmp71
-//│                       i32.const 0
-//│                       i32.eq
-//│                       if
-//│                         local.get $tmp8
-//│                         i32.const 0
-//│                         i32.eq
-//│                         if
-//│                           i32.const 4
-//│                           call $log
-//│                           i32.const 0
-//│                           local.set $app_result
-//│                           local.get $app_result
-//│                           local.set $aw
-//│                           local.get $aw
-//│                           local.set $b
-//│                         else
-//│                         end
-//│                       else
-//│                       end
-//│                     else
-//│                     end
-//│                     br $d
+//│                     br $j
 //│                   end
-//│                   local.get $tmp62
+//│                   local.get $tmp6
 //│                   i32.const 2
 //│                   i32.eq
 //│                   if
-//│                     local.get $tmp71
-//│                     i32.const 3
-//│                     i32.eq
-//│                     if
-//│                       local.get $tmp8
-//│                       i32.const 4
-//│                       i32.eq
-//│                       if
-//│                         i32.const 5
-//│                         call $log
-//│                         i32.const 0
-//│                         local.set $app_result
-//│                         local.get $app_result
-//│                         local.set $bg
-//│                         local.get $bg
-//│                         local.set $b
-//│                       else
-//│                       end
-//│                     else
-//│                     end
+//│                     i32.const 1
+//│                     call $log
+//│                     i32.const 0
+//│                     local.set $app_result
+//│                     local.get $app_result
+//│                     local.set $w
+//│                     local.get $w
+//│                     local.set $b
 //│                   else
+//│                     i32.const 6
+//│                     call $log
+//│                     i32.const 0
+//│                     local.set $app_result
+//│                     local.get $app_result
+//│                     local.set $u
+//│                     local.get $u
+//│                     local.set $b
 //│                   end
-//│                   br $d
+//│                   br $j
 //│                 end
 //│                 i32.const 6
 //│                 call $log
 //│                 i32.const 0
 //│                 local.set $app_result
 //│                 local.get $app_result
-//│                 local.set $e
-//│                 local.get $e
+//│                 local.set $k
+//│                 local.get $k
 //│                 local.set $b
 //│               end
 //│               br $d
@@ -1417,33 +1413,40 @@ let result = if Three(1,2,3) is
 //│             i32.const 4
 //│             i32.add
 //│             i32.load
-//│             local.set $s
-//│             local.get $s
-//│             local.set $tmp51
+//│             local.set $bc
+//│             local.get $bc
+//│             local.set $tmp52
 //│             local.get $tmp4
 //│             i32.const 8
 //│             i32.add
 //│             i32.load
-//│             local.set $t
-//│             local.get $t
-//│             local.set $tmp61
+//│             local.set $bd
+//│             local.get $bd
+//│             local.set $tmp62
 //│             local.get $tmp4
 //│             i32.const 12
 //│             i32.add
 //│             i32.load
-//│             local.set $u
-//│             local.get $u
-//│             local.set $tmp7
-//│             block $d
-//│               block $ad
-//│                 block $w
-//│                   block $Match_tmp51
-//│                     local.get $tmp51
+//│             local.set $be
+//│             local.get $be
+//│             local.set $tmp71
+//│             local.get $tmp4
+//│             i32.const 0
+//│             i32.add
+//│             i32.load
+//│             local.set $bf
+//│             local.get $bf
+//│             local.set $tmp8
+//│             block $bh
+//│               block $bx
+//│                 block $bj
+//│                   block $Match_tmp52
+//│                     local.get $tmp52
 //│                     i32.const 1
 //│                     i32.eq
 //│                     i32.const 1
 //│                     i32.mul
-//│                     local.get $tmp51
+//│                     local.get $tmp52
 //│                     i32.const 0
 //│                     i32.eq
 //│                     i32.const 2
@@ -1451,87 +1454,487 @@ let result = if Three(1,2,3) is
 //│                     i32.add
 //│                     br_table 2 1 0
 //│                   end
-//│                   local.get $tmp61
+//│                   local.get $tmp62
 //│                   i32.const 0
 //│                   i32.eq
 //│                   if
-//│                     local.get $tmp7
+//│                     local.get $tmp71
 //│                     i32.const 0
 //│                     i32.eq
 //│                     if
-//│                       i32.const 2
+//│                       local.get $tmp8
+//│                       i32.const 0
+//│                       i32.eq
+//│                       if
+//│                         i32.const 4
+//│                         call $log
+//│                         i32.const 0
+//│                         local.set $app_result
+//│                         local.get $app_result
+//│                         local.set $bw
+//│                         local.get $bw
+//│                         local.set $b
+//│                       else
+//│                         i32.const 6
+//│                         call $log
+//│                         i32.const 0
+//│                         local.set $app_result
+//│                         local.get $app_result
+//│                         local.set $bu
+//│                         local.get $bu
+//│                         local.set $b
+//│                       end
+//│                     else
+//│                       i32.const 6
 //│                       call $log
 //│                       i32.const 0
 //│                       local.set $app_result
 //│                       local.get $app_result
-//│                       local.set $ac
-//│                       local.get $ac
+//│                       local.set $bq
+//│                       local.get $bq
 //│                       local.set $b
-//│                     else
 //│                     end
 //│                   else
-//│                   end
-//│                   br $d
-//│                 end
-//│                 local.get $tmp61
-//│                 i32.const 2
-//│                 i32.eq
-//│                 if
-//│                   local.get $tmp7
-//│                   i32.const 3
-//│                   i32.eq
-//│                   if
-//│                     i32.const 3
+//│                     i32.const 6
 //│                     call $log
 //│                     i32.const 0
 //│                     local.set $app_result
 //│                     local.get $app_result
-//│                     local.set $ai
-//│                     local.get $ai
+//│                     local.set $bm
+//│                     local.get $bm
 //│                     local.set $b
+//│                   end
+//│                   br $bh
+//│                 end
+//│                 local.get $tmp62
+//│                 i32.const 2
+//│                 i32.eq
+//│                 if
+//│                   local.get $tmp71
+//│                   i32.const 3
+//│                   i32.eq
+//│                   if
+//│                     local.get $tmp8
+//│                     i32.const 4
+//│                     i32.eq
+//│                     if
+//│                       i32.const 5
+//│                       call $log
+//│                       i32.const 0
+//│                       local.set $app_result
+//│                       local.get $app_result
+//│                       local.set $cn
+//│                       local.get $cn
+//│                       local.set $b
+//│                     else
+//│                       i32.const 6
+//│                       call $log
+//│                       i32.const 0
+//│                       local.set $app_result
+//│                       local.get $app_result
+//│                       local.set $cl
+//│                       local.get $cl
+//│                       local.set $b
+//│                     end
 //│                   else
+//│                     i32.const 6
+//│                     call $log
+//│                     i32.const 0
+//│                     local.set $app_result
+//│                     local.get $app_result
+//│                     local.set $ch
+//│                     local.get $ch
+//│                     local.set $b
 //│                   end
 //│                 else
+//│                   i32.const 6
+//│                   call $log
+//│                   i32.const 0
+//│                   local.set $app_result
+//│                   local.get $app_result
+//│                   local.set $cd
+//│                   local.get $cd
+//│                   local.set $b
 //│                 end
-//│                 br $d
+//│                 br $bh
 //│               end
 //│               i32.const 6
 //│               call $log
 //│               i32.const 0
 //│               local.set $app_result
 //│               local.get $app_result
-//│               local.set $e
-//│               local.get $e
+//│               local.set $bi
+//│               local.get $bi
 //│               local.set $b
 //│             end
 //│             br $d
 //│           end
-//│           i32.const 6
-//│           call $log
-//│           i32.const 0
-//│           local.set $app_result
-//│           local.get $app_result
-//│           local.set $e
-//│           local.get $e
-//│           local.set $b
+//│           local.get $tmp4
+//│           i32.const 4
+//│           i32.add
+//│           i32.load
+//│           local.set $y
+//│           local.get $y
+//│           local.set $tmp51
+//│           local.get $tmp4
+//│           i32.const 8
+//│           i32.add
+//│           i32.load
+//│           local.set $z
+//│           local.get $z
+//│           local.set $tmp61
+//│           local.get $tmp4
+//│           i32.const 12
+//│           i32.add
+//│           i32.load
+//│           local.set $ab
+//│           local.get $ab
+//│           local.set $tmp7
+//│           block $ad
+//│             block $ap
+//│               block $af
+//│                 block $Match_tmp51
+//│                   local.get $tmp51
+//│                   i32.const 1
+//│                   i32.eq
+//│                   i32.const 1
+//│                   i32.mul
+//│                   local.get $tmp51
+//│                   i32.const 0
+//│                   i32.eq
+//│                   i32.const 2
+//│                   i32.mul
+//│                   i32.add
+//│                   br_table 2 1 0
+//│                 end
+//│                 local.get $tmp61
+//│                 i32.const 0
+//│                 i32.eq
+//│                 if
+//│                   local.get $tmp7
+//│                   i32.const 0
+//│                   i32.eq
+//│                   if
+//│                     i32.const 2
+//│                     call $log
+//│                     i32.const 0
+//│                     local.set $app_result
+//│                     local.get $app_result
+//│                     local.set $ao
+//│                     local.get $ao
+//│                     local.set $b
+//│                   else
+//│                     i32.const 6
+//│                     call $log
+//│                     i32.const 0
+//│                     local.set $app_result
+//│                     local.get $app_result
+//│                     local.set $am
+//│                     local.get $am
+//│                     local.set $b
+//│                   end
+//│                 else
+//│                   i32.const 6
+//│                   call $log
+//│                   i32.const 0
+//│                   local.set $app_result
+//│                   local.get $app_result
+//│                   local.set $ai
+//│                   local.get $ai
+//│                   local.set $b
+//│                 end
+//│                 br $ad
+//│               end
+//│               local.get $tmp61
+//│               i32.const 2
+//│               i32.eq
+//│               if
+//│                 local.get $tmp7
+//│                 i32.const 3
+//│                 i32.eq
+//│                 if
+//│                   i32.const 3
+//│                   call $log
+//│                   i32.const 0
+//│                   local.set $app_result
+//│                   local.get $app_result
+//│                   local.set $ay
+//│                   local.get $ay
+//│                   local.set $b
+//│                 else
+//│                   i32.const 6
+//│                   call $log
+//│                   i32.const 0
+//│                   local.set $app_result
+//│                   local.get $app_result
+//│                   local.set $aw
+//│                   local.get $aw
+//│                   local.set $b
+//│                 end
+//│               else
+//│                 i32.const 6
+//│                 call $log
+//│                 i32.const 0
+//│                 local.set $app_result
+//│                 local.get $app_result
+//│                 local.set $as
+//│                 local.get $as
+//│                 local.set $b
+//│               end
+//│               br $ad
+//│             end
+//│             i32.const 6
+//│             call $log
+//│             i32.const 0
+//│             local.set $app_result
+//│             local.get $app_result
+//│             local.set $ae
+//│             local.get $ae
+//│             local.set $b
+//│           end
+//│           br $d
 //│         end
+//│         i32.const 6
+//│         call $log
+//│         i32.const 0
+//│         local.set $app_result
+//│         local.get $app_result
+//│         local.set $e
+//│         local.get $e
+//│         local.set $b
 //│       end
-//│       local.get $b
-//│       local.set $result1
 //│     end
-//│     i32.const 6
-//│     call $log
-//│     i32.const 0
-//│     local.set $app_result
-//│     local.get $app_result
-//│     local.set $e
-//│     local.get $e
-//│     local.set $b
+//│     local.get $b
+//│     local.set $result1
 //│   )
 //│   (start $main)
 //│ )
 //│ 
 //│ result
 //│        = undefined
+//│ // Output
+//│ 3
+
+//TODO
+class A(x: Int)
+class B()
+class C()
+let x = A(1)
+let res = if x is
+    A(x) and x is
+        0 then log(0)
+        1 then
+          log(1)
+          3
+    B() then log(20)
+    C() then log(30)
+    else log(40)
+log(res)
+//│ class A(x: Int)
+//│ class B()
+//│ class C()
+//│ let x: A
+//│ let res: 3 | undefined
+//│ undefined
+//│ IR:
+//│ Basic Block entry ():
+//│   a = alloc A
+//│   setfield a.x = 1
+//│   x1 = a
+//│   match x1
+//│     B -> o ()
+//│     C -> q ()
+//│     A -> f ()
+//│     _ -> d ()
+//│ Basic Block o ():
+//│   app_result = call log (20)
+//│   p = app_result
+//│   br c (p)
+//│ Basic Block q ():
+//│   app_result = call log (30)
+//│   r = app_result
+//│   br c (r)
+//│ Basic Block f ():
+//│   tmp9 = x1
+//│   g = getfield tmp9, x
+//│   x1 = g
+//│   match x1
+//│     1 -> m ()
+//│     0 -> k ()
+//│     _ -> i ()
+//│ Basic Block d ():
+//│   app_result = call log (40)
+//│   e = app_result
+//│   br c (e)
+//│ Basic Block c (b):
+//│   res1 = b
+//│   app_result = call log (res1)
+//│ Basic Block m ():
+//│   app_result = call log (1)
+//│   return 3
+//│   n = ()
+//│   br c (n)
+//│ Basic Block k ():
+//│   app_result = call log (0)
+//│   l = app_result
+//│   br c (l)
+//│ Basic Block i ():
+//│   app_result = call log (40)
+//│   j = app_result
+//│   br c (j)
+//│ 
+//│ 
+//│ WASM:
+//│ (module 
+//│   (func $log (import "console" "log") (param i32))
+//│   (memory $memory 1)
+//│   (global (mut i32) i32.const 0) 
+//│   (export "main" (func $main))
+//│   (func $main (local $e i32)(local $res1 i32)(local $a i32)(local $b i32)(local $p i32)(local $x1 i32)(local $r i32)(local $tmp9 i32)(local $j i32)(local $app_result i32)(local $g i32)(local $l i32)
+//│     block $entry
+//│       global.get 0
+//│       local.set $a
+//│       global.get 0
+//│       i32.const 0
+//│       i32.store
+//│       global.get 0
+//│       i32.const 8
+//│       i32.add
+//│       global.set 0
+//│       local.get $a
+//│       i32.const 4
+//│       i32.add
+//│       i32.const 1
+//│       i32.store
+//│       local.get $a
+//│       local.set $x1
+//│       block $d
+//│         block $o
+//│           block $q
+//│             block $f
+//│               block $Match_x1
+//│                 local.get $x1
+//│                 i32.load
+//│                 i32.const 1
+//│                 i32.eq
+//│                 i32.const 1
+//│                 i32.mul
+//│                 local.get $x1
+//│                 i32.load
+//│                 i32.const 2
+//│                 i32.eq
+//│                 i32.const 2
+//│                 i32.mul
+//│                 i32.add
+//│                 local.get $x1
+//│                 i32.load
+//│                 i32.const 0
+//│                 i32.eq
+//│                 i32.const 3
+//│                 i32.mul
+//│                 i32.add
+//│                 br_table 3 2 1 0
+//│               end
+//│               local.get $x1
+//│               local.set $tmp9
+//│               local.get $tmp9
+//│               i32.const 4
+//│               i32.add
+//│               i32.load
+//│               local.set $g
+//│               local.get $g
+//│               local.set $x1
+//│               block $i
+//│                 block $m
+//│                   block $k
+//│                     block $Match_x1
+//│                       local.get $x1
+//│                       i32.const 1
+//│                       i32.eq
+//│                       i32.const 1
+//│                       i32.mul
+//│                       local.get $x1
+//│                       i32.const 0
+//│                       i32.eq
+//│                       i32.const 2
+//│                       i32.mul
+//│                       i32.add
+//│                       br_table 2 1 0
+//│                     end
+//│                     i32.const 0
+//│                     call $log
+//│                     i32.const 0
+//│                     local.set $app_result
+//│                     local.get $app_result
+//│                     local.set $l
+//│                     local.get $l
+//│                     local.set $b
+//│                     br $i
+//│                   end
+//│                   i32.const 1
+//│                   call $log
+//│                   i32.const 0
+//│                   local.set $app_result
+//│                   br $i
+//│                 end
+//│                 i32.const 40
+//│                 call $log
+//│                 i32.const 0
+//│                 local.set $app_result
+//│                 local.get $app_result
+//│                 local.set $j
+//│                 local.get $j
+//│                 local.set $b
+//│               end
+//│               br $d
+//│             end
+//│             i32.const 30
+//│             call $log
+//│             i32.const 0
+//│             local.set $app_result
+//│             local.get $app_result
+//│             local.set $r
+//│             local.get $r
+//│             local.set $b
+//│             br $d
+//│           end
+//│           i32.const 20
+//│           call $log
+//│           i32.const 0
+//│           local.set $app_result
+//│           local.get $app_result
+//│           local.set $p
+//│           local.get $p
+//│           local.set $b
+//│           br $d
+//│         end
+//│         i32.const 40
+//│         call $log
+//│         i32.const 0
+//│         local.set $app_result
+//│         local.get $app_result
+//│         local.set $e
+//│         local.get $e
+//│         local.set $b
+//│       end
+//│     end
+//│     local.get $b
+//│     local.set $res1
+//│     local.get $res1
+//│     call $log
+//│     i32.const 0
+//│     local.set $app_result
+//│   )
+//│   (start $main)
+//│ )
+//│ 
+//│ x
+//│   = A {}
+//│ res
+//│     = 3
+//│ // Output
+//│ 1
+//│ res
+//│     = undefined
 //│ // Output
 //│ 3
