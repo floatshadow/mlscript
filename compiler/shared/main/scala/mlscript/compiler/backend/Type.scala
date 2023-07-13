@@ -37,10 +37,10 @@ enum Type:
   case Int32
   case Float32
   case OpaquePointer
-  case Record(val impl: RecordObj)
-  case Variant(val impl: VariantObj)
-  case Function(val args: List[Type], val ret: Type)
-  case TypeName(val name: String, val args: List[(String, Type)])
+  case Record(impl: RecordObj)
+  case Variant(impl: VariantObj)
+  case Function(args: List[Type], ret: Type)
+  case TypeName(name: String, args: List[(String, Type)])
 
   // TypeName equality is nominal, and we do not perform structural equality
   // because the same type can admit different representations.

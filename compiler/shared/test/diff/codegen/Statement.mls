@@ -106,40 +106,17 @@ log(-99)
 //│   (start $main)
 //│ )
 //│ 
-//│ x1
-//│    = 1
-//│ x2
-//│    = 1
-//│ res
-//│     = undefined
-//│ // Output
-//│ 10
-//│ res
-//│     = undefined
-//│ // Output
-//│ 0
-//│ res
-//│     = undefined
-//│ // Output
-//│ 25
-//│ res
-//│     = undefined
-//│ // Output
-//│ 1
-//│ res
-//│     = undefined
-//│ // Output
-//│ 0
-//│ res
-//│     = true
-//│ res
-//│     = false
-//│ res
-//│     = true
-//│ res
-//│     = undefined
-//│ // Output
-//│ -99
+//│ /!!!\ Uncaught error: mlscript.codegen.CodeGenError: wat2wasm utility was not found under ./bin or in system path, or did not have permission to execute
+//│ 	at: mlscript.codegen.CodeGenError$.apply(Error.scala:5)
+//│ 	at: mlscript.compiler.backend.wasm.CodePrinter$.apply(CodePrinter.scala:61)
+//│ 	at: mlscript.compiler.CodegenTestCompiler.postType(CodegenTest.scala:28)
+//│ 	at: mlscript.DiffTests.rec$1(DiffTests.scala:592)
+//│ 	at: mlscript.DiffTests.$anonfun$new$3(DiffTests.scala:991)
+//│ 	at: org.scalatest.OutcomeOf.outcomeOf(OutcomeOf.scala:85)
+//│ 	at: org.scalatest.OutcomeOf.outcomeOf$(OutcomeOf.scala:83)
+//│ 	at: org.scalatest.OutcomeOf$.outcomeOf(OutcomeOf.scala:104)
+//│ 	at: org.scalatest.Transformer.apply(Transformer.scala:22)
+//│ 	at: org.scalatest.Transformer.apply(Transformer.scala:20)
 
 // true && true
 // true || true

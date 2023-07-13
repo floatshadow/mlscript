@@ -137,3 +137,6 @@ let x = Outside(99,Inside(98))
 //│ 
 //│ x
 //│   = Outside {}
+
+class One(first: Int)
+log of One(111).first
