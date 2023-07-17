@@ -40,7 +40,7 @@ enum Type:
   case Record(impl: RecordObj)
   case Variant(impl: VariantObj)
   case Function(args: List[Type], ret: Type)
-  case TypeName(name: String, args: List[(String, Type)])
+  case TypeName(name: String)
 
   // TypeName equality is nominal, and we do not perform structural equality
   // because the same type can admit different representations.
@@ -51,7 +51,7 @@ enum Type:
       case (Unit, Unit) | (Boolean, Boolean) | (Int32, Int32) |
           (Float32, Float32) | (OpaquePointer, OpaquePointer) =>
         true
-      case (TypeName(n1, _), TypeName(n2, _)) => n1 == n2
+      case (TypeName(n1), TypeName(n2)) => n1 == n2
       case (Function(args1, ret1), Function(args2, ret2)) =>
         args1.length == args2.length && args1
           .zip(args2)
@@ -70,4 +70,4 @@ enum Type:
     case Record(impl)        => impl.toString()
     case Variant(impl)       => impl.toString()
     case Function(args, ret) => s"(${args.mkString(", ")}) -> $ret"
-    case TypeName(name, _)   => name
+    case TypeName(name)   => name

@@ -18,7 +18,6 @@ import mlscript.compiler.backend.wasm.ModulePrinter
 import mlscript.compiler.backend.wasm.Function
 import mlscript.SimpleTerm
 import scala.language.implicitConversions
-import mlscript.TypeName
 
 enum ContainingSyntax:
   case IfThenElse
@@ -33,7 +32,7 @@ class Ir2wasm {
       entryBB: BasicBlock,
       moduleName: String,
       imports: List[String],
-      symbolTypeMap: Map[String, (Type, Int)]
+      symbolTypeMap: Map[String, ((Type,Ls[(String,Type)]), Int)]
   ) =
 
     var worklist: ListBuffer[BasicBlock] = ListBuffer(entryBB)
@@ -198,8 +197,8 @@ class Ir2wasm {
             instrToWasm(instrs.tail)
         case S(SetField(obj, field, value)) =>
           val offset = lh.getType(obj.name) match
-            case Type.TypeName(_, args) => 
-              (args.indexWhere(_._1 == field)+1)*4
+            case Type.TypeName(name) =>
+              (symbolTypeMap(name)._1._2.indexWhere(_._1 == field)+1)*4
             case _                      => ???
           GetLocal(obj.name) <:>
             I32Const(offset) <:>
@@ -216,7 +215,8 @@ class Ir2wasm {
         lh: LocalsHandler
     ): Code = pureValue match
       case Op(op) => operandToWasm(op)
-      case Alloc(Type.TypeName(name, args)) =>
+      case Alloc(Type.TypeName(name)) =>
+        val args = symbolTypeMap(name)._1._2
         GetGlobal(memoryBoundary)
           <:> I32Const(symbolTypeMap(name)._2)
           <:> Store
@@ -246,7 +246,9 @@ class Ir2wasm {
           case Var(str) => (str, lh.getType(str))
           case _        => ??? // TODO record type
         val offset = tpe match
-          case Type.TypeName(_, args) => (args.map(_._1).indexOf(field) + 1) * 4
+          case Type.TypeName(name) => 
+            val args = symbolTypeMap(name)._1._2
+            (args.map(_._1).indexOf(field) + 1) * 4
           case _                      => ??? // TODO record type
         GetLocal(name) <:> I32Const(offset) <:> Add <:> Load
       case IsType(obj, ty)         => ???
@@ -283,7 +285,7 @@ class Ir2wasm {
     def getLoad(op: Operand)(implicit lh: LocalsHandler): Code = op match
       case Var(name) =>
         lh.getType(name) match
-          case Type.TypeName(_, _) => Load
+          case Type.TypeName(_) => Load
           case _                   => Code(Nil)
       case _ => Code(Nil)
 

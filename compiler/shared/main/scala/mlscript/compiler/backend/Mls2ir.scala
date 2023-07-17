@@ -12,7 +12,7 @@ import mlscript.Term
 
 class Mls2ir {
   val visitedSymbols = MutSet[RuntimeSymbol]()
-  val symbolTypeMap = HashMap[Str, Type.TypeName]()
+  val symbolTypeMap = HashMap[Str, (Type.TypeName, Ls[(String, Type)])]()
   val scope = Scope("root")
   val varMap = HashMap[Str, Operand.Var]()
   val entryBB = BasicBlock("entry", Nil, ListBuffer())
@@ -89,7 +89,7 @@ class Mls2ir {
         if isCallee then
           addTmpVar(
             s"new_${sym.runtimeName}",
-            PureValue.Alloc(symbolTypeMap(sym.runtimeName))
+            PureValue.Alloc(symbolTypeMap(sym.runtimeName)._1)
           )
         else ??? // FIXME: lifter should handle lambda?
       case S(sym: TraitSymbol)    => ??? // unimplemented for now
@@ -142,13 +142,13 @@ class Mls2ir {
           if (symbolTypeMap.keys.exists(_ == nme))
             val arguments = args.zipWithIndex.map {
               case ((_, Fld(_, _, arg)), idx) =>
-                (symbolTypeMap(nme).args(idx)._1, translateTerm(arg))
+                (symbolTypeMap(nme)._2(idx)._1, translateTerm(arg))
             }
             val result: Operand.Var =
               Operand.Var(scope.allocateRuntimeName())
             bb.instructions += Instruction.Assignment(
               result,
-              PureValue.Alloc(symbolTypeMap(nme))
+              PureValue.Alloc(symbolTypeMap(nme)._1)
             )
             arguments.foreach((argName, term) =>
               bb.instructions += Instruction.SetField(result, argName, term)
@@ -343,7 +343,7 @@ class Mls2ir {
                 TypeName(nme.name),
                 Nil
               )
-              val symbolParams = params.get.fields.map {
+              val symbolParams:Ls[(String,Type)] = params.get.fields.map {
                 case (name, Fld(_, _, tpe)) =>
                   (
                     name.map(_.name).get,
@@ -353,11 +353,13 @@ class Mls2ir {
                       case Var("Unit")   => Type.Unit
                       case Var("Bool")   => Type.Boolean
                       case Var("String") => Type.OpaquePointer
-                      case Var(tpe)      => symbolTypeMap.getOrElse(tpe, ???)
+                      case Var(tpe)      => symbolTypeMap(tpe)._1
                       case _             => ???
                   )
               }
-              symbolTypeMap += nme.name -> Type.TypeName(nme.name, symbolParams)
+              symbolTypeMap += nme.name -> (Type.TypeName(
+                nme.name
+              ), symbolParams)
             case Trt => ???
             case Mxn => ???
             case Als => ???
@@ -390,7 +392,11 @@ class Mls2ir {
 
   def apply(
       unit: TypingUnit
-  ): (BasicBlock, List[String], Map[String, (Type, Int)]) =
+  ): (
+      BasicBlock,
+      List[String],
+      Map[String, ((Type, Ls[(String, Type)]), Int)]
+  ) =
     translateTypingUnit(unit)(Scope("root"))
     (
       entryBB,
