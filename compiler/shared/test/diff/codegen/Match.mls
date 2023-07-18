@@ -18,7 +18,7 @@ log(x)
 //│   br b (d)
 //│ Basic Block b (a):
 //│   x1 = a
-//│   app_result = call log (x1)
+//│   g1 = call log (x1)
 //│ 
 //│ 
 //│ WASM:
@@ -27,7 +27,7 @@ log(x)
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $app_result i32)(local $f i32)(local $a i32)(local $x1 i32)(local $d i32)
+//│   (func $main (local $f i32)(local $a i32)(local $g1 i32)(local $x1 i32)(local $d i32)
 //│     block $entry
 //│       i32.const 1
 //│       i32.const 1
@@ -49,7 +49,7 @@ log(x)
 //│     local.get $x1
 //│     call $log
 //│     i32.const 0
-//│     local.set $app_result
+//│     local.set $g1
 //│   )
 //│   (start $main)
 //│ )
@@ -95,8 +95,8 @@ log(y)
 //│   br i (k)
 //│ Basic Block i (h):
 //│   y1 = h
-//│   app_result = call log (x1)
-//│   app_result = call log (y1)
+//│   p1 = call log (x1)
+//│   q1 = call log (y1)
 //│ 
 //│ 
 //│ WASM:
@@ -105,7 +105,7 @@ log(y)
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $n i32)(local $app_result i32)(local $f i32)(local $a i32)(local $m i32)(local $x1 i32)(local $h i32)(local $k i32)(local $g i32)(local $y1 i32)(local $o i32)(local $d i32)
+//│   (func $main (local $n i32)(local $f i32)(local $a i32)(local $m i32)(local $x1 i32)(local $h i32)(local $q1 i32)(local $p1 i32)(local $k i32)(local $g i32)(local $y1 i32)(local $o i32)(local $d i32)
 //│     block $entry
 //│       i32.const 1
 //│       i32.const 0
@@ -157,11 +157,11 @@ log(y)
 //│     local.get $x1
 //│     call $log
 //│     i32.const 0
-//│     local.set $app_result
+//│     local.set $p1
 //│     local.get $y1
 //│     call $log
 //│     i32.const 0
-//│     local.set $app_result
+//│     local.set $q1
 //│   )
 //│   (start $main)
 //│ )
@@ -191,30 +191,30 @@ if 51 is
 //│   tmp0 = 51
 //│   tmp01 = 51
 //│   match tmp01
-//│     53 -> i ()
-//│     51 -> e ()
-//│     54 -> k ()
-//│     52 -> g ()
+//│     53 -> l ()
+//│     51 -> f ()
+//│     54 -> o ()
+//│     52 -> i ()
 //│     _ -> c ()
+//│ Basic Block l ():
+//│   n1 = call log (53)
+//│   m = n1
+//│   br b (m)
+//│ Basic Block f ():
+//│   h1 = call log (51)
+//│   g = h1
+//│   br b (g)
+//│ Basic Block o ():
+//│   q1 = call log (54)
+//│   p = q1
+//│   br b (p)
 //│ Basic Block i ():
-//│   app_result = call log (53)
-//│   j = app_result
+//│   k1 = call log (52)
+//│   j = k1
 //│   br b (j)
-//│ Basic Block e ():
-//│   app_result = call log (51)
-//│   f = app_result
-//│   br b (f)
-//│ Basic Block k ():
-//│   app_result = call log (54)
-//│   l = app_result
-//│   br b (l)
-//│ Basic Block g ():
-//│   app_result = call log (52)
-//│   h = app_result
-//│   br b (h)
 //│ Basic Block c ():
-//│   app_result = call log (55)
-//│   d = app_result
+//│   e1 = call log (55)
+//│   d = e1
 //│   br b (d)
 //│ Basic Block b (a):
 //│ 
@@ -225,17 +225,17 @@ if 51 is
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $tmp01 i32)(local $f i32)(local $a i32)(local $tmp0 i32)(local $l i32)(local $h i32)(local $d i32)(local $j i32)(local $app_result i32)
+//│   (func $main (local $tmp01 i32)(local $e1 i32)(local $j i32)(local $n1 i32)(local $a i32)(local $m i32)(local $tmp0 i32)(local $g i32)(local $p i32)(local $h1 i32)(local $k1 i32)(local $q1 i32)(local $d i32)
 //│     block $entry
 //│       i32.const 51
 //│       local.set $tmp0
 //│       i32.const 51
 //│       local.set $tmp01
 //│       block $c
-//│         block $i
-//│           block $e
-//│             block $k
-//│               block $g
+//│         block $l
+//│           block $f
+//│             block $o
+//│               block $i
 //│                 block $Match_tmp01
 //│                   local.get $tmp01
 //│                   i32.const 53
@@ -265,48 +265,48 @@ if 51 is
 //│                 i32.const 52
 //│                 call $log
 //│                 i32.const 0
-//│                 local.set $app_result
-//│                 local.get $app_result
-//│                 local.set $h
-//│                 local.get $h
+//│                 local.set $k1
+//│                 local.get $k1
+//│                 local.set $j
+//│                 local.get $j
 //│                 local.set $a
 //│                 br $c
 //│               end
 //│               i32.const 54
 //│               call $log
 //│               i32.const 0
-//│               local.set $app_result
-//│               local.get $app_result
-//│               local.set $l
-//│               local.get $l
+//│               local.set $q1
+//│               local.get $q1
+//│               local.set $p
+//│               local.get $p
 //│               local.set $a
 //│               br $c
 //│             end
 //│             i32.const 51
 //│             call $log
 //│             i32.const 0
-//│             local.set $app_result
-//│             local.get $app_result
-//│             local.set $f
-//│             local.get $f
+//│             local.set $h1
+//│             local.get $h1
+//│             local.set $g
+//│             local.get $g
 //│             local.set $a
 //│             br $c
 //│           end
 //│           i32.const 53
 //│           call $log
 //│           i32.const 0
-//│           local.set $app_result
-//│           local.get $app_result
-//│           local.set $j
-//│           local.get $j
+//│           local.set $n1
+//│           local.get $n1
+//│           local.set $m
+//│           local.get $m
 //│           local.set $a
 //│           br $c
 //│         end
 //│         i32.const 55
 //│         call $log
 //│         i32.const 0
-//│         local.set $app_result
-//│         local.get $app_result
+//│         local.set $e1
+//│         local.get $e1
 //│         local.set $d
 //│         local.get $d
 //│         local.set $a
@@ -340,25 +340,25 @@ if x is
 //│   a = alloc C
 //│   x1 = a
 //│   match x1
-//│     B -> h ()
-//│     C -> j ()
-//│     A -> f ()
+//│     B -> j ()
+//│     C -> m ()
+//│     A -> g ()
 //│     _ -> d ()
-//│ Basic Block h ():
-//│   app_result = call log (20)
-//│   i = app_result
-//│   br c (i)
 //│ Basic Block j ():
-//│   app_result = call log (30)
-//│   k = app_result
+//│   l1 = call log (20)
+//│   k = l1
 //│   br c (k)
-//│ Basic Block f ():
-//│   app_result = call log (10)
-//│   g = app_result
-//│   br c (g)
+//│ Basic Block m ():
+//│   o1 = call log (30)
+//│   n = o1
+//│   br c (n)
+//│ Basic Block g ():
+//│   i1 = call log (10)
+//│   h = i1
+//│   br c (h)
 //│ Basic Block d ():
-//│   app_result = call log (40)
-//│   e = app_result
+//│   f1 = call log (40)
+//│   e = f1
 //│   br c (e)
 //│ Basic Block c (b):
 //│ 
@@ -369,7 +369,7 @@ if x is
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $e i32)(local $app_result i32)(local $a i32)(local $i i32)(local $b i32)(local $g i32)(local $x1 i32)(local $k i32)
+//│   (func $main (local $n i32)(local $f1 i32)(local $a i32)(local $i1 i32)(local $b i32)(local $o1 i32)(local $x1 i32)(local $h i32)(local $k i32)(local $e i32)(local $l1 i32)
 //│     block $entry
 //│       global.get 0
 //│       local.set $a
@@ -383,9 +383,9 @@ if x is
 //│       local.get $a
 //│       local.set $x1
 //│       block $d
-//│         block $h
-//│           block $j
-//│             block $f
+//│         block $j
+//│           block $m
+//│             block $g
 //│               block $Match_x1
 //│                 local.get $x1
 //│                 i32.load
@@ -412,38 +412,38 @@ if x is
 //│               i32.const 10
 //│               call $log
 //│               i32.const 0
-//│               local.set $app_result
-//│               local.get $app_result
-//│               local.set $g
-//│               local.get $g
+//│               local.set $i1
+//│               local.get $i1
+//│               local.set $h
+//│               local.get $h
 //│               local.set $b
 //│               br $d
 //│             end
 //│             i32.const 30
 //│             call $log
 //│             i32.const 0
-//│             local.set $app_result
-//│             local.get $app_result
-//│             local.set $k
-//│             local.get $k
+//│             local.set $o1
+//│             local.get $o1
+//│             local.set $n
+//│             local.get $n
 //│             local.set $b
 //│             br $d
 //│           end
 //│           i32.const 20
 //│           call $log
 //│           i32.const 0
-//│           local.set $app_result
-//│           local.get $app_result
-//│           local.set $i
-//│           local.get $i
+//│           local.set $l1
+//│           local.get $l1
+//│           local.set $k
+//│           local.get $k
 //│           local.set $b
 //│           br $d
 //│         end
 //│         i32.const 40
 //│         call $log
 //│         i32.const 0
-//│         local.set $app_result
-//│         local.get $app_result
+//│         local.set $f1
+//│         local.get $f1
 //│         local.set $e
 //│         local.get $e
 //│         local.set $b
@@ -476,36 +476,36 @@ if l is
 //│   setfield a.value = 100
 //│   l1 = a
 //│   match l1
-//│     IntLit -> f ()
+//│     IntLit -> g ()
 //│     _ -> d ()
-//│ Basic Block f ():
-//│   g = getfield l1, value
-//│   tmp1 = g
+//│ Basic Block g ():
+//│   h = getfield l1, value
+//│   tmp1 = h
 //│   match tmp1
-//│     100 -> k ()
-//│     101 -> n ()
-//│     102 -> p ()
-//│     _ -> i ()
+//│     100 -> n ()
+//│     101 -> q ()
+//│     102 -> t ()
+//│     _ -> j ()
 //│ Basic Block d ():
-//│   app_result = call log (103)
-//│   e = app_result
+//│   f1 = call log (103)
+//│   e = f1
 //│   br c (e)
-//│ Basic Block k ():
-//│   app_result = call log (100)
-//│   m = app_result
-//│   br c (m)
 //│ Basic Block n ():
-//│   app_result = call log (101)
-//│   o = app_result
+//│   p1 = call log (100)
+//│   o = p1
 //│   br c (o)
-//│ Basic Block p ():
-//│   app_result = call log (102)
-//│   q = app_result
-//│   br c (q)
-//│ Basic Block i ():
-//│   app_result = call log (103)
-//│   j = app_result
-//│   br c (j)
+//│ Basic Block q ():
+//│   s1 = call log (101)
+//│   r = s1
+//│   br c (r)
+//│ Basic Block t ():
+//│   v1 = call log (102)
+//│   u = v1
+//│   br c (u)
+//│ Basic Block j ():
+//│   m1 = call log (103)
+//│   k = m1
+//│   br c (k)
 //│ Basic Block c (b):
 //│ 
 //│ 
@@ -515,7 +515,7 @@ if l is
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $a i32)(local $m i32)(local $g i32)(local $tmp1 i32)(local $o i32)(local $e i32)(local $l1 i32)(local $j i32)(local $app_result i32)(local $q i32)(local $b i32)
+//│   (func $main (local $f1 i32)(local $u i32)(local $a i32)(local $m1 i32)(local $v1 i32)(local $b i32)(local $s1 i32)(local $tmp1 i32)(local $h i32)(local $r i32)(local $p1 i32)(local $k i32)(local $o i32)(local $e i32)(local $l1 i32)
 //│     block $entry
 //│       global.get 0
 //│       local.set $a
@@ -542,13 +542,13 @@ if l is
 //│         i32.const 4
 //│         i32.add
 //│         i32.load
-//│         local.set $g
-//│         local.get $g
+//│         local.set $h
+//│         local.get $h
 //│         local.set $tmp1
-//│         block $i
-//│           block $k
-//│             block $n
-//│               block $p
+//│         block $j
+//│           block $n
+//│             block $q
+//│               block $t
 //│                 block $Match_tmp1
 //│                   local.get $tmp1
 //│                   i32.const 100
@@ -572,48 +572,48 @@ if l is
 //│                 i32.const 102
 //│                 call $log
 //│                 i32.const 0
-//│                 local.set $app_result
-//│                 local.get $app_result
-//│                 local.set $q
-//│                 local.get $q
+//│                 local.set $v1
+//│                 local.get $v1
+//│                 local.set $u
+//│                 local.get $u
 //│                 local.set $b
-//│                 br $i
+//│                 br $j
 //│               end
 //│               i32.const 101
 //│               call $log
 //│               i32.const 0
-//│               local.set $app_result
-//│               local.get $app_result
-//│               local.set $o
-//│               local.get $o
+//│               local.set $s1
+//│               local.get $s1
+//│               local.set $r
+//│               local.get $r
 //│               local.set $b
-//│               br $i
+//│               br $j
 //│             end
 //│             i32.const 100
 //│             call $log
 //│             i32.const 0
-//│             local.set $app_result
-//│             local.get $app_result
-//│             local.set $m
-//│             local.get $m
+//│             local.set $p1
+//│             local.get $p1
+//│             local.set $o
+//│             local.get $o
 //│             local.set $b
-//│             br $i
+//│             br $j
 //│           end
 //│           i32.const 103
 //│           call $log
 //│           i32.const 0
-//│           local.set $app_result
-//│           local.get $app_result
-//│           local.set $j
-//│           local.get $j
+//│           local.set $m1
+//│           local.get $m1
+//│           local.set $k
+//│           local.get $k
 //│           local.set $b
 //│         end
 //│       else
 //│         i32.const 103
 //│         call $log
 //│         i32.const 0
-//│         local.set $app_result
-//│         local.get $app_result
+//│         local.set $f1
+//│         local.get $f1
 //│         local.set $e
 //│         local.get $e
 //│         local.set $b
@@ -648,77 +648,77 @@ let length = if pos is
 //│   setfield a.y = 12
 //│   pos1 = a
 //│   match pos1
-//│     Position -> f ()
+//│     Position -> g ()
 //│     _ -> d ()
-//│ Basic Block f ():
-//│   g = getfield pos1, x
-//│   tmp2 = g
-//│   h = getfield pos1, y
-//│   tmp3 = h
+//│ Basic Block g ():
+//│   h = getfield pos1, x
+//│   tmp2 = h
+//│   i = getfield pos1, y
+//│   tmp3 = i
 //│   match tmp2
-//│     5 -> x ()
-//│     12 -> ae ()
-//│     4 -> r ()
-//│     3 -> l ()
-//│     _ -> j ()
+//│     5 -> ae ()
+//│     12 -> am ()
+//│     4 -> v ()
+//│     3 -> n ()
+//│     _ -> k ()
 //│ Basic Block d ():
-//│   app_result = call log (1)
-//│   e = app_result
+//│   f1 = call log (1)
+//│   e = f1
 //│   br c (e)
-//│ Basic Block x ():
-//│   match tmp3
-//│     12 -> ac ()
-//│     _ -> z ()
 //│ Basic Block ae ():
 //│   match tmp3
-//│     5 -> ai ()
+//│     12 -> aj ()
 //│     _ -> ag ()
-//│ Basic Block r ():
+//│ Basic Block am ():
 //│   match tmp3
-//│     3 -> v ()
-//│     _ -> t ()
-//│ Basic Block l ():
+//│     5 -> ar ()
+//│     _ -> ao ()
+//│ Basic Block v ():
 //│   match tmp3
-//│     4 -> p ()
-//│     _ -> n ()
-//│ Basic Block j ():
-//│   app_result = call log (1)
-//│   k = app_result
-//│   br c (k)
+//│     3 -> ab ()
+//│     _ -> x ()
+//│ Basic Block n ():
+//│   match tmp3
+//│     4 -> s ()
+//│     _ -> p ()
+//│ Basic Block k ():
+//│   m1 = call log (1)
+//│   l = m1
+//│   br c (l)
 //│ Basic Block c (b):
 //│   length1 = b
-//│ Basic Block ac ():
-//│   app_result = call log (13)
-//│   ad = app_result
-//│   br c (ad)
-//│ Basic Block z ():
-//│   app_result = call log (1)
-//│   ab = app_result
-//│   br c (ab)
-//│ Basic Block ai ():
-//│   app_result = call log (13)
-//│   aj = app_result
-//│   br c (aj)
+//│ Basic Block aj ():
+//│   al1 = call log (13)
+//│   ak = al1
+//│   br c (ak)
 //│ Basic Block ag ():
-//│   app_result = call log (1)
-//│   ah = app_result
+//│   ai1 = call log (1)
+//│   ah = ai1
 //│   br c (ah)
-//│ Basic Block v ():
-//│   app_result = call log (5)
-//│   w = app_result
-//│   br c (w)
-//│ Basic Block t ():
-//│   app_result = call log (1)
-//│   u = app_result
-//│   br c (u)
+//│ Basic Block ar ():
+//│   at1 = call log (13)
+//│   as = at1
+//│   br c (as)
+//│ Basic Block ao ():
+//│   aq1 = call log (1)
+//│   ap = aq1
+//│   br c (ap)
+//│ Basic Block ab ():
+//│   ad1 = call log (5)
+//│   ac = ad1
+//│   br c (ac)
+//│ Basic Block x ():
+//│   z1 = call log (1)
+//│   y = z1
+//│   br c (y)
+//│ Basic Block s ():
+//│   u1 = call log (5)
+//│   t = u1
+//│   br c (t)
 //│ Basic Block p ():
-//│   app_result = call log (5)
-//│   q = app_result
+//│   r1 = call log (1)
+//│   q = r1
 //│   br c (q)
-//│ Basic Block n ():
-//│   app_result = call log (1)
-//│   o = app_result
-//│   br c (o)
 //│ 
 //│ 
 //│ WASM:
@@ -727,7 +727,7 @@ let length = if pos is
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $e i32)(local $tmp2 i32)(local $app_result i32)(local $length1 i32)(local $u i32)(local $ah i32)(local $g i32)(local $ad i32)(local $h i32)(local $w i32)(local $k i32)(local $aj i32)(local $o i32)(local $a i32)(local $pos1 i32)(local $ab i32)(local $tmp3 i32)(local $q i32)(local $b i32)
+//│   (func $main (local $e i32)(local $tmp2 i32)(local $at1 i32)(local $ad1 i32)(local $y i32)(local $m1 i32)(local $i i32)(local $ah i32)(local $aq1 i32)(local $ak i32)(local $h i32)(local $length1 i32)(local $u1 i32)(local $t i32)(local $f1 i32)(local $a i32)(local $pos1 i32)(local $z1 i32)(local $as i32)(local $ap i32)(local $tmp3 i32)(local $q i32)(local $ac i32)(local $b i32)(local $r1 i32)(local $l i32)(local $al1 i32)(local $ai1 i32)
 //│     block $entry
 //│       global.get 0
 //│       local.set $a
@@ -759,21 +759,21 @@ let length = if pos is
 //│         i32.const 4
 //│         i32.add
 //│         i32.load
-//│         local.set $g
-//│         local.get $g
+//│         local.set $h
+//│         local.get $h
 //│         local.set $tmp2
 //│         local.get $pos1
 //│         i32.const 8
 //│         i32.add
 //│         i32.load
-//│         local.set $h
-//│         local.get $h
+//│         local.set $i
+//│         local.get $i
 //│         local.set $tmp3
-//│         block $j
-//│           block $x
-//│             block $ae
-//│               block $r
-//│                 block $l
+//│         block $k
+//│           block $ae
+//│             block $am
+//│               block $v
+//│                 block $n
 //│                   block $Match_tmp2
 //│                     local.get $tmp2
 //│                     i32.const 5
@@ -807,22 +807,22 @@ let length = if pos is
 //│                     i32.const 5
 //│                     call $log
 //│                     i32.const 0
-//│                     local.set $app_result
-//│                     local.get $app_result
-//│                     local.set $q
-//│                     local.get $q
+//│                     local.set $u1
+//│                     local.get $u1
+//│                     local.set $t
+//│                     local.get $t
 //│                     local.set $b
 //│                   else
 //│                     i32.const 1
 //│                     call $log
 //│                     i32.const 0
-//│                     local.set $app_result
-//│                     local.get $app_result
-//│                     local.set $o
-//│                     local.get $o
+//│                     local.set $r1
+//│                     local.get $r1
+//│                     local.set $q
+//│                     local.get $q
 //│                     local.set $b
 //│                   end
-//│                   br $j
+//│                   br $k
 //│                 end
 //│                 local.get $tmp3
 //│                 i32.const 3
@@ -831,22 +831,22 @@ let length = if pos is
 //│                   i32.const 5
 //│                   call $log
 //│                   i32.const 0
-//│                   local.set $app_result
-//│                   local.get $app_result
-//│                   local.set $w
-//│                   local.get $w
+//│                   local.set $ad1
+//│                   local.get $ad1
+//│                   local.set $ac
+//│                   local.get $ac
 //│                   local.set $b
 //│                 else
 //│                   i32.const 1
 //│                   call $log
 //│                   i32.const 0
-//│                   local.set $app_result
-//│                   local.get $app_result
-//│                   local.set $u
-//│                   local.get $u
+//│                   local.set $z1
+//│                   local.get $z1
+//│                   local.set $y
+//│                   local.get $y
 //│                   local.set $b
 //│                 end
-//│                 br $j
+//│                 br $k
 //│               end
 //│               local.get $tmp3
 //│               i32.const 5
@@ -855,22 +855,22 @@ let length = if pos is
 //│                 i32.const 13
 //│                 call $log
 //│                 i32.const 0
-//│                 local.set $app_result
-//│                 local.get $app_result
-//│                 local.set $aj
-//│                 local.get $aj
+//│                 local.set $at1
+//│                 local.get $at1
+//│                 local.set $as
+//│                 local.get $as
 //│                 local.set $b
 //│               else
 //│                 i32.const 1
 //│                 call $log
 //│                 i32.const 0
-//│                 local.set $app_result
-//│                 local.get $app_result
-//│                 local.set $ah
-//│                 local.get $ah
+//│                 local.set $aq1
+//│                 local.get $aq1
+//│                 local.set $ap
+//│                 local.get $ap
 //│                 local.set $b
 //│               end
-//│               br $j
+//│               br $k
 //│             end
 //│             local.get $tmp3
 //│             i32.const 12
@@ -879,38 +879,38 @@ let length = if pos is
 //│               i32.const 13
 //│               call $log
 //│               i32.const 0
-//│               local.set $app_result
-//│               local.get $app_result
-//│               local.set $ad
-//│               local.get $ad
+//│               local.set $al1
+//│               local.get $al1
+//│               local.set $ak
+//│               local.get $ak
 //│               local.set $b
 //│             else
 //│               i32.const 1
 //│               call $log
 //│               i32.const 0
-//│               local.set $app_result
-//│               local.get $app_result
-//│               local.set $ab
-//│               local.get $ab
+//│               local.set $ai1
+//│               local.get $ai1
+//│               local.set $ah
+//│               local.get $ah
 //│               local.set $b
 //│             end
-//│             br $j
+//│             br $k
 //│           end
 //│           i32.const 1
 //│           call $log
 //│           i32.const 0
-//│           local.set $app_result
-//│           local.get $app_result
-//│           local.set $k
-//│           local.get $k
+//│           local.set $m1
+//│           local.get $m1
+//│           local.set $l
+//│           local.get $l
 //│           local.set $b
 //│         end
 //│       else
 //│         i32.const 1
 //│         call $log
 //│         i32.const 0
-//│         local.set $app_result
-//│         local.get $app_result
+//│         local.set $f1
+//│         local.get $f1
 //│         local.set $e
 //│         local.get $e
 //│         local.set $b
@@ -945,38 +945,38 @@ if x is
 //│ Basic Block entry ():
 //│   x1 = 1
 //│   match x1
-//│     1 -> k ()
+//│     1 -> m ()
 //│     _ -> c ()
-//│ Basic Block k ():
+//│ Basic Block m ():
 //│   match x1
-//│     1 -> q ()
-//│     _ -> o ()
-//│   l = m
-//│   br b (l)
+//│     1 -> t ()
+//│     _ -> q ()
+//│   n = o
+//│   br b (n)
 //│ Basic Block c ():
 //│   match x1
-//│     1 -> i ()
+//│     1 -> j ()
 //│     _ -> g ()
 //│   d = e
 //│   br b (d)
+//│ Basic Block t ():
+//│   v1 = call log (10)
+//│   u = v1
+//│   br p (u)
 //│ Basic Block q ():
-//│   app_result = call log (10)
-//│   r = app_result
-//│   br n (r)
-//│ Basic Block o ():
-//│   app_result = call log (5)
-//│   p = app_result
-//│   br n (p)
+//│   s1 = call log (5)
+//│   r = s1
+//│   br p (r)
 //│ Basic Block b (a):
-//│ Basic Block i ():
-//│   app_result = call log (-10)
-//│   j = app_result
-//│   br f (j)
+//│ Basic Block j ():
+//│   l1 = call log (-10)
+//│   k = l1
+//│   br f (k)
 //│ Basic Block g ():
-//│   app_result = call log (-5)
-//│   h = app_result
+//│   i1 = call log (-5)
+//│   h = i1
 //│   br f (h)
-//│ Basic Block n (m):
+//│ Basic Block p (o):
 //│ Basic Block f (e):
 //│ 
 //│ 
@@ -986,14 +986,14 @@ if x is
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $e i32)(local $m i32)(local $p i32)(local $x1 i32)(local $h i32)(local $r i32)(local $j i32)(local $app_result i32)
+//│   (func $main (local $u i32)(local $v1 i32)(local $i1 i32)(local $s1 i32)(local $x1 i32)(local $h i32)(local $r i32)(local $k i32)(local $o i32)(local $e i32)(local $l1 i32)
 //│     i32.const 1
 //│     local.set $x1
 //│     local.get $x1
 //│     i32.const 1
 //│     i32.eq
 //│     if
-//│       block $k
+//│       block $m
 //│         local.get $x1
 //│         i32.const 1
 //│         i32.eq
@@ -1001,20 +1001,20 @@ if x is
 //│           i32.const 10
 //│           call $log
 //│           i32.const 0
-//│           local.set $app_result
-//│           local.get $app_result
-//│           local.set $r
-//│           local.get $r
-//│           local.set $m
+//│           local.set $v1
+//│           local.get $v1
+//│           local.set $u
+//│           local.get $u
+//│           local.set $o
 //│         else
 //│           i32.const 5
 //│           call $log
 //│           i32.const 0
-//│           local.set $app_result
-//│           local.get $app_result
-//│           local.set $p
-//│           local.get $p
-//│           local.set $m
+//│           local.set $s1
+//│           local.get $s1
+//│           local.set $r
+//│           local.get $r
+//│           local.set $o
 //│         end
 //│       end
 //│     else
@@ -1026,17 +1026,17 @@ if x is
 //│           i32.const -10
 //│           call $log
 //│           i32.const 0
-//│           local.set $app_result
-//│           local.get $app_result
-//│           local.set $j
-//│           local.get $j
+//│           local.set $l1
+//│           local.get $l1
+//│           local.set $k
+//│           local.get $k
 //│           local.set $e
 //│         else
 //│           i32.const -5
 //│           call $log
 //│           i32.const 0
-//│           local.set $app_result
-//│           local.get $app_result
+//│           local.set $i1
+//│           local.get $i1
 //│           local.set $h
 //│           local.get $h
 //│           local.set $e
@@ -1079,181 +1079,181 @@ let result = if Three(1,2,3) is
 //│   setfield a.x3 = 3
 //│   tmp4 = a
 //│   match tmp4
-//│     Three -> x ()
-//│     Four -> az ()
-//│     Two -> f ()
+//│     Three -> ae ()
+//│     Four -> bo ()
+//│     Two -> g ()
 //│     _ -> d ()
-//│ Basic Block x ():
-//│   y = getfield tmp4, x1
-//│   tmp51 = y
-//│   z = getfield tmp4, x2
-//│   tmp61 = z
-//│   ab = getfield tmp4, x3
-//│   tmp7 = ab
+//│ Basic Block ae ():
+//│   af = getfield tmp4, x1
+//│   tmp51 = af
+//│   ag = getfield tmp4, x2
+//│   tmp61 = ag
+//│   ah = getfield tmp4, x3
+//│   tmp7 = ah
 //│   match tmp51
-//│     1 -> ap ()
-//│     0 -> af ()
-//│     _ -> ad ()
-//│ Basic Block az ():
-//│   bc = getfield tmp4, x1
-//│   tmp52 = bc
-//│   bd = getfield tmp4, x2
-//│   tmp62 = bd
-//│   be = getfield tmp4, x3
-//│   tmp71 = be
-//│   bf = getfield tmp4, x4
-//│   tmp8 = bf
+//│     1 -> az ()
+//│     0 -> am ()
+//│     _ -> aj ()
+//│ Basic Block bo ():
+//│   bp = getfield tmp4, x1
+//│   tmp52 = bp
+//│   bq = getfield tmp4, x2
+//│   tmp62 = bq
+//│   br = getfield tmp4, x3
+//│   tmp71 = br
+//│   bs = getfield tmp4, x4
+//│   tmp8 = bs
 //│   match tmp52
-//│     1 -> bx ()
-//│     0 -> bj ()
-//│     _ -> bh ()
-//│ Basic Block f ():
-//│   g = getfield tmp4, x1
-//│   tmp5 = g
-//│   h = getfield tmp4, x2
-//│   tmp6 = h
+//│     1 -> cs ()
+//│     0 -> bx ()
+//│     _ -> bu ()
+//│ Basic Block g ():
+//│   h = getfield tmp4, x1
+//│   tmp5 = h
+//│   i = getfield tmp4, x2
+//│   tmp6 = i
 //│   match tmp5
-//│     1 -> r ()
-//│     0 -> l ()
-//│     _ -> j ()
+//│     1 -> v ()
+//│     0 -> n ()
+//│     _ -> k ()
 //│ Basic Block d ():
-//│   app_result = call log (6)
-//│   e = app_result
+//│   f1 = call log (6)
+//│   e = f1
 //│   br c (e)
-//│ Basic Block ap ():
+//│ Basic Block az ():
 //│   match tmp61
-//│     2 -> at ()
-//│     _ -> ar ()
-//│ Basic Block af ():
+//│     2 -> bg ()
+//│     _ -> bd ()
+//│ Basic Block am ():
 //│   match tmp61
-//│     0 -> aj ()
-//│     _ -> ah ()
-//│ Basic Block ad ():
-//│   app_result = call log (6)
-//│   ae = app_result
-//│   br c (ae)
+//│     0 -> ar ()
+//│     _ -> ao ()
+//│ Basic Block aj ():
+//│   al1 = call log (6)
+//│   ak = al1
+//│   br c (ak)
+//│ Basic Block cs ():
+//│   match tmp62
+//│     2 -> cx ()
+//│     _ -> cu ()
 //│ Basic Block bx ():
 //│   match tmp62
-//│     2 -> ce ()
+//│     0 -> cf ()
 //│     _ -> bz ()
-//│ Basic Block bj ():
-//│   match tmp62
-//│     0 -> bn ()
-//│     _ -> bl ()
-//│ Basic Block bh ():
-//│   app_result = call log (6)
-//│   bi = app_result
-//│   br c (bi)
-//│ Basic Block r ():
+//│ Basic Block bu ():
+//│   bw1 = call log (6)
+//│   bv = bw1
+//│   br c (bv)
+//│ Basic Block v ():
 //│   match tmp6
-//│     2 -> v ()
-//│     _ -> t ()
-//│ Basic Block l ():
+//│     2 -> ab ()
+//│     _ -> x ()
+//│ Basic Block n ():
 //│   match tmp6
-//│     0 -> p ()
-//│     _ -> n ()
-//│ Basic Block j ():
-//│   app_result = call log (6)
-//│   k = app_result
-//│   br c (k)
+//│     0 -> s ()
+//│     _ -> p ()
+//│ Basic Block k ():
+//│   m1 = call log (6)
+//│   l = m1
+//│   br c (l)
 //│ Basic Block c (b):
 //│   result1 = b
-//│ Basic Block at ():
+//│ Basic Block bg ():
 //│   match tmp7
-//│     3 -> ax ()
-//│     _ -> av ()
+//│     3 -> bl ()
+//│     _ -> bi ()
+//│ Basic Block bd ():
+//│   bf1 = call log (6)
+//│   be = bf1
+//│   br c (be)
 //│ Basic Block ar ():
-//│   app_result = call log (6)
-//│   as = app_result
-//│   br c (as)
-//│ Basic Block aj ():
 //│   match tmp7
-//│     0 -> an ()
-//│     _ -> al ()
-//│ Basic Block ah ():
-//│   app_result = call log (6)
-//│   ai = app_result
-//│   br c (ai)
-//│ Basic Block ce ():
+//│     0 -> aw ()
+//│     _ -> at ()
+//│ Basic Block ao ():
+//│   aq1 = call log (6)
+//│   ap = aq1
+//│   br c (ap)
+//│ Basic Block cx ():
 //│   match tmp71
-//│     3 -> ci ()
-//│     _ -> cg ()
+//│     3 -> dg ()
+//│     _ -> cz ()
+//│ Basic Block cu ():
+//│   cw1 = call log (6)
+//│   cv = cw1
+//│   br c (cv)
+//│ Basic Block cf ():
+//│   match tmp71
+//│     0 -> ck ()
+//│     _ -> ch ()
 //│ Basic Block bz ():
-//│   app_result = call log (6)
-//│   cd = app_result
+//│   ce1 = call log (6)
+//│   cd = ce1
 //│   br c (cd)
-//│ Basic Block bn ():
-//│   match tmp71
-//│     0 -> br ()
-//│     _ -> bp ()
-//│ Basic Block bl ():
-//│   app_result = call log (6)
-//│   bm = app_result
-//│   br c (bm)
-//│ Basic Block v ():
-//│   app_result = call log (1)
-//│   w = app_result
-//│   br c (w)
-//│ Basic Block t ():
-//│   app_result = call log (6)
-//│   u = app_result
-//│   br c (u)
+//│ Basic Block ab ():
+//│   ad1 = call log (1)
+//│   ac = ad1
+//│   br c (ac)
+//│ Basic Block x ():
+//│   z1 = call log (6)
+//│   y = z1
+//│   br c (y)
+//│ Basic Block s ():
+//│   u1 = call log (0)
+//│   t = u1
+//│   br c (t)
 //│ Basic Block p ():
-//│   app_result = call log (0)
-//│   q = app_result
+//│   r1 = call log (6)
+//│   q = r1
 //│   br c (q)
-//│ Basic Block n ():
-//│   app_result = call log (6)
-//│   o = app_result
-//│   br c (o)
-//│ Basic Block ax ():
-//│   app_result = call log (3)
-//│   ay = app_result
-//│   br c (ay)
-//│ Basic Block av ():
-//│   app_result = call log (6)
-//│   aw = app_result
-//│   br c (aw)
-//│ Basic Block an ():
-//│   app_result = call log (2)
-//│   ao = app_result
-//│   br c (ao)
-//│ Basic Block al ():
-//│   app_result = call log (6)
-//│   am = app_result
-//│   br c (am)
-//│ Basic Block ci ():
+//│ Basic Block bl ():
+//│   bn1 = call log (3)
+//│   bm = bn1
+//│   br c (bm)
+//│ Basic Block bi ():
+//│   bk1 = call log (6)
+//│   bj = bk1
+//│   br c (bj)
+//│ Basic Block aw ():
+//│   ay1 = call log (2)
+//│   ax = ay1
+//│   br c (ax)
+//│ Basic Block at ():
+//│   av1 = call log (6)
+//│   au = av1
+//│   br c (au)
+//│ Basic Block dg ():
 //│   match tmp8
-//│     4 -> cm ()
-//│     _ -> ck ()
-//│ Basic Block cg ():
-//│   app_result = call log (6)
-//│   ch = app_result
-//│   br c (ch)
-//│ Basic Block br ():
-//│   match tmp8
-//│     0 -> bv ()
-//│     _ -> bt ()
-//│ Basic Block bp ():
-//│   app_result = call log (6)
-//│   bq = app_result
-//│   br c (bq)
-//│ Basic Block cm ():
-//│   app_result = call log (5)
-//│   cn = app_result
-//│   br c (cn)
+//│     4 -> dl ()
+//│     _ -> di ()
+//│ Basic Block cz ():
+//│   df1 = call log (6)
+//│   de = df1
+//│   br c (de)
 //│ Basic Block ck ():
-//│   app_result = call log (6)
-//│   cl = app_result
-//│   br c (cl)
-//│ Basic Block bv ():
-//│   app_result = call log (4)
-//│   bw = app_result
-//│   br c (bw)
-//│ Basic Block bt ():
-//│   app_result = call log (6)
-//│   bu = app_result
-//│   br c (bu)
+//│   match tmp8
+//│     0 -> cp ()
+//│     _ -> cm ()
+//│ Basic Block ch ():
+//│   cj1 = call log (6)
+//│   ci = cj1
+//│   br c (ci)
+//│ Basic Block dl ():
+//│   dn1 = call log (5)
+//│   dm = dn1
+//│   br c (dm)
+//│ Basic Block di ():
+//│   dk1 = call log (6)
+//│   dj = dk1
+//│   br c (dj)
+//│ Basic Block cp ():
+//│   cr1 = call log (4)
+//│   cq = cr1
+//│   br c (cq)
+//│ Basic Block cm ():
+//│   co1 = call log (6)
+//│   cn = co1
+//│   br c (cn)
 //│ 
 //│ 
 //│ WASM:
@@ -1262,7 +1262,7 @@ let result = if Three(1,2,3) is
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $e i32)(local $ae i32)(local $am i32)(local $bw i32)(local $ao i32)(local $g i32)(local $tmp52 i32)(local $tmp6 i32)(local $bf i32)(local $tmp71 i32)(local $app_result i32)(local $y i32)(local $bq i32)(local $u i32)(local $cd i32)(local $bc i32)(local $a i32)(local $ab i32)(local $as i32)(local $bi i32)(local $cn i32)(local $aw i32)(local $tmp7 i32)(local $bm i32)(local $ch i32)(local $q i32)(local $bu i32)(local $bd i32)(local $b i32)(local $tmp62 i32)(local $tmp4 i32)(local $ai i32)(local $be i32)(local $h i32)(local $w i32)(local $tmp8 i32)(local $tmp51 i32)(local $result1 i32)(local $k i32)(local $tmp61 i32)(local $cl i32)(local $ay i32)(local $tmp5 i32)(local $o i32)(local $z i32)
+//│   (func $main (local $av1 i32)(local $tmp6 i32)(local $ay1 i32)(local $ah i32)(local $bn1 i32)(local $tmp61 i32)(local $bw1 i32)(local $e i32)(local $bf1 i32)(local $bs i32)(local $cj1 i32)(local $cr1 i32)(local $df1 i32)(local $ad1 i32)(local $ce1 i32)(local $dk1 i32)(local $tmp71 i32)(local $y i32)(local $br i32)(local $cw1 i32)(local $u1 i32)(local $t i32)(local $f1 i32)(local $bq i32)(local $cd i32)(local $a i32)(local $bj i32)(local $z1 i32)(local $ap i32)(local $cn i32)(local $m1 i32)(local $tmp7 i32)(local $af i32)(local $de i32)(local $bm i32)(local $i i32)(local $cv i32)(local $bk1 i32)(local $q i32)(local $ac i32)(local $b i32)(local $cq i32)(local $r1 i32)(local $l i32)(local $bp i32)(local $ag i32)(local $al1 i32)(local $dj i32)(local $tmp52 i32)(local $tmp62 i32)(local $tmp4 i32)(local $aq1 i32)(local $dm i32)(local $ak i32)(local $ax i32)(local $ci i32)(local $au i32)(local $bv i32)(local $be i32)(local $h i32)(local $tmp8 i32)(local $co1 i32)(local $tmp51 i32)(local $result1 i32)(local $dn1 i32)(local $tmp5 i32)
 //│     block $entry
 //│       global.get 0
 //│       local.set $a
@@ -1291,9 +1291,9 @@ let result = if Three(1,2,3) is
 //│       local.get $a
 //│       local.set $tmp4
 //│       block $d
-//│         block $x
-//│           block $az
-//│             block $f
+//│         block $ae
+//│           block $bo
+//│             block $g
 //│               block $Match_tmp4
 //│                 local.get $tmp4
 //│                 i32.load
@@ -1321,19 +1321,19 @@ let result = if Three(1,2,3) is
 //│               i32.const 4
 //│               i32.add
 //│               i32.load
-//│               local.set $g
-//│               local.get $g
+//│               local.set $h
+//│               local.get $h
 //│               local.set $tmp5
 //│               local.get $tmp4
 //│               i32.const 8
 //│               i32.add
 //│               i32.load
-//│               local.set $h
-//│               local.get $h
+//│               local.set $i
+//│               local.get $i
 //│               local.set $tmp6
-//│               block $j
-//│                 block $r
-//│                   block $l
+//│               block $k
+//│                 block $v
+//│                   block $n
 //│                     block $Match_tmp5
 //│                       local.get $tmp5
 //│                       i32.const 1
@@ -1355,22 +1355,22 @@ let result = if Three(1,2,3) is
 //│                       i32.const 0
 //│                       call $log
 //│                       i32.const 0
-//│                       local.set $app_result
-//│                       local.get $app_result
-//│                       local.set $q
-//│                       local.get $q
+//│                       local.set $u1
+//│                       local.get $u1
+//│                       local.set $t
+//│                       local.get $t
 //│                       local.set $b
 //│                     else
 //│                       i32.const 6
 //│                       call $log
 //│                       i32.const 0
-//│                       local.set $app_result
-//│                       local.get $app_result
-//│                       local.set $o
-//│                       local.get $o
+//│                       local.set $r1
+//│                       local.get $r1
+//│                       local.set $q
+//│                       local.get $q
 //│                       local.set $b
 //│                     end
-//│                     br $j
+//│                     br $k
 //│                   end
 //│                   local.get $tmp6
 //│                   i32.const 2
@@ -1379,30 +1379,30 @@ let result = if Three(1,2,3) is
 //│                     i32.const 1
 //│                     call $log
 //│                     i32.const 0
-//│                     local.set $app_result
-//│                     local.get $app_result
-//│                     local.set $w
-//│                     local.get $w
+//│                     local.set $ad1
+//│                     local.get $ad1
+//│                     local.set $ac
+//│                     local.get $ac
 //│                     local.set $b
 //│                   else
 //│                     i32.const 6
 //│                     call $log
 //│                     i32.const 0
-//│                     local.set $app_result
-//│                     local.get $app_result
-//│                     local.set $u
-//│                     local.get $u
+//│                     local.set $z1
+//│                     local.get $z1
+//│                     local.set $y
+//│                     local.get $y
 //│                     local.set $b
 //│                   end
-//│                   br $j
+//│                   br $k
 //│                 end
 //│                 i32.const 6
 //│                 call $log
 //│                 i32.const 0
-//│                 local.set $app_result
-//│                 local.get $app_result
-//│                 local.set $k
-//│                 local.get $k
+//│                 local.set $m1
+//│                 local.get $m1
+//│                 local.set $l
+//│                 local.get $l
 //│                 local.set $b
 //│               end
 //│               br $d
@@ -1411,33 +1411,33 @@ let result = if Three(1,2,3) is
 //│             i32.const 4
 //│             i32.add
 //│             i32.load
-//│             local.set $bc
-//│             local.get $bc
+//│             local.set $bp
+//│             local.get $bp
 //│             local.set $tmp52
 //│             local.get $tmp4
 //│             i32.const 8
 //│             i32.add
 //│             i32.load
-//│             local.set $bd
-//│             local.get $bd
+//│             local.set $bq
+//│             local.get $bq
 //│             local.set $tmp62
 //│             local.get $tmp4
 //│             i32.const 12
 //│             i32.add
 //│             i32.load
-//│             local.set $be
-//│             local.get $be
+//│             local.set $br
+//│             local.get $br
 //│             local.set $tmp71
 //│             local.get $tmp4
 //│             i32.const 0
 //│             i32.add
 //│             i32.load
-//│             local.set $bf
-//│             local.get $bf
+//│             local.set $bs
+//│             local.get $bs
 //│             local.set $tmp8
-//│             block $bh
-//│               block $bx
-//│                 block $bj
+//│             block $bu
+//│               block $cs
+//│                 block $bx
 //│                   block $Match_tmp52
 //│                     local.get $tmp52
 //│                     i32.const 1
@@ -1467,42 +1467,42 @@ let result = if Three(1,2,3) is
 //│                         i32.const 4
 //│                         call $log
 //│                         i32.const 0
-//│                         local.set $app_result
-//│                         local.get $app_result
-//│                         local.set $bw
-//│                         local.get $bw
+//│                         local.set $cr1
+//│                         local.get $cr1
+//│                         local.set $cq
+//│                         local.get $cq
 //│                         local.set $b
 //│                       else
 //│                         i32.const 6
 //│                         call $log
 //│                         i32.const 0
-//│                         local.set $app_result
-//│                         local.get $app_result
-//│                         local.set $bu
-//│                         local.get $bu
+//│                         local.set $co1
+//│                         local.get $co1
+//│                         local.set $cn
+//│                         local.get $cn
 //│                         local.set $b
 //│                       end
 //│                     else
 //│                       i32.const 6
 //│                       call $log
 //│                       i32.const 0
-//│                       local.set $app_result
-//│                       local.get $app_result
-//│                       local.set $bq
-//│                       local.get $bq
+//│                       local.set $cj1
+//│                       local.get $cj1
+//│                       local.set $ci
+//│                       local.get $ci
 //│                       local.set $b
 //│                     end
 //│                   else
 //│                     i32.const 6
 //│                     call $log
 //│                     i32.const 0
-//│                     local.set $app_result
-//│                     local.get $app_result
-//│                     local.set $bm
-//│                     local.get $bm
+//│                     local.set $ce1
+//│                     local.get $ce1
+//│                     local.set $cd
+//│                     local.get $cd
 //│                     local.set $b
 //│                   end
-//│                   br $bh
+//│                   br $bu
 //│                 end
 //│                 local.get $tmp62
 //│                 i32.const 2
@@ -1519,50 +1519,50 @@ let result = if Three(1,2,3) is
 //│                       i32.const 5
 //│                       call $log
 //│                       i32.const 0
-//│                       local.set $app_result
-//│                       local.get $app_result
-//│                       local.set $cn
-//│                       local.get $cn
+//│                       local.set $dn1
+//│                       local.get $dn1
+//│                       local.set $dm
+//│                       local.get $dm
 //│                       local.set $b
 //│                     else
 //│                       i32.const 6
 //│                       call $log
 //│                       i32.const 0
-//│                       local.set $app_result
-//│                       local.get $app_result
-//│                       local.set $cl
-//│                       local.get $cl
+//│                       local.set $dk1
+//│                       local.get $dk1
+//│                       local.set $dj
+//│                       local.get $dj
 //│                       local.set $b
 //│                     end
 //│                   else
 //│                     i32.const 6
 //│                     call $log
 //│                     i32.const 0
-//│                     local.set $app_result
-//│                     local.get $app_result
-//│                     local.set $ch
-//│                     local.get $ch
+//│                     local.set $df1
+//│                     local.get $df1
+//│                     local.set $de
+//│                     local.get $de
 //│                     local.set $b
 //│                   end
 //│                 else
 //│                   i32.const 6
 //│                   call $log
 //│                   i32.const 0
-//│                   local.set $app_result
-//│                   local.get $app_result
-//│                   local.set $cd
-//│                   local.get $cd
+//│                   local.set $cw1
+//│                   local.get $cw1
+//│                   local.set $cv
+//│                   local.get $cv
 //│                   local.set $b
 //│                 end
-//│                 br $bh
+//│                 br $bu
 //│               end
 //│               i32.const 6
 //│               call $log
 //│               i32.const 0
-//│               local.set $app_result
-//│               local.get $app_result
-//│               local.set $bi
-//│               local.get $bi
+//│               local.set $bw1
+//│               local.get $bw1
+//│               local.set $bv
+//│               local.get $bv
 //│               local.set $b
 //│             end
 //│             br $d
@@ -1571,26 +1571,26 @@ let result = if Three(1,2,3) is
 //│           i32.const 4
 //│           i32.add
 //│           i32.load
-//│           local.set $y
-//│           local.get $y
+//│           local.set $af
+//│           local.get $af
 //│           local.set $tmp51
 //│           local.get $tmp4
 //│           i32.const 8
 //│           i32.add
 //│           i32.load
-//│           local.set $z
-//│           local.get $z
+//│           local.set $ag
+//│           local.get $ag
 //│           local.set $tmp61
 //│           local.get $tmp4
 //│           i32.const 12
 //│           i32.add
 //│           i32.load
-//│           local.set $ab
-//│           local.get $ab
+//│           local.set $ah
+//│           local.get $ah
 //│           local.set $tmp7
-//│           block $ad
-//│             block $ap
-//│               block $af
+//│           block $aj
+//│             block $az
+//│               block $am
 //│                 block $Match_tmp51
 //│                   local.get $tmp51
 //│                   i32.const 1
@@ -1616,32 +1616,32 @@ let result = if Three(1,2,3) is
 //│                     i32.const 2
 //│                     call $log
 //│                     i32.const 0
-//│                     local.set $app_result
-//│                     local.get $app_result
-//│                     local.set $ao
-//│                     local.get $ao
+//│                     local.set $ay1
+//│                     local.get $ay1
+//│                     local.set $ax
+//│                     local.get $ax
 //│                     local.set $b
 //│                   else
 //│                     i32.const 6
 //│                     call $log
 //│                     i32.const 0
-//│                     local.set $app_result
-//│                     local.get $app_result
-//│                     local.set $am
-//│                     local.get $am
+//│                     local.set $av1
+//│                     local.get $av1
+//│                     local.set $au
+//│                     local.get $au
 //│                     local.set $b
 //│                   end
 //│                 else
 //│                   i32.const 6
 //│                   call $log
 //│                   i32.const 0
-//│                   local.set $app_result
-//│                   local.get $app_result
-//│                   local.set $ai
-//│                   local.get $ai
+//│                   local.set $aq1
+//│                   local.get $aq1
+//│                   local.set $ap
+//│                   local.get $ap
 //│                   local.set $b
 //│                 end
-//│                 br $ad
+//│                 br $aj
 //│               end
 //│               local.get $tmp61
 //│               i32.const 2
@@ -1654,40 +1654,40 @@ let result = if Three(1,2,3) is
 //│                   i32.const 3
 //│                   call $log
 //│                   i32.const 0
-//│                   local.set $app_result
-//│                   local.get $app_result
-//│                   local.set $ay
-//│                   local.get $ay
+//│                   local.set $bn1
+//│                   local.get $bn1
+//│                   local.set $bm
+//│                   local.get $bm
 //│                   local.set $b
 //│                 else
 //│                   i32.const 6
 //│                   call $log
 //│                   i32.const 0
-//│                   local.set $app_result
-//│                   local.get $app_result
-//│                   local.set $aw
-//│                   local.get $aw
+//│                   local.set $bk1
+//│                   local.get $bk1
+//│                   local.set $bj
+//│                   local.get $bj
 //│                   local.set $b
 //│                 end
 //│               else
 //│                 i32.const 6
 //│                 call $log
 //│                 i32.const 0
-//│                 local.set $app_result
-//│                 local.get $app_result
-//│                 local.set $as
-//│                 local.get $as
+//│                 local.set $bf1
+//│                 local.get $bf1
+//│                 local.set $be
+//│                 local.get $be
 //│                 local.set $b
 //│               end
-//│               br $ad
+//│               br $aj
 //│             end
 //│             i32.const 6
 //│             call $log
 //│             i32.const 0
-//│             local.set $app_result
-//│             local.get $app_result
-//│             local.set $ae
-//│             local.get $ae
+//│             local.set $al1
+//│             local.get $al1
+//│             local.set $ak
+//│             local.get $ak
 //│             local.set $b
 //│           end
 //│           br $d
@@ -1695,8 +1695,8 @@ let result = if Three(1,2,3) is
 //│         i32.const 6
 //│         call $log
 //│         i32.const 0
-//│         local.set $app_result
-//│         local.get $app_result
+//│         local.set $f1
+//│         local.get $f1
 //│         local.set $e
 //│         local.get $e
 //│         local.set $b
@@ -1739,45 +1739,45 @@ log(res)
 //│   setfield a.x = 1
 //│   x1 = a
 //│   match x1
-//│     B -> o ()
-//│     C -> q ()
-//│     A -> f ()
+//│     B -> s ()
+//│     C -> v ()
+//│     A -> g ()
 //│     _ -> d ()
-//│ Basic Block o ():
-//│   app_result = call log (20)
-//│   p = app_result
-//│   br c (p)
-//│ Basic Block q ():
-//│   app_result = call log (30)
-//│   r = app_result
-//│   br c (r)
-//│ Basic Block f ():
+//│ Basic Block s ():
+//│   u1 = call log (20)
+//│   t = u1
+//│   br c (t)
+//│ Basic Block v ():
+//│   y1 = call log (30)
+//│   w = y1
+//│   br c (w)
+//│ Basic Block g ():
 //│   tmp9 = x1
-//│   g = getfield tmp9, x
-//│   x1 = g
+//│   h = getfield tmp9, x
+//│   x1 = h
 //│   match x1
-//│     1 -> m ()
-//│     0 -> k ()
-//│     _ -> i ()
+//│     1 -> p ()
+//│     0 -> m ()
+//│     _ -> j ()
 //│ Basic Block d ():
-//│   app_result = call log (40)
-//│   e = app_result
+//│   f1 = call log (40)
+//│   e = f1
 //│   br c (e)
 //│ Basic Block c (b):
 //│   res1 = b
-//│   app_result = call log (res1)
+//│   z1 = call log (res1)
+//│ Basic Block p ():
+//│   r1 = call log (1)
+//│   q = 3
+//│   br c (q)
 //│ Basic Block m ():
-//│   app_result = call log (1)
-//│   n = 3
+//│   o1 = call log (0)
+//│   n = o1
 //│   br c (n)
-//│ Basic Block k ():
-//│   app_result = call log (0)
-//│   l = app_result
-//│   br c (l)
-//│ Basic Block i ():
-//│   app_result = call log (40)
-//│   j = app_result
-//│   br c (j)
+//│ Basic Block j ():
+//│   l1 = call log (40)
+//│   k = l1
+//│   br c (k)
 //│ 
 //│ 
 //│ WASM:
@@ -1786,7 +1786,7 @@ log(res)
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $e i32)(local $a i32)(local $b i32)(local $p i32)(local $x1 i32)(local $r i32)(local $tmp9 i32)(local $n i32)(local $res1 i32)(local $j i32)(local $app_result i32)(local $g i32)(local $l i32)
+//│   (func $main (local $a i32)(local $z1 i32)(local $o1 i32)(local $x1 i32)(local $h i32)(local $w i32)(local $tmp9 i32)(local $k i32)(local $e i32)(local $l1 i32)(local $n i32)(local $res1 i32)(local $u1 i32)(local $t i32)(local $f1 i32)(local $q i32)(local $b i32)(local $y1 i32)(local $r1 i32)
 //│     block $entry
 //│       global.get 0
 //│       local.set $a
@@ -1805,9 +1805,9 @@ log(res)
 //│       local.get $a
 //│       local.set $x1
 //│       block $d
-//│         block $o
-//│           block $q
-//│             block $f
+//│         block $s
+//│           block $v
+//│             block $g
 //│               block $Match_x1
 //│                 local.get $x1
 //│                 i32.load
@@ -1837,12 +1837,12 @@ log(res)
 //│               i32.const 4
 //│               i32.add
 //│               i32.load
-//│               local.set $g
-//│               local.get $g
+//│               local.set $h
+//│               local.get $h
 //│               local.set $x1
-//│               block $i
-//│                 block $m
-//│                   block $k
+//│               block $j
+//│                 block $p
+//│                   block $m
 //│                     block $Match_x1
 //│                       local.get $x1
 //│                       i32.const 1
@@ -1860,30 +1860,30 @@ log(res)
 //│                     i32.const 0
 //│                     call $log
 //│                     i32.const 0
-//│                     local.set $app_result
-//│                     local.get $app_result
-//│                     local.set $l
-//│                     local.get $l
+//│                     local.set $o1
+//│                     local.get $o1
+//│                     local.set $n
+//│                     local.get $n
 //│                     local.set $b
-//│                     br $i
+//│                     br $j
 //│                   end
 //│                   i32.const 1
 //│                   call $log
 //│                   i32.const 0
-//│                   local.set $app_result
+//│                   local.set $r1
 //│                   i32.const 3
-//│                   local.set $n
-//│                   local.get $n
+//│                   local.set $q
+//│                   local.get $q
 //│                   local.set $b
-//│                   br $i
+//│                   br $j
 //│                 end
 //│                 i32.const 40
 //│                 call $log
 //│                 i32.const 0
-//│                 local.set $app_result
-//│                 local.get $app_result
-//│                 local.set $j
-//│                 local.get $j
+//│                 local.set $l1
+//│                 local.get $l1
+//│                 local.set $k
+//│                 local.get $k
 //│                 local.set $b
 //│               end
 //│               br $d
@@ -1891,28 +1891,28 @@ log(res)
 //│             i32.const 30
 //│             call $log
 //│             i32.const 0
-//│             local.set $app_result
-//│             local.get $app_result
-//│             local.set $r
-//│             local.get $r
+//│             local.set $y1
+//│             local.get $y1
+//│             local.set $w
+//│             local.get $w
 //│             local.set $b
 //│             br $d
 //│           end
 //│           i32.const 20
 //│           call $log
 //│           i32.const 0
-//│           local.set $app_result
-//│           local.get $app_result
-//│           local.set $p
-//│           local.get $p
+//│           local.set $u1
+//│           local.get $u1
+//│           local.set $t
+//│           local.get $t
 //│           local.set $b
 //│           br $d
 //│         end
 //│         i32.const 40
 //│         call $log
 //│         i32.const 0
-//│         local.set $app_result
-//│         local.get $app_result
+//│         local.set $f1
+//│         local.get $f1
 //│         local.set $e
 //│         local.get $e
 //│         local.set $b
@@ -1923,7 +1923,7 @@ log(res)
 //│     local.get $res1
 //│     call $log
 //│     i32.const 0
-//│     local.set $app_result
+//│     local.set $z1
 //│   )
 //│   (start $main)
 //│ )

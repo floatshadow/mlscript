@@ -3,7 +3,7 @@
   (memory $memory 1)
   (global (mut i32) i32.const 0) 
   (export "main" (func $main))
-  (func $main (local $a i32)(local $m i32)(local $g i32)(local $tmp1 i32)(local $o i32)(local $e i32)(local $l1 i32)(local $j i32)(local $app_result i32)(local $q i32)(local $b i32)
+  (func $main (local $f1 i32)(local $u i32)(local $a i32)(local $m1 i32)(local $v1 i32)(local $b i32)(local $s1 i32)(local $tmp1 i32)(local $h i32)(local $r i32)(local $p1 i32)(local $k i32)(local $o i32)(local $e i32)(local $l1 i32)
     block $entry
       global.get 0
       local.set $a
@@ -30,13 +30,13 @@
         i32.const 4
         i32.add
         i32.load
-        local.set $g
-        local.get $g
+        local.set $h
+        local.get $h
         local.set $tmp1
-        block $i
-          block $k
-            block $n
-              block $p
+        block $j
+          block $n
+            block $q
+              block $t
                 block $Match_tmp1
                   local.get $tmp1
                   i32.const 100
@@ -60,48 +60,48 @@
                 i32.const 102
                 call $log
                 i32.const 0
-                local.set $app_result
-                local.get $app_result
-                local.set $q
-                local.get $q
+                local.set $v1
+                local.get $v1
+                local.set $u
+                local.get $u
                 local.set $b
-                br $i
+                br $j
               end
               i32.const 101
               call $log
               i32.const 0
-              local.set $app_result
-              local.get $app_result
-              local.set $o
-              local.get $o
+              local.set $s1
+              local.get $s1
+              local.set $r
+              local.get $r
               local.set $b
-              br $i
+              br $j
             end
             i32.const 100
             call $log
             i32.const 0
-            local.set $app_result
-            local.get $app_result
-            local.set $m
-            local.get $m
+            local.set $p1
+            local.get $p1
+            local.set $o
+            local.get $o
             local.set $b
-            br $i
+            br $j
           end
           i32.const 103
           call $log
           i32.const 0
-          local.set $app_result
-          local.get $app_result
-          local.set $j
-          local.get $j
+          local.set $m1
+          local.get $m1
+          local.set $k
+          local.get $k
           local.set $b
         end
       else
         i32.const 103
         call $log
         i32.const 0
-        local.set $app_result
-        local.get $app_result
+        local.set $f1
+        local.get $f1
         local.set $e
         local.get $e
         local.set $b

@@ -3,7 +3,7 @@
   (memory $memory 1)
   (global (mut i32) i32.const 0) 
   (export "main" (func $main))
-  (func $main (local $string11 i32)(local $app_result i32)
+  (func $main (local $a1 i32)(local $string11 i32)
     global.get 0
     i32.const 0
     i32.add
@@ -33,7 +33,7 @@
     local.get $string11
     call $log
     i32.const 0
-    local.set $app_result
+    local.set $a1
   )
   (start $main)
 )

@@ -161,13 +161,13 @@ class Mls2ir {
               val arguments = args map { case (_, Fld(_, _, arg)) =>
                 translateTerm(arg)
               }
-              makeCall("app_result", callee, arguments)
+              makeCall(scope.allocateRuntimeName(), callee, arguments)
             case _ =>
               val callee = translateVar(nme, true)
               val arguments = args map { case (_, Fld(_, _, arg)) =>
                 translateTerm(arg)
               }
-              makeCall("app_result", callee, arguments)
+              makeCall(scope.allocateRuntimeName(), callee, arguments)
         case _ => ???
     case _ => throw CodeGenError(s"ill-formed application ${inspect(term)}")
 
