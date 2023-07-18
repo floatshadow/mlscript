@@ -3,7 +3,7 @@
   (memory $memory 1)
   (global (mut i32) i32.const 0) 
   (export "main" (func $main))
-  (func $main (local $e i32)(local $res1 i32)(local $a i32)(local $b i32)(local $p i32)(local $x1 i32)(local $r i32)(local $tmp9 i32)(local $j i32)(local $app_result i32)(local $g i32)(local $l i32)
+  (func $main (local $e i32)(local $a i32)(local $b i32)(local $p i32)(local $x1 i32)(local $r i32)(local $tmp9 i32)(local $n i32)(local $res1 i32)(local $j i32)(local $app_result i32)(local $g i32)(local $l i32)
     block $entry
       global.get 0
       local.set $a
@@ -88,6 +88,10 @@
                   call $log
                   i32.const 0
                   local.set $app_result
+                  i32.const 3
+                  local.set $n
+                  local.get $n
+                  local.set $b
                   br $i
                 end
                 i32.const 40

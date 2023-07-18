@@ -951,13 +951,13 @@ if x is
 //│   match x1
 //│     1 -> q ()
 //│     _ -> o ()
-//│   l = ()
+//│   l = m
 //│   br b (l)
 //│ Basic Block c ():
 //│   match x1
 //│     1 -> i ()
 //│     _ -> g ()
-//│   d = ()
+//│   d = e
 //│   br b (d)
 //│ Basic Block q ():
 //│   app_result = call log (10)
@@ -977,9 +977,7 @@ if x is
 //│   h = app_result
 //│   br f (h)
 //│ Basic Block n (m):
-//│   return m
 //│ Basic Block f (e):
-//│   return e
 //│ 
 //│ 
 //│ WASM:
@@ -1715,7 +1713,6 @@ let result = if Three(1,2,3) is
 //│ // Output
 //│ 3
 
-//TODO
 class A(x: Int)
 class B()
 class C()
@@ -1771,8 +1768,7 @@ log(res)
 //│   app_result = call log (res1)
 //│ Basic Block m ():
 //│   app_result = call log (1)
-//│   return 3
-//│   n = ()
+//│   n = 3
 //│   br c (n)
 //│ Basic Block k ():
 //│   app_result = call log (0)
@@ -1790,7 +1786,7 @@ log(res)
 //│   (memory $memory 1)
 //│   (global (mut i32) i32.const 0) 
 //│   (export "main" (func $main))
-//│   (func $main (local $e i32)(local $res1 i32)(local $a i32)(local $b i32)(local $p i32)(local $x1 i32)(local $r i32)(local $tmp9 i32)(local $j i32)(local $app_result i32)(local $g i32)(local $l i32)
+//│   (func $main (local $e i32)(local $a i32)(local $b i32)(local $p i32)(local $x1 i32)(local $r i32)(local $tmp9 i32)(local $n i32)(local $res1 i32)(local $j i32)(local $app_result i32)(local $g i32)(local $l i32)
 //│     block $entry
 //│       global.get 0
 //│       local.set $a
@@ -1875,6 +1871,10 @@ log(res)
 //│                   call $log
 //│                   i32.const 0
 //│                   local.set $app_result
+//│                   i32.const 3
+//│                   local.set $n
+//│                   local.get $n
+//│                   local.set $b
 //│                   br $i
 //│                 end
 //│                 i32.const 40

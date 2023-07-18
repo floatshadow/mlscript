@@ -272,14 +272,12 @@ class Mls2ir {
     case Blk(stmts) =>
       val blkScope = scope.derive("Blk")
       val flattened = stmts.iterator.flatMap(_.desugared._2).toList
+      var result = Operand.Unit;
       flattened.iterator.zipWithIndex.foreach {
         case (t: Term, index) =>
-          val result = translateTerm(t)(blkScope)
-          if index + 1 == flattened.length then
-            bb.instructions += Instruction.Return(S(result))
-          else result
+          result = translateTerm(t)(blkScope)
         case (NuFunDef(isLetRec, Var(nme), _, L(rhs)), _) =>
-          val result = translateTerm(rhs)(blkScope)
+          result = translateTerm(rhs)(blkScope)
           val pat = blkScope.declareValue(nme, isLetRec, isLetRec.isEmpty)
           val lhs: Operand.Var = Operand.Var(pat.runtimeName)
           varMap += pat.runtimeName -> lhs
@@ -290,7 +288,7 @@ class Mls2ir {
         case (_: Def | _: TypeDef | _: NuFunDef /* | _: NuTypeDef */, _) =>
           throw CodeGenError("unsupported definitions in blocks")
       }
-      Operand.Unit
+      result
     case c: CaseOf => translateCase(c, None)
     case IntLit(value) =>
       if value.isValidInt then Operand.Const(value.toInt)
