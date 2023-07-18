@@ -1,0 +1,112 @@
+:NewParser
+:NewDefs
+
+//TODO
+fun incr(x:Int):Int = x+1
+log of incr(2)
+//│ fun incr: (x: Int,) -> Int
+//│ undefined
+//│ IR:
+//│ Basic Block entry ():
+//│   app_result = call incr (2)
+//│   app_result = call log (app_result)
+//│ 
+//│ IR:
+//│ Basic Block incr (x):
+//│   a = Add x, 1
+//│   return a
+//│ 
+//│ 
+//│ WASM:
+//│ (module 
+//│   (func $log (import "console" "log") (param i32))
+//│   (memory $memory 1)
+//│   (global (mut i32) i32.const 0) 
+//│   (export "main" (func $main))
+//│   (func $main (local $app_result i32)
+//│     i32.const 2
+//│     call $incr
+//│     i32.const 0
+//│     local.set $app_result
+//│     local.get $app_result
+//│     call $log
+//│     i32.const 0
+//│     local.set $app_result
+//│   )
+//│   (start $main)
+//│ )
+//│ 
+//│ /!!!\ Uncaught error: mlscript.codegen.CodeGenError: wat2wasm failed to translate WebAssembly text file compiler/shared/test/diff/wasmout/codegen_Function_1.wat to binary
+//│ 	at: mlscript.codegen.CodeGenError$.apply(Error.scala:5)
+//│ 	at: mlscript.compiler.backend.wasm.CodePrinter$.apply(CodePrinter.scala:66)
+//│ 	at: mlscript.compiler.CodegenTestCompiler.postType(CodegenTest.scala:28)
+//│ 	at: mlscript.DiffTests.rec$1(DiffTests.scala:592)
+//│ 	at: mlscript.DiffTests.$anonfun$new$3(DiffTests.scala:991)
+//│ 	at: org.scalatest.OutcomeOf.outcomeOf(OutcomeOf.scala:85)
+//│ 	at: org.scalatest.OutcomeOf.outcomeOf$(OutcomeOf.scala:83)
+//│ 	at: org.scalatest.OutcomeOf$.outcomeOf(OutcomeOf.scala:104)
+//│ 	at: org.scalatest.Transformer.apply(Transformer.scala:22)
+//│ 	at: org.scalatest.Transformer.apply(Transformer.scala:20)
+
+//TODO
+fun fib(x:Int):Int = if x is
+    0 then 0
+    1 then 1
+    else fib(-1+x) + fib(-2+x)
+fib(2)
+//│ fun fib: (x: Int,) -> Int
+//│ Int
+//│ IR:
+//│ Basic Block entry ():
+//│   app_result = call fib (2)
+//│ 
+//│ IR:
+//│ Basic Block fib (x):
+//│   match x
+//│     1 -> j ()
+//│     0 -> h ()
+//│     _ -> c ()
+//│ Basic Block j ():
+//│   k = 1
+//│   br b (k)
+//│ Basic Block h ():
+//│   i = 0
+//│   br b (i)
+//│ Basic Block c ():
+//│   e = Add -1, x
+//│   app_result = call fib (e)
+//│   f = Add -2, x
+//│   app_result = call fib (f)
+//│   g = Add app_result, app_result
+//│   d = g
+//│   br b (d)
+//│ Basic Block b (a):
+//│   return a
+//│ 
+//│ 
+//│ WASM:
+//│ (module 
+//│ 
+//│   (memory $memory 1)
+//│   (global (mut i32) i32.const 0) 
+//│   (export "main" (func $main))
+//│   (func $main (local $app_result i32)
+//│     i32.const 2
+//│     call $fib
+//│     i32.const 0
+//│     local.set $app_result
+//│   )
+//│   (start $main)
+//│ )
+//│ 
+//│ /!!!\ Uncaught error: mlscript.codegen.CodeGenError: wat2wasm failed to translate WebAssembly text file compiler/shared/test/diff/wasmout/codegen_Function_2.wat to binary
+//│ 	at: mlscript.codegen.CodeGenError$.apply(Error.scala:5)
+//│ 	at: mlscript.compiler.backend.wasm.CodePrinter$.apply(CodePrinter.scala:66)
+//│ 	at: mlscript.compiler.CodegenTestCompiler.postType(CodegenTest.scala:28)
+//│ 	at: mlscript.DiffTests.rec$1(DiffTests.scala:592)
+//│ 	at: mlscript.DiffTests.$anonfun$new$3(DiffTests.scala:991)
+//│ 	at: org.scalatest.OutcomeOf.outcomeOf(OutcomeOf.scala:85)
+//│ 	at: org.scalatest.OutcomeOf.outcomeOf$(OutcomeOf.scala:83)
+//│ 	at: org.scalatest.OutcomeOf$.outcomeOf(OutcomeOf.scala:104)
+//│ 	at: org.scalatest.Transformer.apply(Transformer.scala:22)
+//│ 	at: org.scalatest.Transformer.apply(Transformer.scala:20)

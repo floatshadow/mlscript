@@ -12,11 +12,12 @@ import mlscript.Term
 
 class Mls2ir {
   val visitedSymbols = MutSet[RuntimeSymbol]()
-  val symbolTypeMap = HashMap[Str, (Type.TypeName, Ls[(String, Type)])]()
+  val symbolTypeMap = HashMap[Str, (Type, Ls[(String, Type)])]()
   val scope = Scope("root")
   val varMap = HashMap[Str, Operand.Var]()
   val entryBB = BasicBlock("entry", Nil, ListBuffer())
   var bb = entryBB
+  var functionList = ListBuffer[BasicBlock]()
   var imports = ListBuffer.empty[String]
 
   def makeCall(name: Str, fn: Operand, args: List[Operand])(implicit
@@ -139,27 +140,34 @@ class Mls2ir {
     case App(trm, Tup(args)) =>
       trm match
         case Var(nme) =>
-          if (symbolTypeMap.keys.exists(_ == nme))
-            val arguments = args.zipWithIndex.map {
-              case ((_, Fld(_, _, arg)), idx) =>
-                (symbolTypeMap(nme)._2(idx)._1, translateTerm(arg))
-            }
-            val result: Operand.Var =
-              Operand.Var(scope.allocateRuntimeName())
-            bb.instructions += Instruction.Assignment(
-              result,
-              PureValue.Alloc(symbolTypeMap(nme)._1)
-            )
-            arguments.foreach((argName, term) =>
-              bb.instructions += Instruction.SetField(result, argName, term)
-            )
-            result
-          else
-            val callee = translateVar(nme, true)
-            val arguments = args map { case (_, Fld(_, _, arg)) =>
-              translateTerm(arg)
-            }
-            makeCall("app_result", callee, arguments)
+          symbolTypeMap.get(nme) match
+            case S(Type.TypeName(name), params) =>
+              val arguments = args.zipWithIndex.map {
+                case ((_, Fld(_, _, arg)), idx) =>
+                  (params(idx)._1, translateTerm(arg))
+              }
+              val result: Operand.Var =
+                Operand.Var(scope.allocateRuntimeName())
+              bb.instructions += Instruction.Assignment(
+                result,
+                PureValue.Alloc(symbolTypeMap(nme)._1)
+              )
+              arguments.foreach((argName, term) =>
+                bb.instructions += Instruction.SetField(result, argName, term)
+              )
+              result
+            case S(Type.Function(params, ret), _) =>
+              val callee = translateVar(nme, true)
+              val arguments = args map { case (_, Fld(_, _, arg)) =>
+                translateTerm(arg)
+              }
+              makeCall("app_result", callee, arguments)
+            case _ =>
+              val callee = translateVar(nme, true)
+              val arguments = args map { case (_, Fld(_, _, arg)) =>
+                translateTerm(arg)
+              }
+              makeCall("app_result", callee, arguments)
         case _ => ???
     case _ => throw CodeGenError(s"ill-formed application ${inspect(term)}")
 
@@ -341,7 +349,7 @@ class Mls2ir {
                 TypeName(nme.name),
                 Nil
               )
-              val symbolParams:Ls[(String,Type)] = params.get.fields.map {
+              val symbolParams: Ls[(String, Type)] = params.get.fields.map {
                 case (name, Fld(_, _, tpe)) =>
                   (
                     name.map(_.name).get,
@@ -367,7 +375,52 @@ class Mls2ir {
           translateTerm(term) // FIXME handle return value
         case NuFunDef(isLetRec, nme, tparams, rhs) =>
           isLetRec match
-            case None       => ???
+            case None =>
+              rhs match
+                case Left(Lam(Tup(fields), rhs)) =>
+                  val ret = rhs match
+                    case Asc(term, tpe) =>
+                      val result: Operand.Var =
+                        Operand.Var(scope.allocateRuntimeName(nme.name))
+                      varMap += nme.name -> result
+                      scope.declareValue(nme.name, N, true)
+                      val funScope = scope.derive("Fun")
+                      val params = fields.map((k, v) =>
+                        k match
+                          case S(Var(name)) =>
+                            val param: Operand.Var =
+                              Operand.Var(funScope.allocateRuntimeName(name))
+                            funScope.declareParameter(name)
+                            varMap += name -> param
+                            param
+                          case N =>
+                            throw CodeGenError(
+                              s"Unnamed function parameter in $nme($fields)"
+                            )
+                      )
+                      val funEntry = BasicBlock(
+                        nme.name,
+                        params,
+                        ListBuffer.empty[Instruction]
+                      )
+                      bb = funEntry
+                      val funRet = translateTerm(term)(funScope)
+                      bb.instructions += Instruction.Return(S(funRet))
+                      functionList += funEntry
+                      bb = entryBB
+                      tpe
+                    case _ => ???
+                  symbolTypeMap += nme.name -> (Type.Function(
+                    fields.map((k, v) =>
+                      v.value match
+                        case Var("Int") => Type.Int32
+                        case _          => ???
+                    ),
+                    ret match
+                      case TypeName("Int") => Type.Int32
+                      case _               => ???
+                  ), Nil)
+                case _ => ???
             case Some(true) => ???
             case Some(false) =>
               rhs match
@@ -391,13 +444,13 @@ class Mls2ir {
   def apply(
       unit: TypingUnit
   ): (
-      BasicBlock,
+      List[BasicBlock],
       List[String],
       Map[String, ((Type, Ls[(String, Type)]), Int)]
   ) =
     translateTypingUnit(unit)(Scope("root"))
     (
-      entryBB,
+      entryBB +: functionList.toList,
       imports.toList,
       symbolTypeMap.toIterable.zipWithIndex
         .map((map, idx) => map._1 -> (map._2, idx))
