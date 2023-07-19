@@ -7,7 +7,7 @@
     global.get 0
     local.set $a
     global.get 0
-    i32.const 0
+    i32.const 1
     i32.store
     global.get 0
     i32.const 8
@@ -23,7 +23,7 @@
     global.get 0
     local.set $b
     global.get 0
-    i32.const 1
+    i32.const 0
     i32.store
     global.get 0
     i32.const 12

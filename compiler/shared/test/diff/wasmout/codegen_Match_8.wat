@@ -8,7 +8,7 @@
       global.get 0
       local.set $a
       global.get 0
-      i32.const 3
+      i32.const 0
       i32.store
       global.get 0
       i32.const 16
@@ -32,26 +32,26 @@
       local.get $a
       local.set $tmp4
       block $d
-        block $ae
-          block $bo
-            block $g
+        block $g
+          block $ae
+            block $bo
               block $Match_tmp4
                 local.get $tmp4
                 i32.load
-                i32.const 3
+                i32.const 2
                 i32.eq
                 i32.const 1
                 i32.mul
                 local.get $tmp4
                 i32.load
-                i32.const 1
+                i32.const 0
                 i32.eq
                 i32.const 2
                 i32.mul
                 i32.add
                 local.get $tmp4
                 i32.load
-                i32.const 2
+                i32.const 1
                 i32.eq
                 i32.const 3
                 i32.mul
@@ -62,136 +62,98 @@
               i32.const 4
               i32.add
               i32.load
-              local.set $h
-              local.get $h
-              local.set $tmp5
+              local.set $bp
+              local.get $bp
+              local.set $tmp52
               local.get $tmp4
               i32.const 8
               i32.add
               i32.load
-              local.set $i
-              local.get $i
-              local.set $tmp6
-              block $k
-                block $v
-                  block $n
-                    block $Match_tmp5
-                      local.get $tmp5
-                      i32.const 1
+              local.set $bq
+              local.get $bq
+              local.set $tmp62
+              local.get $tmp4
+              i32.const 12
+              i32.add
+              i32.load
+              local.set $br
+              local.get $br
+              local.set $tmp71
+              local.get $tmp4
+              i32.const 0
+              i32.add
+              i32.load
+              local.set $bs
+              local.get $bs
+              local.set $tmp8
+              block $bu
+                block $bx
+                  block $cs
+                    block $Match_tmp52
+                      local.get $tmp52
+                      i32.const 0
                       i32.eq
                       i32.const 1
                       i32.mul
-                      local.get $tmp5
-                      i32.const 0
+                      local.get $tmp52
+                      i32.const 1
                       i32.eq
                       i32.const 2
                       i32.mul
                       i32.add
                       br_table 2 1 0
                     end
-                    local.get $tmp6
-                    i32.const 0
+                    local.get $tmp62
+                    i32.const 2
                     i32.eq
                     if
-                      i32.const 0
-                      call $log
-                      i32.const 0
-                      local.set $u1
-                      local.get $u1
-                      local.set $t
-                      local.get $t
-                      local.set $b
+                      local.get $tmp71
+                      i32.const 3
+                      i32.eq
+                      if
+                        local.get $tmp8
+                        i32.const 4
+                        i32.eq
+                        if
+                          i32.const 5
+                          call $log
+                          i32.const 0
+                          local.set $dn1
+                          local.get $dn1
+                          local.set $dm
+                          local.get $dm
+                          local.set $b
+                        else
+                          i32.const 6
+                          call $log
+                          i32.const 0
+                          local.set $dk1
+                          local.get $dk1
+                          local.set $dj
+                          local.get $dj
+                          local.set $b
+                        end
+                      else
+                        i32.const 6
+                        call $log
+                        i32.const 0
+                        local.set $df1
+                        local.get $df1
+                        local.set $de
+                        local.get $de
+                        local.set $b
+                      end
                     else
                       i32.const 6
                       call $log
                       i32.const 0
-                      local.set $r1
-                      local.get $r1
-                      local.set $q
-                      local.get $q
+                      local.set $cw1
+                      local.get $cw1
+                      local.set $cv
+                      local.get $cv
                       local.set $b
                     end
-                    br $k
-                  end
-                  local.get $tmp6
-                  i32.const 2
-                  i32.eq
-                  if
-                    i32.const 1
-                    call $log
-                    i32.const 0
-                    local.set $ad1
-                    local.get $ad1
-                    local.set $ac
-                    local.get $ac
-                    local.set $b
-                  else
-                    i32.const 6
-                    call $log
-                    i32.const 0
-                    local.set $z1
-                    local.get $z1
-                    local.set $y
-                    local.get $y
-                    local.set $b
-                  end
-                  br $k
-                end
-                i32.const 6
-                call $log
-                i32.const 0
-                local.set $m1
-                local.get $m1
-                local.set $l
-                local.get $l
-                local.set $b
-              end
-              br $d
-            end
-            local.get $tmp4
-            i32.const 4
-            i32.add
-            i32.load
-            local.set $bp
-            local.get $bp
-            local.set $tmp52
-            local.get $tmp4
-            i32.const 8
-            i32.add
-            i32.load
-            local.set $bq
-            local.get $bq
-            local.set $tmp62
-            local.get $tmp4
-            i32.const 12
-            i32.add
-            i32.load
-            local.set $br
-            local.get $br
-            local.set $tmp71
-            local.get $tmp4
-            i32.const 0
-            i32.add
-            i32.load
-            local.set $bs
-            local.get $bs
-            local.set $tmp8
-            block $bu
-              block $cs
-                block $bx
-                  block $Match_tmp52
-                    local.get $tmp52
-                    i32.const 1
-                    i32.eq
-                    i32.const 1
-                    i32.mul
-                    local.get $tmp52
-                    i32.const 0
-                    i32.eq
-                    i32.const 2
-                    i32.mul
-                    i32.add
-                    br_table 2 1 0
+                    br $bu
                   end
                   local.get $tmp62
                   i32.const 0
@@ -245,106 +207,92 @@
                   end
                   br $bu
                 end
-                local.get $tmp62
-                i32.const 2
-                i32.eq
-                if
-                  local.get $tmp71
-                  i32.const 3
+                i32.const 6
+                call $log
+                i32.const 0
+                local.set $bw1
+                local.get $bw1
+                local.set $bv
+                local.get $bv
+                local.set $b
+              end
+              br $d
+            end
+            local.get $tmp4
+            i32.const 4
+            i32.add
+            i32.load
+            local.set $af
+            local.get $af
+            local.set $tmp51
+            local.get $tmp4
+            i32.const 8
+            i32.add
+            i32.load
+            local.set $ag
+            local.get $ag
+            local.set $tmp61
+            local.get $tmp4
+            i32.const 12
+            i32.add
+            i32.load
+            local.set $ah
+            local.get $ah
+            local.set $tmp7
+            block $aj
+              block $am
+                block $az
+                  block $Match_tmp51
+                    local.get $tmp51
+                    i32.const 0
+                    i32.eq
+                    i32.const 1
+                    i32.mul
+                    local.get $tmp51
+                    i32.const 1
+                    i32.eq
+                    i32.const 2
+                    i32.mul
+                    i32.add
+                    br_table 2 1 0
+                  end
+                  local.get $tmp61
+                  i32.const 2
                   i32.eq
                   if
-                    local.get $tmp8
-                    i32.const 4
+                    local.get $tmp7
+                    i32.const 3
                     i32.eq
                     if
-                      i32.const 5
+                      i32.const 3
                       call $log
                       i32.const 0
-                      local.set $dn1
-                      local.get $dn1
-                      local.set $dm
-                      local.get $dm
+                      local.set $bn1
+                      local.get $bn1
+                      local.set $bm
+                      local.get $bm
                       local.set $b
                     else
                       i32.const 6
                       call $log
                       i32.const 0
-                      local.set $dk1
-                      local.get $dk1
-                      local.set $dj
-                      local.get $dj
+                      local.set $bk1
+                      local.get $bk1
+                      local.set $bj
+                      local.get $bj
                       local.set $b
                     end
                   else
                     i32.const 6
                     call $log
                     i32.const 0
-                    local.set $df1
-                    local.get $df1
-                    local.set $de
-                    local.get $de
+                    local.set $bf1
+                    local.get $bf1
+                    local.set $be
+                    local.get $be
                     local.set $b
                   end
-                else
-                  i32.const 6
-                  call $log
-                  i32.const 0
-                  local.set $cw1
-                  local.get $cw1
-                  local.set $cv
-                  local.get $cv
-                  local.set $b
-                end
-                br $bu
-              end
-              i32.const 6
-              call $log
-              i32.const 0
-              local.set $bw1
-              local.get $bw1
-              local.set $bv
-              local.get $bv
-              local.set $b
-            end
-            br $d
-          end
-          local.get $tmp4
-          i32.const 4
-          i32.add
-          i32.load
-          local.set $af
-          local.get $af
-          local.set $tmp51
-          local.get $tmp4
-          i32.const 8
-          i32.add
-          i32.load
-          local.set $ag
-          local.get $ag
-          local.set $tmp61
-          local.get $tmp4
-          i32.const 12
-          i32.add
-          i32.load
-          local.set $ah
-          local.get $ah
-          local.set $tmp7
-          block $aj
-            block $az
-              block $am
-                block $Match_tmp51
-                  local.get $tmp51
-                  i32.const 1
-                  i32.eq
-                  i32.const 1
-                  i32.mul
-                  local.get $tmp51
-                  i32.const 0
-                  i32.eq
-                  i32.const 2
-                  i32.mul
-                  i32.add
-                  br_table 2 1 0
+                  br $aj
                 end
                 local.get $tmp61
                 i32.const 0
@@ -384,51 +332,103 @@
                 end
                 br $aj
               end
-              local.get $tmp61
-              i32.const 2
-              i32.eq
-              if
-                local.get $tmp7
-                i32.const 3
+              i32.const 6
+              call $log
+              i32.const 0
+              local.set $al1
+              local.get $al1
+              local.set $ak
+              local.get $ak
+              local.set $b
+            end
+            br $d
+          end
+          local.get $tmp4
+          i32.const 4
+          i32.add
+          i32.load
+          local.set $h
+          local.get $h
+          local.set $tmp5
+          local.get $tmp4
+          i32.const 8
+          i32.add
+          i32.load
+          local.set $i
+          local.get $i
+          local.set $tmp6
+          block $k
+            block $n
+              block $v
+                block $Match_tmp5
+                  local.get $tmp5
+                  i32.const 0
+                  i32.eq
+                  i32.const 1
+                  i32.mul
+                  local.get $tmp5
+                  i32.const 1
+                  i32.eq
+                  i32.const 2
+                  i32.mul
+                  i32.add
+                  br_table 2 1 0
+                end
+                local.get $tmp6
+                i32.const 2
                 i32.eq
                 if
-                  i32.const 3
+                  i32.const 1
                   call $log
                   i32.const 0
-                  local.set $bn1
-                  local.get $bn1
-                  local.set $bm
-                  local.get $bm
+                  local.set $ad1
+                  local.get $ad1
+                  local.set $ac
+                  local.get $ac
                   local.set $b
                 else
                   i32.const 6
                   call $log
                   i32.const 0
-                  local.set $bk1
-                  local.get $bk1
-                  local.set $bj
-                  local.get $bj
+                  local.set $z1
+                  local.get $z1
+                  local.set $y
+                  local.get $y
                   local.set $b
                 end
+                br $k
+              end
+              local.get $tmp6
+              i32.const 0
+              i32.eq
+              if
+                i32.const 0
+                call $log
+                i32.const 0
+                local.set $u1
+                local.get $u1
+                local.set $t
+                local.get $t
+                local.set $b
               else
                 i32.const 6
                 call $log
                 i32.const 0
-                local.set $bf1
-                local.get $bf1
-                local.set $be
-                local.get $be
+                local.set $r1
+                local.get $r1
+                local.set $q
+                local.get $q
                 local.set $b
               end
-              br $aj
+              br $k
             end
             i32.const 6
             call $log
             i32.const 0
-            local.set $al1
-            local.get $al1
-            local.set $ak
-            local.get $ak
+            local.set $m1
+            local.get $m1
+            local.set $l
+            local.get $l
             local.set $b
           end
           br $d

@@ -9,6 +9,7 @@ import mlscript.compiler.backend.PureValue._
 import mlscript.compiler.backend.Type._
 import scala.collection.mutable.ListBuffer
 import mlscript.IntLit
+import scala.collection.mutable.ListMap
 
 class InterBlockTest extends munit.FunSuite {
 
@@ -78,7 +79,7 @@ class InterBlockTest extends munit.FunSuite {
           Assignment(Var("x0"), Alloc(Boolean)),
           Match(
             Var("x0"),
-            Map(IntLit(1) -> (blk_1, Nil)),
+            ListMap(IntLit(1) -> (blk_1, Nil)),
             (blk_2, Nil)
           )
         )
@@ -121,7 +122,7 @@ class InterBlockTest extends munit.FunSuite {
           Assignment(Var("x0"), Alloc(Boolean)),
           Match(
             Var("x0"),
-            Map(IntLit(1) -> (blk_1, Nil)),
+            ListMap(IntLit(1) -> (blk_1, Nil)),
             (blk_2, Nil)
           )
         )

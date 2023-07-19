@@ -17,59 +17,59 @@
       local.get $a
       local.set $x1
       block $d
-        block $j
-          block $m
-            block $g
+        block $g
+          block $j
+            block $m
               block $Match_x1
                 local.get $x1
                 i32.load
-                i32.const 1
+                i32.const 0
                 i32.eq
                 i32.const 1
                 i32.mul
                 local.get $x1
                 i32.load
-                i32.const 2
+                i32.const 1
                 i32.eq
                 i32.const 2
                 i32.mul
                 i32.add
                 local.get $x1
                 i32.load
-                i32.const 0
+                i32.const 2
                 i32.eq
                 i32.const 3
                 i32.mul
                 i32.add
                 br_table 3 2 1 0
               end
-              i32.const 10
+              i32.const 30
               call $log
               i32.const 0
-              local.set $i1
-              local.get $i1
-              local.set $h
-              local.get $h
+              local.set $o1
+              local.get $o1
+              local.set $n
+              local.get $n
               local.set $b
               br $d
             end
-            i32.const 30
+            i32.const 20
             call $log
             i32.const 0
-            local.set $o1
-            local.get $o1
-            local.set $n
-            local.get $n
+            local.set $l1
+            local.get $l1
+            local.set $k
+            local.get $k
             local.set $b
             br $d
           end
-          i32.const 20
+          i32.const 10
           call $log
           i32.const 0
-          local.set $l1
-          local.get $l1
-          local.set $k
-          local.get $k
+          local.set $i1
+          local.get $i1
+          local.set $h
+          local.get $h
           local.set $b
           br $d
         end

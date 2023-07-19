@@ -2,11 +2,18 @@
   (func $log (import "console" "log") (param i32))
   (memory $memory 1)
   (global (mut i32) i32.const 0) 
+
+  (func $incr (param $x i32) (result i32) (local $a i32)
+    local.get $x
+    i32.const 1
+    i32.add
+    local.set $a
+    local.get $a
+  )
   (export "main" (func $main))
   (func $main (local $c1 i32)(local $b1 i32)
     i32.const 2
     call $incr
-    i32.const 0
     local.set $b1
     local.get $b1
     call $log

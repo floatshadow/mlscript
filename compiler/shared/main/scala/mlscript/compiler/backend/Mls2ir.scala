@@ -9,10 +9,12 @@ import mlscript.utils.shorthands.*
 import mlscript.utils.*
 import mlscript.codegen.Helpers.*
 import mlscript.Term
+import scala.collection.mutable.ListMap
 
 class Mls2ir {
   val visitedSymbols = MutSet[RuntimeSymbol]()
-  val symbolTypeMap = HashMap[Str, (Type, Ls[(String, Type)])]()
+  val symbolTypeMap = HashMap[Str, Type]()
+  val classDefMap = HashMap[Type.TypeName, Ls[(String, Type)]]()
   val scope = Scope("root")
   val varMap = HashMap[Str, Operand.Var]()
   val entryBB = BasicBlock("entry", Nil, ListBuffer())
@@ -90,7 +92,7 @@ class Mls2ir {
         if isCallee then
           addTmpVar(
             s"new_${sym.runtimeName}",
-            PureValue.Alloc(symbolTypeMap(sym.runtimeName)._1)
+            PureValue.Alloc(symbolTypeMap(sym.runtimeName))
           )
         else ??? // FIXME: lifter should handle lambda?
       case S(sym: TraitSymbol)    => ??? // unimplemented for now
@@ -125,7 +127,7 @@ class Mls2ir {
       )
       bb.instructions += Instruction.Match(
         tstOp,
-        Map(IntLit(1) -> (trueBB, Nil)),
+        ListMap(IntLit(1) -> (trueBB, Nil)),
         (falseBB, Nil)
       )
       bb = trueBB
@@ -141,7 +143,8 @@ class Mls2ir {
       trm match
         case Var(nme) =>
           symbolTypeMap.get(nme) match
-            case S(Type.TypeName(name), params) =>
+            case S(tpe: Type.TypeName) =>
+              val params = classDefMap(tpe)
               val arguments = args.zipWithIndex.map {
                 case ((_, Fld(_, _, arg)), idx) =>
                   (params(idx)._1, translateTerm(arg))
@@ -150,13 +153,13 @@ class Mls2ir {
                 Operand.Var(scope.allocateRuntimeName())
               bb.instructions += Instruction.Assignment(
                 result,
-                PureValue.Alloc(symbolTypeMap(nme)._1)
+                PureValue.Alloc(symbolTypeMap(nme))
               )
               arguments.foreach((argName, term) =>
                 bb.instructions += Instruction.SetField(result, argName, term)
               )
               result
-            case S(Type.Function(params, ret), _) =>
+            case S(Type.Function(params, ret)) =>
               val callee = translateVar(nme, true)
               val arguments = args map { case (_, Fld(_, _, arg)) =>
                 translateTerm(arg)
@@ -242,7 +245,7 @@ class Mls2ir {
     )
     parent.instructions += Instruction.Match(
       translateTerm(caseOf.trm),
-      childern.toMap,
+      childern.to(ListMap),
       elseBranch
     )
     bb = joinBB
@@ -359,13 +362,12 @@ class Mls2ir {
                       case Var("Unit")   => Type.Unit
                       case Var("Bool")   => Type.Boolean
                       case Var("String") => Type.OpaquePointer
-                      case Var(tpe)      => symbolTypeMap(tpe)._1
+                      case Var(tpe)      => symbolTypeMap(tpe)
                       case _             => ???
                   )
               }
-              symbolTypeMap += nme.name -> (Type.TypeName(
-                nme.name
-              ), symbolParams)
+              symbolTypeMap += nme.name -> Type.TypeName(nme.name)
+              classDefMap += Type.TypeName(nme.name) -> symbolParams
             case Trt => ???
             case Mxn => ???
             case Als => ???
@@ -411,16 +413,20 @@ class Mls2ir {
                       tpe
                     case _ => ???
                   symbolTypeMap += nme.name -> (Type.Function(
-                    fields.map((k, v) =>
+                    fields.map((k, v) => // TODO better way to convert type
                       v.value match
                         case Var("Int") => Type.Int32
+                        case Var(name)  => Type.TypeName(name)
                         case _          => ???
                     ),
                     ret match
                       case TypeName("Int") => Type.Int32
                       case _               => ???
-                  ), Nil)
-                case _ => ???
+                  ))
+                case Left(IntLit(x)) =>
+                  throw CodeGenError(s"$x; ${x.getClass}")
+                case _ =>
+                  ???
             case Some(true) => ???
             case Some(false) =>
               rhs match
@@ -446,14 +452,14 @@ class Mls2ir {
   ): (
       List[BasicBlock],
       List[String],
-      Map[String, ((Type, Ls[(String, Type)]), Int)]
+      Map[Type.TypeName, (Ls[(String, Type)], Int)],
+      Map[String, Type]
   ) =
     translateTypingUnit(unit)(Scope("root"))
     (
-      entryBB +: functionList.toList,
+      functionList.toList :+ entryBB,
       imports.toList,
-      symbolTypeMap.toIterable.zipWithIndex
-        .map((map, idx) => map._1 -> (map._2, idx))
-        .toMap
+      classDefMap.toIterable.zipWithIndex.map((pair,i) => pair._1->(pair._2,i)).toMap,
+      symbolTypeMap.toMap
     )
 }

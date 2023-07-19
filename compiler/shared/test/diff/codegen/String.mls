@@ -5,7 +5,7 @@ let string1 = "c"
 log(string1)
 //│ let string1: "c"
 //│ undefined
-//│ IR:
+//│ entry IR:
 //│ Basic Block entry ():
 //│   string11 = c
 //│   a1 = call log (string11)

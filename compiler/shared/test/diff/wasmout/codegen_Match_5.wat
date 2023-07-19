@@ -34,56 +34,56 @@
         local.get $h
         local.set $tmp1
         block $j
-          block $n
-            block $q
-              block $t
+          block $t
+            block $n
+              block $q
                 block $Match_tmp1
                   local.get $tmp1
-                  i32.const 100
+                  i32.const 102
                   i32.eq
                   i32.const 1
                   i32.mul
                   local.get $tmp1
-                  i32.const 101
+                  i32.const 100
                   i32.eq
                   i32.const 2
                   i32.mul
                   i32.add
                   local.get $tmp1
-                  i32.const 102
+                  i32.const 101
                   i32.eq
                   i32.const 3
                   i32.mul
                   i32.add
                   br_table 3 2 1 0
                 end
-                i32.const 102
+                i32.const 101
                 call $log
                 i32.const 0
-                local.set $v1
-                local.get $v1
-                local.set $u
-                local.get $u
+                local.set $s1
+                local.get $s1
+                local.set $r
+                local.get $r
                 local.set $b
                 br $j
               end
-              i32.const 101
+              i32.const 100
               call $log
               i32.const 0
-              local.set $s1
-              local.get $s1
-              local.set $r
-              local.get $r
+              local.set $p1
+              local.get $p1
+              local.set $o
+              local.get $o
               local.set $b
               br $j
             end
-            i32.const 100
+            i32.const 102
             call $log
             i32.const 0
-            local.set $p1
-            local.get $p1
-            local.set $o
-            local.get $o
+            local.set $v1
+            local.get $v1
+            local.set $u
+            local.get $u
             local.set $b
             br $j
           end

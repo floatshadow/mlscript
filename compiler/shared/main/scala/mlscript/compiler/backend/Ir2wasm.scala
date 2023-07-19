@@ -29,11 +29,48 @@ class Ir2wasm {
   val memoryBoundary = 0
 
   def translate(
+      blocks: Ls[BasicBlock],
+      moduleName: String,
+      imports: List[String],
+      classDefMap: Map[Type.TypeName,(Ls[(String,Type)],Int)],
+      symbolTypeMap: Map[String, Type]
+  ) =
+    wasm.Module(
+      moduleName.replaceAll("/", "_"),
+      imports,
+      1,
+      blocks.map(bb =>
+        val isMain = bb.name == "entry"
+        Function(if isMain then "main" else bb.name, bb.params, isMain) { lh =>
+          val paramsTpe =
+            if (bb.params.size == 0)
+              Nil
+            else
+              symbolTypeMap.get(bb.name) match
+                case S(Type.Function(paramTpe, _)) => paramTpe
+                case _ => throw CodeGenError(s"unresolved symbol ${bb.name}")
+          bb.params
+            .zip(paramsTpe)
+            .foreach((param, tpe) =>
+              lh.register(
+                param.name,
+                tpe,
+                true
+              )
+            )
+          translateFunction(bb, moduleName, imports, classDefMap, symbolTypeMap, lh)
+        }
+      )
+    )
+
+  def translateFunction(
       entryBB: BasicBlock,
       moduleName: String,
       imports: List[String],
-      symbolTypeMap: Map[String, ((Type,Ls[(String,Type)]), Int)]
-  ) =
+      classDefMap: Map[Type.TypeName,(Ls[(String,Type)],Int)],
+      symbolTypeMap: Map[String, Type],
+      lh: LocalsHandler
+  ): Code =
 
     var worklist: ListBuffer[BasicBlock] = ListBuffer(entryBB)
     var nodes: ListBuffer[BasicBlock] = ListBuffer()
@@ -91,10 +128,22 @@ class Ir2wasm {
               case S(Match(value, cases, default)) =>
                 if (cases.size == 1)
                   val (key, (thenBlock, thenArgs)) = cases.head
+                  val thenlh = LocalsHandler(lh)
+                  (value,key) match
+                    case (Operand.Var(op),mlscript.Var(name)) => 
+                      // TODO better class shadowing
+                      // TODO do it in multi branches case
+                      if (classDefMap.keys.exists(Type.TypeName(name) == _))
+                        thenlh.register(op,Type.TypeName(name),lh.getIsParam(op))
+                    case _ => ()
+
                   operandToWasm(value) <:> getLoad(value) <:> operandToWasm(
                     key
                   ) <:> Eq <:>
-                    If_void <:> doBranch(source, thenBlock, thenArgs) <:>
+                    If_void <:> doBranch(source, thenBlock, thenArgs)(
+                      context,
+                      thenlh
+                    ) <:>
                     Else <:> doBranch(source, default._1, default._2) <:> End
                 else
                   val casesList = cases.toList
@@ -107,8 +156,10 @@ class Ir2wasm {
                     ) <:>
                     doTree(default._1)
                     <:> End
-              case S(Return(value)) => Code(Nil) // TODO
-              case S(Unreachable)   => Code(List(WasmUnreachable))
+              case S(Return(S(Var(op)))) => Code(List(GetLocal(op)))
+              case S(Return(S(Operand.Const(v: Int)))) =>
+                Code(List(I32Const(v)))
+              case S(Unreachable) => Code(List(WasmUnreachable))
               case _ =>
                 Code(Nil)
             // TODO
@@ -189,17 +240,25 @@ class Ir2wasm {
         case S(_: Return)                     => Code(Nil)
         case S(Call(result, Var(name), args)) =>
           // TODO Currently only log() is call, have to handle the different number/type of result variable
-          lh.register(result.get.name, Type.Unit)
+          lh.register(
+            result.get.name,
+            Type.Unit
+          ) // TODO get the type of function result
+          val resultCode: Code = symbolTypeMap.get(name) match
+            case S(Type.Function(_, _)) =>
+              Code(Nil)
+            case S(_) => ???
+            case N    => I32Const(0)
           args.map(operandToWasm) <:>
             WasmCall(name) <:>
-            I32Const(0) <:>
+            resultCode <:>
             SetLocal(result.get.name) <:>
             instrToWasm(instrs.tail)
         case S(SetField(obj, field, value)) =>
           val offset = lh.getType(obj.name) match
-            case Type.TypeName(name) =>
-              (symbolTypeMap(name)._1._2.indexWhere(_._1 == field)+1)*4
-            case _                      => ???
+            case tpe:Type.TypeName =>
+              (classDefMap(tpe)._1.indexWhere(_._1 == field) + 1) * 4
+            case _ => ???
           GetLocal(obj.name) <:>
             I32Const(offset) <:>
             Add <:>
@@ -207,7 +266,7 @@ class Ir2wasm {
             Store <:>
             instrToWasm(instrs.tail)
         case S(instr) =>
-          Comment(s"Not implemented instruction: $instr")
+          ??? // TODO
         case N => Code(Nil)
     }
 
@@ -215,10 +274,10 @@ class Ir2wasm {
         lh: LocalsHandler
     ): Code = pureValue match
       case Op(op) => operandToWasm(op)
-      case Alloc(Type.TypeName(name)) =>
-        val args = symbolTypeMap(name)._1._2
+      case Alloc(tpe:Type.TypeName) =>
+        val (args,classId) = classDefMap(tpe)
         GetGlobal(memoryBoundary)
-          <:> I32Const(symbolTypeMap(name)._2)
+          <:> I32Const(classId)
           <:> Store
           <:> GetGlobal(memoryBoundary)
           <:> I32Const((args.length + 1) * 4)
@@ -246,10 +305,12 @@ class Ir2wasm {
           case Var(str) => (str, lh.getType(str))
           case _        => ??? // TODO record type
         val offset = tpe match
-          case Type.TypeName(name) => 
-            val args = symbolTypeMap(name)._1._2
+          case tpe:Type.TypeName =>
+            val (args,classId) = classDefMap(tpe)
             (args.map(_._1).indexOf(field) + 1) * 4
-          case _                      => ??? // TODO record type
+          case Type.Unit => 4
+          case x =>
+            ??? // TODO record type
         GetLocal(name) <:> I32Const(offset) <:> Add <:> Load
       case IsType(obj, ty)         => ???
       case Cast(obj, ty)           => ???
@@ -277,8 +338,8 @@ class Ir2wasm {
       case Unit =>
         I32Const(0)
       case Var(name) =>
-        if (symbolTypeMap.keys.exists(_ == name))
-          I32Const(symbolTypeMap(name)._2)
+        if (classDefMap.keys.exists(_.name == name))
+          I32Const(classDefMap(Type.TypeName(name))._2)
         else
           GetLocal(name)
 
@@ -286,7 +347,7 @@ class Ir2wasm {
       case Var(name) =>
         lh.getType(name) match
           case Type.TypeName(_) => Load
-          case _                   => Code(Nil)
+          case _                => Code(Nil)
       case _ => Code(Nil)
 
     def mkString(s: String): Code =
@@ -309,11 +370,5 @@ class Ir2wasm {
 
       setChars <:> setMemory
 
-    // TODO:
-    wasm.Module(
-      moduleName.replaceAll("/", "_"),
-      imports,
-      1,
-      List(Function("main", 0, true) { lh => doTree(entryBB)(Nil, lh) })
-    )
+    doTree(entryBB)(Nil, lh)
 }

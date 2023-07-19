@@ -46,13 +46,13 @@
         local.get $i
         local.set $tmp3
         block $k
-          block $ae
+          block $n
             block $am
-              block $v
-                block $n
+              block $ae
+                block $v
                   block $Match_tmp2
                     local.get $tmp2
-                    i32.const 5
+                    i32.const 3
                     i32.eq
                     i32.const 1
                     i32.mul
@@ -63,13 +63,13 @@
                     i32.mul
                     i32.add
                     local.get $tmp2
-                    i32.const 4
+                    i32.const 5
                     i32.eq
                     i32.const 3
                     i32.mul
                     i32.add
                     local.get $tmp2
-                    i32.const 3
+                    i32.const 4
                     i32.eq
                     i32.const 4
                     i32.mul
@@ -77,49 +77,49 @@
                     br_table 4 3 2 1 0
                   end
                   local.get $tmp3
-                  i32.const 4
+                  i32.const 3
                   i32.eq
                   if
                     i32.const 5
                     call $log
                     i32.const 0
-                    local.set $u1
-                    local.get $u1
-                    local.set $t
-                    local.get $t
+                    local.set $ad1
+                    local.get $ad1
+                    local.set $ac
+                    local.get $ac
                     local.set $b
                   else
                     i32.const 1
                     call $log
                     i32.const 0
-                    local.set $r1
-                    local.get $r1
-                    local.set $q
-                    local.get $q
+                    local.set $z1
+                    local.get $z1
+                    local.set $y
+                    local.get $y
                     local.set $b
                   end
                   br $k
                 end
                 local.get $tmp3
-                i32.const 3
+                i32.const 12
                 i32.eq
                 if
-                  i32.const 5
+                  i32.const 13
                   call $log
                   i32.const 0
-                  local.set $ad1
-                  local.get $ad1
-                  local.set $ac
-                  local.get $ac
+                  local.set $al1
+                  local.get $al1
+                  local.set $ak
+                  local.get $ak
                   local.set $b
                 else
                   i32.const 1
                   call $log
                   i32.const 0
-                  local.set $z1
-                  local.get $z1
-                  local.set $y
-                  local.get $y
+                  local.set $ai1
+                  local.get $ai1
+                  local.set $ah
+                  local.get $ah
                   local.set $b
                 end
                 br $k
@@ -149,25 +149,25 @@
               br $k
             end
             local.get $tmp3
-            i32.const 12
+            i32.const 4
             i32.eq
             if
-              i32.const 13
+              i32.const 5
               call $log
               i32.const 0
-              local.set $al1
-              local.get $al1
-              local.set $ak
-              local.get $ak
+              local.set $u1
+              local.get $u1
+              local.set $t
+              local.get $t
               local.set $b
             else
               i32.const 1
               call $log
               i32.const 0
-              local.set $ai1
-              local.get $ai1
-              local.set $ah
-              local.get $ah
+              local.set $r1
+              local.get $r1
+              local.set $q
+              local.get $q
               local.set $b
             end
             br $k

@@ -15,7 +15,7 @@ log(-99)
 //│ let x1: 1
 //│ let x2: 1
 //│ undefined
-//│ IR:
+//│ entry IR:
 //│ Basic Block entry ():
 //│   x11 = 1
 //│   x21 = x11

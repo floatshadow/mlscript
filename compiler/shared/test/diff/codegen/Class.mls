@@ -9,7 +9,7 @@ let y = Two(201,202)
 //│ let x: One
 //│ class Two(first: Int, second: Int)
 //│ let y: Two
-//│ IR:
+//│ entry IR:
 //│ Basic Block entry ():
 //│   a = alloc One
 //│   setfield a.first = 101
@@ -30,7 +30,7 @@ let y = Two(201,202)
 //│     global.get 0
 //│     local.set $a
 //│     global.get 0
-//│     i32.const 0
+//│     i32.const 1
 //│     i32.store
 //│     global.get 0
 //│     i32.const 8
@@ -46,7 +46,7 @@ let y = Two(201,202)
 //│     global.get 0
 //│     local.set $b
 //│     global.get 0
-//│     i32.const 1
+//│     i32.const 0
 //│     i32.store
 //│     global.get 0
 //│     i32.const 12
@@ -79,7 +79,7 @@ let x = Outside(99,Inside(98))
 //│ class Inside(value: Int)
 //│ class Outside(value: Int, inside: Inside)
 //│ let x: Outside
-//│ IR:
+//│ entry IR:
 //│ Basic Block entry ():
 //│   a = alloc Inside
 //│   setfield a.value = 98
@@ -142,7 +142,7 @@ class One(first: Int)
 log of One(111).first
 //│ class One(first: Int)
 //│ undefined
-//│ IR:
+//│ entry IR:
 //│ Basic Block entry ():
 //│   a = alloc One
 //│   setfield a.first = 111

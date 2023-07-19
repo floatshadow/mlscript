@@ -6,6 +6,7 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.immutable
 import mlscript.utils.shorthands.*
 import mlscript.SimpleTerm
+import scala.collection.mutable.ListMap
 
 enum Operand:
   case Const(val value: Boolean | Int | Float | String)
@@ -126,7 +127,7 @@ enum Instruction:
   )
   case Match(
       val value: Operand,
-      val cases: Map[SimpleTerm, (BasicBlock, List[Operand])],
+      val cases: ListMap[SimpleTerm, (BasicBlock, List[Operand])],
       val default: (BasicBlock, List[Operand])
   )
   case Return(val value: Option[Operand])
