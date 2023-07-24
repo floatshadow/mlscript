@@ -1,6 +1,6 @@
 (module 
-  (func $log (import "console" "log") (param i32))
-  (memory $memory 1)
+  (import "system" "mem" (memory 100))
+  (func $log (import "system" "log") (param i32 i32))
   (global (mut i32) i32.const 0) 
 
   (func $sum (param $x i32) (result i32) (local $t i32)(local $m i32)(local $i i32)(local $l i32)(local $h1 i32)(local $k i32)(local $o i32)(local $n1 i32)(local $f i32)
@@ -11,14 +11,14 @@
       i32.eq
       if
         local.get $x
-        i32.const 4
+        i32.const 8
         i32.add
         i32.load
         local.set $k
         local.get $k
         local.set $h1
         local.get $x
-        i32.const 8
+        i32.const 4
         i32.add
         i32.load
         local.set $l
@@ -137,6 +137,7 @@
     call $sum
     local.set $p1
     local.get $p1
+    i32.const 2
     call $log
     i32.const 0
     local.set $q1

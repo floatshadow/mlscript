@@ -1,6 +1,6 @@
 (module 
+  (import "system" "mem" (memory 100))
 
-  (memory $memory 1)
   (global (mut i32) i32.const 0) 
   (export "main" (func $main))
   (func $main (local $a i32)(local $b i32)(local $x1 i32)

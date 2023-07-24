@@ -1,6 +1,6 @@
 (module 
-  (func $log (import "console" "log") (param i32))
-  (memory $memory 1)
+  (import "system" "mem" (memory 100))
+  (func $log (import "system" "log") (param i32 i32))
   (global (mut i32) i32.const 0) 
   (export "main" (func $main))
   (func $main (local $f1 i32)(local $u i32)(local $a i32)(local $m1 i32)(local $v1 i32)(local $b i32)(local $s1 i32)(local $tmp1 i32)(local $h i32)(local $r i32)(local $p1 i32)(local $k i32)(local $o i32)(local $e i32)(local $l1 i32)
@@ -58,6 +58,7 @@
                   br_table 3 2 1 0
                 end
                 i32.const 101
+                i32.const 2
                 call $log
                 i32.const 0
                 local.set $s1
@@ -68,6 +69,7 @@
                 br $j
               end
               i32.const 100
+              i32.const 2
               call $log
               i32.const 0
               local.set $p1
@@ -78,6 +80,7 @@
               br $j
             end
             i32.const 102
+            i32.const 2
             call $log
             i32.const 0
             local.set $v1
@@ -88,6 +91,7 @@
             br $j
           end
           i32.const 103
+          i32.const 2
           call $log
           i32.const 0
           local.set $m1
@@ -98,6 +102,7 @@
         end
       else
         i32.const 103
+        i32.const 2
         call $log
         i32.const 0
         local.set $f1

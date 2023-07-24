@@ -1,6 +1,6 @@
 (module 
-  (func $log (import "console" "log") (param i32))
-  (memory $memory 1)
+  (import "system" "mem" (memory 100))
+  (func $log (import "system" "log") (param i32 i32))
   (global (mut i32) i32.const 0) 
 
   (func $get1 (result i32) 
@@ -11,6 +11,7 @@
     call $get1
     local.set $a1
     local.get $a1
+    i32.const 2
     call $log
     i32.const 0
     local.set $b1

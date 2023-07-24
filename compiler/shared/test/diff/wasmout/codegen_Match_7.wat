@@ -1,6 +1,6 @@
 (module 
-  (func $log (import "console" "log") (param i32))
-  (memory $memory 1)
+  (import "system" "mem" (memory 100))
+  (func $log (import "system" "log") (param i32 i32))
   (global (mut i32) i32.const 0) 
   (export "main" (func $main))
   (func $main (local $u i32)(local $v1 i32)(local $i1 i32)(local $s1 i32)(local $x1 i32)(local $h i32)(local $r i32)(local $k i32)(local $o i32)(local $e i32)(local $l1 i32)
@@ -16,6 +16,7 @@
         i32.eq
         if
           i32.const 10
+          i32.const 2
           call $log
           i32.const 0
           local.set $v1
@@ -25,6 +26,7 @@
           local.set $o
         else
           i32.const 5
+          i32.const 2
           call $log
           i32.const 0
           local.set $s1
@@ -41,6 +43,7 @@
         i32.eq
         if
           i32.const -10
+          i32.const 2
           call $log
           i32.const 0
           local.set $l1
@@ -50,6 +53,7 @@
           local.set $e
         else
           i32.const -5
+          i32.const 2
           call $log
           i32.const 0
           local.set $i1
