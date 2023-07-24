@@ -11,8 +11,8 @@ object ModulePrinter {
 
   private def mkMod(mod: Module): Document = stack(
     "(module ",
+    Indented(Raw(s"(import \"system\" \"mem\" (memory 100))")),
     Indented(Stacked(mod.imports map mkImport)),
-    Indented(Raw(s"(memory $$memory 1)")),
     Indented("(global (mut i32) i32.const 0) " * mod.globals),
     Indented(Stacked(mod.functions map mkFun)),
     Indented(Raw("(start $main)")),
@@ -20,7 +20,7 @@ object ModulePrinter {
   )
 
   private def mkImport(s: String): Document = s match
-    case "log" => line(List(Raw("(func $log (import \"console\" \"log\") (param i32))")))
+    case "log" => line(List(Raw("(func $log (import \"system\" \"log\") (param i32 i32))")))
     case _ => line(List("(import ", s, ")"))
 
   private def mkFun(fh: Function): Document = {

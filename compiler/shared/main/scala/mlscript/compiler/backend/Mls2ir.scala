@@ -52,8 +52,9 @@ class Mls2ir {
       case PureValue.Neg(value)       => value.getType(symbolTypeMap.toMap)
       case PureValue.GetField(obj, field) =>
         obj.getType(symbolTypeMap.toMap) match
-          case tpNme: Type.TypeName => classDefMap(tpNme)(field)
-          case _                    => ???
+          case tpNme: Type.TypeName => classDefMap(tpNme).get(field) match
+            case S(tpe) => tpe
+            case N => Type.Unit //TODO handle casting
       case PureValue.IsType(_, ty)         => Type.Boolean
       case PureValue.Cast(_, ty)           => ty
       case PureValue.IsVariant(_, variant) => Type.Boolean
@@ -63,9 +64,22 @@ class Mls2ir {
 
   def addTmpVar(value: PureValue)(implicit scope: Scope): Operand.Var =
     val result: Operand.Var = Operand.Var(scope.allocateRuntimeName)
+    // TODO Handle scoping
     val tpe = value match
-      case PureValue.Op(op) => op.getType(symbolTypeMap.toMap)
-      case _                => Type.Unit
+      case PureValue.Op(op)           => op.getType(symbolTypeMap.toMap)
+      case PureValue.Alloc(ty)        => ty
+      case PureValue.BinOp(_, lhs, _) => lhs.getType(symbolTypeMap.toMap)
+      case PureValue.Neg(value)       => value.getType(symbolTypeMap.toMap)
+      case PureValue.GetField(obj, field) =>
+        obj.getType(symbolTypeMap.toMap) match
+          case tpNme: Type.TypeName => classDefMap(tpNme).get(field) match
+            case S(tpe) => tpe
+            case N => Type.Unit //TODO handle casting
+          case _                    => ???
+      case PureValue.IsType(_, ty)         => Type.Boolean
+      case PureValue.Cast(_, ty)           => ty
+      case PureValue.IsVariant(_, variant) => Type.Boolean
+      case PureValue.AsVariant(_, variant) => ???
     symbolTypeMap += result -> tpe
     bb.instructions += Instruction.Assignment(result, value)
     result
@@ -419,9 +433,13 @@ class Mls2ir {
                       val ret = tpe
                       symbolTypeMap += Operand.Var(nme.name) -> (Type.Function(
                         fields.map((k, v) => // TODO better way to convert type
-                          v.value match
-                            case Var("Int") => Type.Int32
-                            case Var(name)  => Type.TypeName(name)
+                          (k,v.value) match
+                            case (S(param),Var("Int")) => 
+                              symbolTypeMap += Operand.Var(param.name) -> Type.Int32
+                              Type.Int32
+                            case (S(param),Var(name))  => 
+                              symbolTypeMap += Operand.Var(param.name) -> Type.TypeName(name)
+                              Type.TypeName(name)
                             case _          => ???
                         ),
                         ret match

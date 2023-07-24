@@ -261,14 +261,20 @@ class Ir2wasm {
               Code(Nil)
             case S(_) => ???
             case N    => I32Const(0)
-          val getType: Code = name match
-            case "log" =>           
-              // println(s"symbolTypeMap = $symbolTypeMap")
-              // print(s"${args.head} type = ")
-              // println(s"${args.head.getType(symbolTypeMap)}")
-              Code(Nil)
+          val typeCode: Code = name match
+            case "log" => args.head.getType(symbolTypeMap) match
+              case Type.Unit => I32Const(0)
+              case Type.Boolean => I32Const(1)
+              case Type.Int32 => I32Const(2)
+              case Type.Float32 => I32Const(3)
+              case Type.OpaquePointer => I32Const(4)
+              case Type.Record(_) => I32Const(5)
+              case Type.Variant(_) => I32Const(6)
+              case Type.Function(_,_) => I32Const(7)
+              case Type.TypeName(_) => I32Const(8)
             case _ => Code(Nil)
           args.map(operandToWasm) <:>
+            typeCode <:>
             WasmCall(name) <:>
             resultCode <:>
             SetLocal(result.get.name) <:>
