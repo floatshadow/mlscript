@@ -18,6 +18,7 @@ import mlscript.compiler.backend.wasm.ModulePrinter
 import mlscript.compiler.backend.wasm.Function
 import mlscript.SimpleTerm
 import scala.language.implicitConversions
+import scala.collection.mutable.ListMap
 
 enum ContainingSyntax:
   case IfThenElse
@@ -32,8 +33,8 @@ class Ir2wasm {
       blocks: Ls[BasicBlock],
       moduleName: String,
       imports: List[String],
-      classDefMap: Map[Type.TypeName,(Ls[(String,Type)],Int)],
-      symbolTypeMap: Map[String, Type]
+      classDefMap: Map[Type.TypeName, (ListMap[String, Type], Int)],
+      symbolTypeMap: Map[Operand.Var, Type]
   ) =
     wasm.Module(
       moduleName.replaceAll("/", "_"),
@@ -46,7 +47,7 @@ class Ir2wasm {
             if (bb.params.size == 0)
               Nil
             else
-              symbolTypeMap.get(bb.name) match
+              symbolTypeMap.get(Var(bb.name)) match
                 case S(Type.Function(paramTpe, _)) => paramTpe
                 case _ => throw CodeGenError(s"unresolved symbol ${bb.name}")
           bb.params
@@ -58,7 +59,14 @@ class Ir2wasm {
                 true
               )
             )
-          translateFunction(bb, moduleName, imports, classDefMap, symbolTypeMap, lh)
+          translateFunction(
+            bb,
+            moduleName,
+            imports,
+            classDefMap,
+            symbolTypeMap,
+            lh
+          )
         }
       )
     )
@@ -67,8 +75,8 @@ class Ir2wasm {
       entryBB: BasicBlock,
       moduleName: String,
       imports: List[String],
-      classDefMap: Map[Type.TypeName,(Ls[(String,Type)],Int)],
-      symbolTypeMap: Map[String, Type],
+      classDefMap: Map[Type.TypeName, (ListMap[String, Type], Int)],
+      symbolTypeMap: Map[Operand.Var, Type],
       lh: LocalsHandler
   ): Code =
 
@@ -129,12 +137,16 @@ class Ir2wasm {
                 if (cases.size == 1)
                   val (key, (thenBlock, thenArgs)) = cases.head
                   val thenlh = LocalsHandler(lh)
-                  (value,key) match
-                    case (Operand.Var(op),mlscript.Var(name)) => 
+                  (value, key) match
+                    case (Operand.Var(op), mlscript.Var(name)) =>
                       // TODO better class shadowing
                       // TODO do it in multi branches case
                       if (classDefMap.keys.exists(Type.TypeName(name) == _))
-                        thenlh.register(op,Type.TypeName(name),lh.getIsParam(op))
+                        thenlh.register(
+                          op,
+                          Type.TypeName(name),
+                          lh.getIsParam(op)
+                        )
                     case _ => ()
 
                   operandToWasm(value) <:> getLoad(value) <:> operandToWasm(
@@ -244,11 +256,18 @@ class Ir2wasm {
             result.get.name,
             Type.Unit
           ) // TODO get the type of function result
-          val resultCode: Code = symbolTypeMap.get(name) match
+          val resultCode: Code = symbolTypeMap.get(Var(name)) match
             case S(Type.Function(_, _)) =>
               Code(Nil)
             case S(_) => ???
             case N    => I32Const(0)
+          val getType: Code = name match
+            case "log" =>           
+              // println(s"symbolTypeMap = $symbolTypeMap")
+              // print(s"${args.head} type = ")
+              // println(s"${args.head.getType(symbolTypeMap)}")
+              Code(Nil)
+            case _ => Code(Nil)
           args.map(operandToWasm) <:>
             WasmCall(name) <:>
             resultCode <:>
@@ -256,8 +275,8 @@ class Ir2wasm {
             instrToWasm(instrs.tail)
         case S(SetField(obj, field, value)) =>
           val offset = lh.getType(obj.name) match
-            case tpe:Type.TypeName =>
-              (classDefMap(tpe)._1.indexWhere(_._1 == field) + 1) * 4
+            case tpe: Type.TypeName =>
+              (classDefMap(tpe)._1.toList.indexWhere(_._1 == field) + 1) * 4
             case _ => ???
           GetLocal(obj.name) <:>
             I32Const(offset) <:>
@@ -274,13 +293,13 @@ class Ir2wasm {
         lh: LocalsHandler
     ): Code = pureValue match
       case Op(op) => operandToWasm(op)
-      case Alloc(tpe:Type.TypeName) =>
-        val (args,classId) = classDefMap(tpe)
+      case Alloc(tpe: Type.TypeName) =>
+        val (args, classId) = classDefMap(tpe)
         GetGlobal(memoryBoundary)
           <:> I32Const(classId)
           <:> Store
           <:> GetGlobal(memoryBoundary)
-          <:> I32Const((args.length + 1) * 4)
+          <:> I32Const((args.size + 1) * 4)
           <:> Add
           <:> SetGlobal(memoryBoundary)
       case Alloc(_) => ???
@@ -305,9 +324,9 @@ class Ir2wasm {
           case Var(str) => (str, lh.getType(str))
           case _        => ??? // TODO record type
         val offset = tpe match
-          case tpe:Type.TypeName =>
-            val (args,classId) = classDefMap(tpe)
-            (args.map(_._1).indexOf(field) + 1) * 4
+          case tpe: Type.TypeName =>
+            val (args, classId) = classDefMap(tpe)
+            (args.map(_._1).toList.indexOf(field) + 1) * 4
           case Type.Unit => 4
           case x =>
             ??? // TODO record type
