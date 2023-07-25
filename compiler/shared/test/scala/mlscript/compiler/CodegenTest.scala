@@ -21,9 +21,9 @@ class CodegenTestCompiler extends DiffTests {
       typer: Typer
   )(tpd: typer.TypedTypingUnit): List[Str] =
     val outputBuilder = StringBuilder()
-    val (blocks, imports, classDefMap, symbolTypeMap) = new Mls2ir().apply(unit)
+    val (blocks, imports, classDefMap, recordDefMap, symbolTypeMap) = new Mls2ir().apply(unit)
     blocks.foreach(bb => output(s"${bb.name} IR:\n${bb.printIR}"))
-    val wasmModule = new Ir2wasm().translate(blocks, testName, imports, classDefMap, symbolTypeMap)
+    val wasmModule = new Ir2wasm().translate(blocks, testName, imports, classDefMap, recordDefMap, symbolTypeMap)
     output(s"\nWASM:\n${ModulePrinter(wasmModule)}\n")
     CodePrinter(wasmModule)
     outputBuilder.toString().linesIterator.toList

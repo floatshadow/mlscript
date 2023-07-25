@@ -34,6 +34,7 @@ class Ir2wasm {
       moduleName: String,
       imports: List[String],
       classDefMap: Map[Type.TypeName, (ListMap[String, Type], Int)],
+      recordDefMap: Map[Type.Record, Int],
       symbolTypeMap: Map[Operand.Var, Type]
   ) =
     wasm.Module(
@@ -64,6 +65,7 @@ class Ir2wasm {
             moduleName,
             imports,
             classDefMap,
+            recordDefMap,
             symbolTypeMap,
             lh
           )
@@ -76,6 +78,7 @@ class Ir2wasm {
       moduleName: String,
       imports: List[String],
       classDefMap: Map[Type.TypeName, (ListMap[String, Type], Int)],
+      recordDefMap: Map[Type.Record, Int],
       symbolTypeMap: Map[Operand.Var, Type],
       lh: LocalsHandler
   ): Code =
@@ -262,16 +265,17 @@ class Ir2wasm {
             case S(_) => ???
             case N    => I32Const(0)
           val typeCode: Code = name match
-            case "log" => args.head.getType(symbolTypeMap) match
-              case Type.Unit => I32Const(0)
-              case Type.Boolean => I32Const(1)
-              case Type.Int32 => I32Const(2)
-              case Type.Float32 => I32Const(3)
-              case Type.OpaquePointer => I32Const(4)
-              case Type.Record(_) => I32Const(5)
-              case Type.Variant(_) => I32Const(6)
-              case Type.Function(_,_) => I32Const(7)
-              case Type.TypeName(_) => I32Const(8)
+            case "log" =>
+              args.head.getType(symbolTypeMap) match
+                case Type.Unit           => I32Const(0)
+                case Type.Boolean        => I32Const(1)
+                case Type.Int32          => I32Const(2)
+                case Type.Float32        => I32Const(3)
+                case Type.OpaquePointer  => I32Const(4)
+                case Type.Record(_)      => I32Const(5)
+                case Type.Variant(_)     => I32Const(6)
+                case Type.Function(_, _) => I32Const(7)
+                case Type.TypeName(_)    => I32Const(8)
             case _ => Code(Nil)
           args.map(operandToWasm) <:>
             typeCode <:>
@@ -283,6 +287,8 @@ class Ir2wasm {
           val offset = lh.getType(obj.name) match
             case tpe: Type.TypeName =>
               (classDefMap(tpe)._1.toList.indexWhere(_._1 == field) + 1) * 4
+            case Type.Record(recObj) =>
+              (recObj.fields.toList.indexWhere(_._1 == field) + 1) * 4
             case _ => ???
           GetLocal(obj.name) <:>
             I32Const(offset) <:>
@@ -306,6 +312,14 @@ class Ir2wasm {
           <:> Store
           <:> GetGlobal(memoryBoundary)
           <:> I32Const((args.size + 1) * 4)
+          <:> Add
+          <:> SetGlobal(memoryBoundary)
+      case Alloc(obj:Type.Record) =>
+        GetGlobal(memoryBoundary)
+          <:> I32Const(recordDefMap(obj)) //TODO Should be id instead
+          <:> Store
+          <:> GetGlobal(memoryBoundary)
+          <:> I32Const((obj.impl.fields.size + 1) * 4)
           <:> Add
           <:> SetGlobal(memoryBoundary)
       case Alloc(_) => ???
@@ -334,8 +348,8 @@ class Ir2wasm {
             val (args, classId) = classDefMap(tpe)
             (args.map(_._1).toList.indexOf(field) + 1) * 4
           case Type.Unit => 4
-          case x =>
-            ??? // TODO record type
+          case Type.Record(recObj) => (recObj.fields.map(_._1).toList.indexOf(field)+1)*4
+          case _ => ??? // TODO record type
         GetLocal(name) <:> I32Const(offset) <:> Add <:> Load
       case IsType(obj, ty)         => ???
       case Cast(obj, ty)           => ???

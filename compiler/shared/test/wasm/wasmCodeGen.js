@@ -1,7 +1,7 @@
 const util = require("util");
 const fs = require("fs");
 const path = require("path");
-const wasmFilePath = path.join(__dirname, "../diff/wasmout/codegen_Statement_1.wasm");
+const wasmFilePath = path.join(__dirname, "../diff/wasmout/codegen_Record_1.wasm");
 const wasmBinary = fs.readFileSync(wasmFilePath);
 const memory = new WebAssembly.Memory({ initial: 100 });
 

@@ -16,12 +16,13 @@ class Mls2ir {
   val visitedSymbols = MutSet[RuntimeSymbol]()
   val symbolTypeMap = HashMap[Operand.Var, Type]()
   val classDefMap = HashMap[Type.TypeName, ListMap[String, Type]]()
+  val recordDef = ListBuffer[Type.Record]()
   val scope = Scope("root")
   val varMap = HashMap[Str, Operand.Var]()
   val entryBB = BasicBlock("entry", Nil, ListBuffer())
   var bb = entryBB
   var functionList = ListBuffer[BasicBlock]()
-  var imports = ListBuffer.empty[String]
+  var imports = ListBuffer[String]()
 
   def makeCall(name: Str, fn: Operand, args: List[Operand])(implicit
       scope: Scope
@@ -52,9 +53,10 @@ class Mls2ir {
       case PureValue.Neg(value)       => value.getType(symbolTypeMap.toMap)
       case PureValue.GetField(obj, field) =>
         obj.getType(symbolTypeMap.toMap) match
-          case tpNme: Type.TypeName => classDefMap(tpNme).get(field) match
-            case S(tpe) => tpe
-            case N => Type.Unit //TODO handle casting
+          case tpNme: Type.TypeName =>
+            classDefMap(tpNme).get(field) match
+              case S(tpe) => tpe
+              case N      => Type.Unit // TODO handle casting
       case PureValue.IsType(_, ty)         => Type.Boolean
       case PureValue.Cast(_, ty)           => ty
       case PureValue.IsVariant(_, variant) => Type.Boolean
@@ -72,10 +74,15 @@ class Mls2ir {
       case PureValue.Neg(value)       => value.getType(symbolTypeMap.toMap)
       case PureValue.GetField(obj, field) =>
         obj.getType(symbolTypeMap.toMap) match
-          case tpNme: Type.TypeName => classDefMap(tpNme).get(field) match
-            case S(tpe) => tpe
-            case N => Type.Unit //TODO handle casting
-          case _                    => ???
+          case tpNme: Type.TypeName =>
+            classDefMap(tpNme).get(field) match
+              case S(tpe) => tpe
+              case N      => Type.Unit // TODO handle casting
+          case record: Type.Record =>
+            record.impl(field) match
+              case S(tpe) => tpe
+              case N      => Type.Unit // TODO handle casting
+          case _ => ???
       case PureValue.IsType(_, ty)         => Type.Boolean
       case PureValue.Cast(_, ty)           => ty
       case PureValue.IsVariant(_, variant) => Type.Boolean
@@ -304,7 +311,22 @@ class Mls2ir {
     case Super()   => ??? // FIXME: need to check the semantics
     case Lam(_, _) => ??? // should be handled by lifter
     case t: App    => translateApp(t)
-    case Rcd(_)    => ??? // FIXME: what representation should we use?
+    case Rcd(fields) =>
+      val result: Operand.Var = Operand.Var(scope.allocateRuntimeName())
+      val values = fields.map((k, v) => (k.name, translateTerm(v.value)))
+      val recTpe:Type.Record = Type.Record(
+        RecordObj(
+          values.map((k, v) => k -> v.getType(symbolTypeMap.toMap)).to(MutMap)
+        )
+      )
+      if (!recordDef.contains(recTpe))
+        recordDef += recTpe
+      bb.instructions += Instruction.Assignment(result, PureValue.Alloc(recTpe))
+      values.foreach((k, v) =>
+        bb.instructions += Instruction.SetField(result, k, v)
+      )
+      symbolTypeMap += result -> recTpe
+      result
     case Sel(receiver, fieldName) =>
       val receiverOp = translateTerm(receiver)
       // FIXME: add cast
@@ -433,14 +455,17 @@ class Mls2ir {
                       val ret = tpe
                       symbolTypeMap += Operand.Var(nme.name) -> (Type.Function(
                         fields.map((k, v) => // TODO better way to convert type
-                          (k,v.value) match
-                            case (S(param),Var("Int")) => 
-                              symbolTypeMap += Operand.Var(param.name) -> Type.Int32
+                          (k, v.value) match
+                            case (S(param), Var("Int")) =>
+                              symbolTypeMap += Operand.Var(
+                                param.name
+                              ) -> Type.Int32
                               Type.Int32
-                            case (S(param),Var(name))  => 
-                              symbolTypeMap += Operand.Var(param.name) -> Type.TypeName(name)
+                            case (S(param), Var(name)) =>
+                              symbolTypeMap += Operand.Var(param.name) -> Type
+                                .TypeName(name)
                               Type.TypeName(name)
-                            case _          => ???
+                            case _ => ???
                         ),
                         ret match
                           case TypeName("Int") => Type.Int32
@@ -505,6 +530,7 @@ class Mls2ir {
       List[BasicBlock],
       List[String],
       Map[Type.TypeName, (ListMap[String, Type], Int)],
+      Map[Type.Record, Int],
       Map[Operand.Var, Type]
   ) =
     translateTypingUnit(unit)(Scope("root"))
@@ -514,6 +540,7 @@ class Mls2ir {
       classDefMap.toIterable.zipWithIndex
         .map((pair, i) => pair._1 -> (pair._2, i))
         .toMap,
+      recordDef.zipWithIndex.map((k, v) => k -> v).toMap,
       symbolTypeMap.toMap
     )
 }
