@@ -171,12 +171,10 @@ class Ir2wasm {
                     ) <:>
                     doTree(default._1)
                     <:> End
-              case S(Return(S(Var(op)))) => Code(List(GetLocal(op)))
-              case S(Return(S(Operand.Const(v: Int)))) =>
-                Code(List(I32Const(v)))
+              case S(Return(S(Var(op))))           => Code(List(GetLocal(op)))
+              case S(Return(S(op: Operand.Const))) => operandToWasm(op)
               case S(Unreachable) => Code(List(WasmUnreachable))
-              case _ =>
-                Code(Nil)
+              case _              => Code(Nil)
             // TODO
           )
 
@@ -314,9 +312,9 @@ class Ir2wasm {
           <:> I32Const((args.size + 1) * 4)
           <:> Add
           <:> SetGlobal(memoryBoundary)
-      case Alloc(obj:Type.Record) =>
+      case Alloc(obj: Type.Record) =>
         GetGlobal(memoryBoundary)
-          <:> I32Const(recordDefMap(obj)) //TODO Should be id instead
+          <:> I32Const(recordDefMap(obj))
           <:> Store
           <:> GetGlobal(memoryBoundary)
           <:> I32Const((obj.impl.fields.size + 1) * 4)
@@ -348,7 +346,8 @@ class Ir2wasm {
             val (args, classId) = classDefMap(tpe)
             (args.map(_._1).toList.indexOf(field) + 1) * 4
           case Type.Unit => 4
-          case Type.Record(recObj) => (recObj.fields.map(_._1).toList.indexOf(field)+1)*4
+          case Type.Record(recObj) =>
+            (recObj.fields.map(_._1).toList.indexOf(field) + 1) * 4
           case _ => ??? // TODO record type
         GetLocal(name) <:> I32Const(offset) <:> Add <:> Load
       case IsType(obj, ty)         => ???

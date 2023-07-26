@@ -314,7 +314,7 @@ class Mls2ir {
     case Rcd(fields) =>
       val result: Operand.Var = Operand.Var(scope.allocateRuntimeName())
       val values = fields.map((k, v) => (k.name, translateTerm(v.value)))
-      val recTpe:Type.Record = Type.Record(
+      val recTpe: Type.Record = Type.Record(
         RecordObj(
           values.map((k, v) => k -> v.getType(symbolTypeMap.toMap)).to(MutMap)
         )
@@ -427,12 +427,12 @@ class Mls2ir {
                 .map { case (name, Fld(_, _, tpe)) =>
                   // TODO handle type
                   val paramTpe = tpe match
-                    case Var("Int")    => Type.Int32
-                    case Var("Unit")   => Type.Unit
-                    case Var("Bool")   => Type.Boolean
-                    case Var("String") => Type.OpaquePointer
-                    case trm: Var      => symbolTypeMap(Operand.Var(trm.name))
-                    case _             => ???
+                    case Var("Int")  => Type.Int32
+                    case Var("Unit") => Type.Unit
+                    case Var("Bool") => Type.Boolean
+                    case Var("Str")  => Type.OpaquePointer
+                    case trm: Var    => symbolTypeMap(Operand.Var(trm.name))
+                    case _           => ???
                   (name.map(_.name).get, paramTpe)
                 }
                 .to(ListMap)
@@ -468,8 +468,11 @@ class Mls2ir {
                             case _ => ???
                         ),
                         ret match
-                          case TypeName("Int") => Type.Int32
-                          case _               => ???
+                          case TypeName("Int")  => Type.Int32
+                          case TypeName("Str")  => Type.OpaquePointer
+                          case TypeName("Bool") => Type.Boolean
+                          case TypeName(x)      => Type.TypeName(x)
+                          case _                => ???
                       ))
                       val result: Operand.Var =
                         Operand.Var(scope.allocateRuntimeName(nme.name))
