@@ -240,17 +240,17 @@ log of sum(list)
 //│ Basic Block entry ():
 //│   a = alloc Nil
 //│   b = alloc Cons
-//│   setfield b.tail = 7
-//│   setfield b.head = a
+//│   setfield b.head = 7
+//│   setfield b.tail = a
 //│   c = alloc Cons
-//│   setfield c.tail = 5
-//│   setfield c.head = b
+//│   setfield c.head = 5
+//│   setfield c.tail = b
 //│   d = alloc Cons
-//│   setfield d.tail = 3
-//│   setfield d.head = c
+//│   setfield d.head = 3
+//│   setfield d.tail = c
 //│   e = alloc Cons
-//│   setfield e.tail = 1
-//│   setfield e.head = d
+//│   setfield e.head = 1
+//│   setfield e.tail = d
 //│   list1 = e
 //│   f1 = call sum (list1)
 //│   g1 = call log (f1)
@@ -270,14 +270,14 @@ log of sum(list)
 //│       i32.eq
 //│       if
 //│         local.get $x
-//│         i32.const 8
+//│         i32.const 4
 //│         i32.add
 //│         i32.load
 //│         local.set $k
 //│         local.get $k
 //│         local.set $h1
 //│         local.get $x
-//│         i32.const 4
+//│         i32.const 8
 //│         i32.add
 //│         i32.load
 //│         local.set $l

@@ -59,21 +59,21 @@
                 br_table 3 2 1 0
               end
               local.get $tmp4
-              i32.const 8
+              i32.const 4
               i32.add
               i32.load
               local.set $bp
               local.get $bp
               local.set $tmp52
               local.get $tmp4
-              i32.const 12
+              i32.const 8
               i32.add
               i32.load
               local.set $bq
               local.get $bq
               local.set $tmp62
               local.get $tmp4
-              i32.const 4
+              i32.const 12
               i32.add
               i32.load
               local.set $br
@@ -228,21 +228,21 @@
               br $d
             end
             local.get $tmp4
-            i32.const 8
+            i32.const 4
             i32.add
             i32.load
             local.set $af
             local.get $af
             local.set $tmp51
             local.get $tmp4
-            i32.const 12
+            i32.const 8
             i32.add
             i32.load
             local.set $ag
             local.get $ag
             local.set $tmp61
             local.get $tmp4
-            i32.const 4
+            i32.const 12
             i32.add
             i32.load
             local.set $ah
@@ -360,14 +360,14 @@
             br $d
           end
           local.get $tmp4
-          i32.const 8
+          i32.const 4
           i32.add
           i32.load
           local.set $h
           local.get $h
           local.set $tmp5
           local.get $tmp4
-          i32.const 12
+          i32.const 8
           i32.add
           i32.load
           local.set $i

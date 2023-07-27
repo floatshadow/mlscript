@@ -18,7 +18,7 @@ import mlscript.compiler.backend.wasm.ModulePrinter
 import mlscript.compiler.backend.wasm.Function
 import mlscript.SimpleTerm
 import scala.language.implicitConversions
-import scala.collection.mutable.{ListMap,HashMap}
+import scala.collection.mutable.{ListMap,HashMap,LinkedHashMap}
 
 enum ContainingSyntax:
   case IfThenElse
@@ -33,7 +33,7 @@ class Ir2wasm {
       blocks: Ls[(BasicBlock,Map[Operand.Var, Type])],
       moduleName: String,
       imports: List[String],
-      classDefMap: Map[Type.TypeName, (ListMap[String, Type], Int)],
+      classDefMap: Map[Type.TypeName, (LinkedHashMap[String, Type], Int)],
       recordDefMap: Map[Type.Record, Int]
   ) =
     wasm.Module(
@@ -76,7 +76,7 @@ class Ir2wasm {
       entryBB: BasicBlock,
       moduleName: String,
       imports: List[String],
-      classDefMap: Map[Type.TypeName, (ListMap[String, Type], Int)],
+      classDefMap: Map[Type.TypeName, (LinkedHashMap[String, Type], Int)],
       recordDefMap: Map[Type.Record, Int],
       symbolTypeMap: Map[Operand.Var, Type],
       lh: LocalsHandler
@@ -344,10 +344,9 @@ class Ir2wasm {
           case tpe: Type.TypeName =>
             val (args, classId) = classDefMap(tpe)
             (args.map(_._1).toList.indexOf(field) + 1) * 4
-          case Type.Unit => 4
           case Type.Record(recObj) =>
             (recObj.fields.map(_._1).toList.indexOf(field) + 1) * 4
-          case _ => ??? // TODO record type
+          case _ => 4
         GetLocal(name) <:> I32Const(offset) <:> Add <:> Load
       case IsType(obj, ty)         => ???
       case Cast(obj, ty)           => ???

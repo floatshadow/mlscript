@@ -11,14 +11,14 @@
       i32.eq
       if
         local.get $x
-        i32.const 8
+        i32.const 4
         i32.add
         i32.load
         local.set $k
         local.get $k
         local.set $h1
         local.get $x
-        i32.const 4
+        i32.const 8
         i32.add
         i32.load
         local.set $l

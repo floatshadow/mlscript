@@ -661,8 +661,8 @@ let length = if pos is
 //│ entry IR:
 //│ Basic Block entry ():
 //│   a = alloc Position
-//│   setfield a.y = 5
-//│   setfield a.x = 12
+//│   setfield a.x = 5
+//│   setfield a.y = 12
 //│   pos1 = a
 //│   match pos1
 //│     Position -> g ()
@@ -773,14 +773,14 @@ let length = if pos is
 //│       i32.eq
 //│       if
 //│         local.get $pos1
-//│         i32.const 8
+//│         i32.const 4
 //│         i32.add
 //│         i32.load
 //│         local.set $h
 //│         local.get $h
 //│         local.set $tmp2
 //│         local.get $pos1
-//│         i32.const 4
+//│         i32.const 8
 //│         i32.add
 //│         i32.load
 //│         local.set $i
@@ -1105,9 +1105,9 @@ let result = if Three(1,2,3) is
 //│ entry IR:
 //│ Basic Block entry ():
 //│   a = alloc Three
-//│   setfield a.x3 = 1
-//│   setfield a.x1 = 2
-//│   setfield a.x2 = 3
+//│   setfield a.x1 = 1
+//│   setfield a.x2 = 2
+//│   setfield a.x3 = 3
 //│   tmp4 = a
 //│   match tmp4
 //│     Two -> g ()
@@ -1349,21 +1349,21 @@ let result = if Three(1,2,3) is
 //│                 br_table 3 2 1 0
 //│               end
 //│               local.get $tmp4
-//│               i32.const 8
+//│               i32.const 4
 //│               i32.add
 //│               i32.load
 //│               local.set $bp
 //│               local.get $bp
 //│               local.set $tmp52
 //│               local.get $tmp4
-//│               i32.const 12
+//│               i32.const 8
 //│               i32.add
 //│               i32.load
 //│               local.set $bq
 //│               local.get $bq
 //│               local.set $tmp62
 //│               local.get $tmp4
-//│               i32.const 4
+//│               i32.const 12
 //│               i32.add
 //│               i32.load
 //│               local.set $br
@@ -1518,21 +1518,21 @@ let result = if Three(1,2,3) is
 //│               br $d
 //│             end
 //│             local.get $tmp4
-//│             i32.const 8
+//│             i32.const 4
 //│             i32.add
 //│             i32.load
 //│             local.set $af
 //│             local.get $af
 //│             local.set $tmp51
 //│             local.get $tmp4
-//│             i32.const 12
+//│             i32.const 8
 //│             i32.add
 //│             i32.load
 //│             local.set $ag
 //│             local.get $ag
 //│             local.set $tmp61
 //│             local.get $tmp4
-//│             i32.const 4
+//│             i32.const 12
 //│             i32.add
 //│             i32.load
 //│             local.set $ah
@@ -1650,14 +1650,14 @@ let result = if Three(1,2,3) is
 //│             br $d
 //│           end
 //│           local.get $tmp4
-//│           i32.const 8
+//│           i32.const 4
 //│           i32.add
 //│           i32.load
 //│           local.set $h
 //│           local.get $h
 //│           local.set $tmp5
 //│           local.get $tmp4
-//│           i32.const 12
+//│           i32.const 8
 //│           i32.add
 //│           i32.load
 //│           local.set $i
@@ -1766,6 +1766,7 @@ let result = if Three(1,2,3) is
 //│ // Output
 //│ 3
 
+// FIXME type inference is required
 class A(x: Int)
 class B()
 class C()

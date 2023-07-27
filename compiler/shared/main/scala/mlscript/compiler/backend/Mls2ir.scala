@@ -9,12 +9,11 @@ import mlscript.utils.shorthands.*
 import mlscript.utils.*
 import mlscript.codegen.Helpers.*
 import mlscript.Term
-import scala.collection.mutable.ListMap
-import java.io.ObjectInputStream.GetField
+import scala.collection.mutable.{ListMap,LinkedHashMap}
 
 class Mls2ir {
   val visitedSymbols = MutSet[RuntimeSymbol]()
-  val classDefMap = HashMap[Type.TypeName, ListMap[String, Type]]()
+  val classDefMap = HashMap[Type.TypeName, LinkedHashMap[String, Type]]()
   val recordDef = ListBuffer[Type.Record]()
   val scope = Scope("root")
   val varMap = HashMap[Str, Operand.Var]()
@@ -195,9 +194,8 @@ class Mls2ir {
       symbolTypeMap.get(Operand.Var(nme)) match
         case S(tpe: Type.TypeName) =>
           val params = classDefMap(tpe)
-          val arguments = args.zipWithIndex.map {
-            case ((_, Fld(_, _, arg)), idx) =>
-              (params.keys.toSeq(idx), translateTerm(arg))
+          val arguments = (args.zip(params.toList)).map{(arg,param)=>
+            (param._1,translateTerm(arg._2.value))
           }
           val result: Operand.Var =
             Operand.Var(scope.allocateRuntimeName())
@@ -437,9 +435,8 @@ class Mls2ir {
                     case _           => ???
                   (name.map(_.name).get, paramTpe)
                 }
-                .to(ListMap)
               entrySymbolTypeMap += Operand.Var(nme.name) -> Type.TypeName(nme.name)
-              classDefMap += Type.TypeName(nme.name) -> symbolParams
+              classDefMap += Type.TypeName(nme.name) -> symbolParams.to(LinkedHashMap)
             case Trt => ???
             case Mxn => ???
             case Als => ???
@@ -528,7 +525,7 @@ class Mls2ir {
   ): (
       List[(BasicBlock,Map[Operand.Var, Type])],
       List[String],
-      Map[Type.TypeName, (ListMap[String, Type], Int)],
+      Map[Type.TypeName, (LinkedHashMap[String, Type], Int)],
       Map[Type.Record, Int]
   ) =
     translateTypingUnit(unit)(Scope("root"))

@@ -32,14 +32,14 @@
       i32.eq
       if
         local.get $pos1
-        i32.const 8
+        i32.const 4
         i32.add
         i32.load
         local.set $h
         local.get $h
         local.set $tmp2
         local.get $pos1
-        i32.const 4
+        i32.const 8
         i32.add
         i32.load
         local.set $i
