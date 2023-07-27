@@ -61,15 +61,15 @@
     local.get $a
   )
   (export "main" (func $main))
-  (func $main (local $o1 i32)(local $n1 i32)
+  (func $main (local $a1 i32)(local $b1 i32)
     i32.const 10
     call $fib
-    local.set $n1
-    local.get $n1
+    local.set $a1
+    local.get $a1
     i32.const 2
     call $log
     i32.const 0
-    local.set $o1
+    local.set $b1
   )
   (start $main)
 )

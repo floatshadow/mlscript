@@ -45,7 +45,7 @@
     local.get $f
   )
   (export "main" (func $main))
-  (func $main (local $e i32)(local $a i32)(local $list1 i32)(local $b i32)(local $c i32)(local $q1 i32)(local $p1 i32)(local $d i32)
+  (func $main (local $e i32)(local $f1 i32)(local $a i32)(local $g1 i32)(local $list1 i32)(local $b i32)(local $c i32)(local $d i32)
     global.get 0
     local.set $a
     global.get 0
@@ -135,12 +135,12 @@
     local.set $list1
     local.get $list1
     call $sum
-    local.set $p1
-    local.get $p1
+    local.set $f1
+    local.get $f1
     i32.const 2
     call $log
     i32.const 0
-    local.set $q1
+    local.set $g1
   )
   (start $main)
 )

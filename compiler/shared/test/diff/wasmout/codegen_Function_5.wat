@@ -101,47 +101,47 @@
     local.get $a
   )
   (export "main" (func $main))
-  (func $main (local $l1 i32)(local $j1 i32)(local $e1 i32)(local $f1 i32)(local $b1 i32)(local $g1 i32)(local $h1 i32)(local $d1 i32)(local $k i32)(local $c1 i32)(local $i1 i32)
+  (func $main (local $e1 i32)(local $j i32)(local $f1 i32)(local $b1 i32)(local $g1 i32)(local $h1 i32)(local $k1 i32)(local $a1 i32)(local $d1 i32)(local $c1 i32)(local $i1 i32)
     call $getString
-    local.set $b1
-    local.get $b1
+    local.set $a1
+    local.get $a1
     i32.const 4
     call $log
     i32.const 0
-    local.set $c1
+    local.set $b1
     call $getTrue
+    local.set $c1
+    local.get $c1
+    i32.const 1
+    call $log
+    i32.const 0
     local.set $d1
-    local.get $d1
-    i32.const 1
-    call $log
-    i32.const 0
-    local.set $e1
     call $getFalse
-    local.set $f1
-    local.get $f1
+    local.set $e1
+    local.get $e1
     i32.const 1
     call $log
     i32.const 0
-    local.set $g1
+    local.set $f1
     call $getZero
-    local.set $h1
-    local.get $h1
+    local.set $g1
+    local.get $g1
     i32.const 2
     call $log
     i32.const 0
-    local.set $i1
+    local.set $h1
     call $getClass
-    local.set $j1
-    local.get $j1
+    local.set $i1
+    local.get $i1
     i32.const 4
     i32.add
     i32.load
-    local.set $k
-    local.get $k
+    local.set $j
+    local.get $j
     i32.const 2
     call $log
     i32.const 0
-    local.set $l1
+    local.set $k1
   )
   (start $main)
 )

@@ -12,8 +12,8 @@ log of incr(2)
 //│ 
 //│ entry IR:
 //│ Basic Block entry ():
-//│   b1 = call incr (2)
-//│   c1 = call log (b1)
+//│   a1 = call incr (2)
+//│   b1 = call log (a1)
 //│ 
 //│ 
 //│ WASM:
@@ -30,15 +30,15 @@ log of incr(2)
 //│     local.get $a
 //│   )
 //│   (export "main" (func $main))
-//│   (func $main (local $c1 i32)(local $b1 i32)
+//│   (func $main (local $a1 i32)(local $b1 i32)
 //│     i32.const 2
 //│     call $incr
-//│     local.set $b1
-//│     local.get $b1
+//│     local.set $a1
+//│     local.get $a1
 //│     i32.const 2
 //│     call $log
 //│     i32.const 0
-//│     local.set $c1
+//│     local.set $b1
 //│   )
 //│   (start $main)
 //│ )
@@ -78,8 +78,8 @@ log of fib(10)
 //│ 
 //│ entry IR:
 //│ Basic Block entry ():
-//│   n1 = call fib (10)
-//│   o1 = call log (n1)
+//│   a1 = call fib (10)
+//│   b1 = call log (a1)
 //│ 
 //│ 
 //│ WASM:
@@ -146,15 +146,15 @@ log of fib(10)
 //│     local.get $a
 //│   )
 //│   (export "main" (func $main))
-//│   (func $main (local $o1 i32)(local $n1 i32)
+//│   (func $main (local $a1 i32)(local $b1 i32)
 //│     i32.const 10
 //│     call $fib
-//│     local.set $n1
-//│     local.get $n1
+//│     local.set $a1
+//│     local.get $a1
 //│     i32.const 2
 //│     call $log
 //│     i32.const 0
-//│     local.set $o1
+//│     local.set $b1
 //│   )
 //│   (start $main)
 //│ )
@@ -201,6 +201,7 @@ log of get1()
 //│ res
 //│     = [Function: get1]
 
+//FIXME handle class inheritance
 class List()
 class Nil() extends List
 class Cons(head:Int, tail:List) extends List
@@ -251,8 +252,8 @@ log of sum(list)
 //│   setfield e.tail = 1
 //│   setfield e.head = d
 //│   list1 = e
-//│   p1 = call sum (list1)
-//│   q1 = call log (p1)
+//│   f1 = call sum (list1)
+//│   g1 = call log (f1)
 //│ 
 //│ 
 //│ WASM:
@@ -303,7 +304,7 @@ log of sum(list)
 //│     local.get $f
 //│   )
 //│   (export "main" (func $main))
-//│   (func $main (local $e i32)(local $a i32)(local $list1 i32)(local $b i32)(local $c i32)(local $q1 i32)(local $p1 i32)(local $d i32)
+//│   (func $main (local $e i32)(local $f1 i32)(local $a i32)(local $g1 i32)(local $list1 i32)(local $b i32)(local $c i32)(local $d i32)
 //│     global.get 0
 //│     local.set $a
 //│     global.get 0
@@ -393,12 +394,12 @@ log of sum(list)
 //│     local.set $list1
 //│     local.get $list1
 //│     call $sum
-//│     local.set $p1
-//│     local.get $p1
+//│     local.set $f1
+//│     local.get $f1
 //│     i32.const 2
 //│     call $log
 //│     i32.const 0
-//│     local.set $q1
+//│     local.set $g1
 //│   )
 //│   (start $main)
 //│ )
@@ -450,17 +451,17 @@ log(getClass().x)
 //│ 
 //│ entry IR:
 //│ Basic Block entry ():
-//│   b1 = call getString ()
-//│   c1 = call log (b1)
-//│   d1 = call getTrue ()
-//│   e1 = call log (d1)
-//│   f1 = call getFalse ()
-//│   g1 = call log (f1)
-//│   h1 = call getZero ()
-//│   i1 = call log (h1)
-//│   j1 = call getClass ()
-//│   k = getfield j1, x
-//│   l1 = call log (k)
+//│   a1 = call getString ()
+//│   b1 = call log (a1)
+//│   c1 = call getTrue ()
+//│   d1 = call log (c1)
+//│   e1 = call getFalse ()
+//│   f1 = call log (e1)
+//│   g1 = call getZero ()
+//│   h1 = call log (g1)
+//│   i1 = call getClass ()
+//│   j = getfield i1, x
+//│   k1 = call log (j)
 //│ 
 //│ 
 //│ WASM:
@@ -567,47 +568,47 @@ log(getClass().x)
 //│     local.get $a
 //│   )
 //│   (export "main" (func $main))
-//│   (func $main (local $l1 i32)(local $j1 i32)(local $e1 i32)(local $f1 i32)(local $b1 i32)(local $g1 i32)(local $h1 i32)(local $d1 i32)(local $k i32)(local $c1 i32)(local $i1 i32)
+//│   (func $main (local $e1 i32)(local $j i32)(local $f1 i32)(local $b1 i32)(local $g1 i32)(local $h1 i32)(local $k1 i32)(local $a1 i32)(local $d1 i32)(local $c1 i32)(local $i1 i32)
 //│     call $getString
-//│     local.set $b1
-//│     local.get $b1
+//│     local.set $a1
+//│     local.get $a1
 //│     i32.const 4
 //│     call $log
 //│     i32.const 0
-//│     local.set $c1
+//│     local.set $b1
 //│     call $getTrue
+//│     local.set $c1
+//│     local.get $c1
+//│     i32.const 1
+//│     call $log
+//│     i32.const 0
 //│     local.set $d1
-//│     local.get $d1
-//│     i32.const 1
-//│     call $log
-//│     i32.const 0
-//│     local.set $e1
 //│     call $getFalse
-//│     local.set $f1
-//│     local.get $f1
+//│     local.set $e1
+//│     local.get $e1
 //│     i32.const 1
 //│     call $log
 //│     i32.const 0
-//│     local.set $g1
+//│     local.set $f1
 //│     call $getZero
-//│     local.set $h1
-//│     local.get $h1
+//│     local.set $g1
+//│     local.get $g1
 //│     i32.const 2
 //│     call $log
 //│     i32.const 0
-//│     local.set $i1
+//│     local.set $h1
 //│     call $getClass
-//│     local.set $j1
-//│     local.get $j1
+//│     local.set $i1
+//│     local.get $i1
 //│     i32.const 4
 //│     i32.add
 //│     i32.load
-//│     local.set $k
-//│     local.get $k
+//│     local.set $j
+//│     local.get $j
 //│     i32.const 2
 //│     call $log
 //│     i32.const 0
-//│     local.set $l1
+//│     local.set $k1
 //│   )
 //│   (start $main)
 //│ )
@@ -622,3 +623,77 @@ log(getClass().x)
 //│     = [Function: getZero]
 //│ res
 //│     = [Function: getClass]
+
+fun Square(x:Int):Int = x*x
+fun Cube(x:Int):Int = x*x*x
+log of Square(3)+Cube(2)
+//│ fun Square: (x: Int,) -> Int
+//│ fun Cube: (x: Int,) -> Int
+//│ undefined
+//│ Square IR:
+//│ Basic Block Square (x):
+//│   a = Mul x, x
+//│   return a
+//│ 
+//│ Cube IR:
+//│ Basic Block Cube (x):
+//│   a = Mul x, x
+//│   b = Mul a, x
+//│   return b
+//│ 
+//│ entry IR:
+//│ Basic Block entry ():
+//│   a1 = call Square (3)
+//│   b1 = call Cube (2)
+//│   c = Add a1, b1
+//│   d1 = call log (c)
+//│ 
+//│ 
+//│ WASM:
+//│ (module 
+//│   (import "system" "mem" (memory 100))
+//│   (func $log (import "system" "log") (param i32 i32))
+//│   (global (mut i32) i32.const 0) 
+//│ 
+//│   (func $Square (param $x i32) (result i32) (local $a i32)
+//│     local.get $x
+//│     local.get $x
+//│     i32.mul
+//│     local.set $a
+//│     local.get $a
+//│   )
+//│ 
+//│   (func $Cube (param $x i32) (result i32) (local $a i32)(local $b i32)
+//│     local.get $x
+//│     local.get $x
+//│     i32.mul
+//│     local.set $a
+//│     local.get $a
+//│     local.get $x
+//│     i32.mul
+//│     local.set $b
+//│     local.get $b
+//│   )
+//│   (export "main" (func $main))
+//│   (func $main (local $a1 i32)(local $c i32)(local $d1 i32)(local $b1 i32)
+//│     i32.const 3
+//│     call $Square
+//│     local.set $a1
+//│     i32.const 2
+//│     call $Cube
+//│     local.set $b1
+//│     local.get $a1
+//│     local.get $b1
+//│     i32.add
+//│     local.set $c
+//│     local.get $c
+//│     i32.const 2
+//│     call $log
+//│     i32.const 0
+//│     local.set $d1
+//│   )
+//│   (start $main)
+//│ )
+//│ 
+//│ res
+//│     = [Function: Square]

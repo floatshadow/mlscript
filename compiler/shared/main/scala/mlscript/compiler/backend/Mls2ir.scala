@@ -481,19 +481,12 @@ class Mls2ir {
                         Operand.Var(scope.allocateRuntimeName(nme.name))
                       varMap += nme.name -> result
                       scope.declareValue(nme.name, N, true)
-                      val funScope = scope.derive("Fun")
+                      val funScope = scope.deriveUnit("Fun")
                       val params = fields.map((k, v) =>
-                        k match
-                          case S(Var(name)) =>
-                            val param: Operand.Var =
-                              Operand.Var(funScope.allocateRuntimeName(name))
-                            funScope.declareParameter(name)
-                            varMap += name -> param
-                            param
-                          case N =>
-                            throw CodeGenError(
-                              s"Unnamed function parameter in $nme($fields)"
-                            )
+                        val param: Operand.Var = Operand.Var(funScope.allocateRuntimeName(k.get.name))
+                        funScope.declareParameter(param.name)
+                        varMap += param.name -> param
+                        param
                       )
                       val funEntry = BasicBlock(
                         nme.name,
