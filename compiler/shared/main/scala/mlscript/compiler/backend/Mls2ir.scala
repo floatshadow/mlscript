@@ -14,15 +14,16 @@ import java.io.ObjectInputStream.GetField
 
 class Mls2ir {
   val visitedSymbols = MutSet[RuntimeSymbol]()
-  val symbolTypeMap = HashMap[Operand.Var, Type]()
   val classDefMap = HashMap[Type.TypeName, ListMap[String, Type]]()
   val recordDef = ListBuffer[Type.Record]()
   val scope = Scope("root")
   val varMap = HashMap[Str, Operand.Var]()
   val entryBB = BasicBlock("entry", Nil, ListBuffer())
+  val entrySymbolTypeMap = HashMap[Operand.Var, Type]()
   var bb = entryBB
-  var functionList = ListBuffer[BasicBlock]()
-  var imports = ListBuffer[String]()
+  var symbolTypeMap = HashMap[Operand.Var, Type]()
+  var functionList = ListBuffer[(BasicBlock,Map[Operand.Var, Type])]()
+  var imports = ListBuffer[String]() // TODO handle MLscript buildin function
 
   def makeCall(name: Str, fn: Operand, args: List[Operand])(implicit
       scope: Scope
@@ -396,6 +397,7 @@ class Mls2ir {
 
   def translateTypingUnit(unit: TypingUnit)(implicit scope: Scope): Unit =
     unit.entities.foreach { entity =>
+      symbolTypeMap = entrySymbolTypeMap
       entity match
         case LetS(isRec, pat, rhs)    => ???
         case DataDefn(body)           => ???
@@ -431,12 +433,12 @@ class Mls2ir {
                     case Var("Unit") => Type.Unit
                     case Var("Bool") => Type.Boolean
                     case Var("Str")  => Type.OpaquePointer
-                    case trm: Var    => symbolTypeMap(Operand.Var(trm.name))
+                    case trm: Var    => entrySymbolTypeMap(Operand.Var(trm.name))
                     case _           => ???
                   (name.map(_.name).get, paramTpe)
                 }
                 .to(ListMap)
-              symbolTypeMap += Operand.Var(nme.name) -> Type.TypeName(nme.name)
+              entrySymbolTypeMap += Operand.Var(nme.name) -> Type.TypeName(nme.name)
               classDefMap += Type.TypeName(nme.name) -> symbolParams
             case Trt => ???
             case Mxn => ???
@@ -452,20 +454,18 @@ class Mls2ir {
                 case Left(Lam(Tup(fields), rhs)) =>
                   rhs match
                     case Asc(term, tpe) =>
+                      val funSymbolTypeMap = entrySymbolTypeMap.clone()
                       val ret = tpe
-                      symbolTypeMap += Operand.Var(nme.name) -> (Type.Function(
+                      val functionMap = Operand.Var(nme.name) -> (Type.Function(
                         fields.map((k, v) => // TODO better way to convert type
-                          (k, v.value) match
-                            case (S(param), Var("Int")) =>
-                              symbolTypeMap += Operand.Var(
-                                param.name
-                              ) -> Type.Int32
-                              Type.Int32
-                            case (S(param), Var(name)) =>
-                              symbolTypeMap += Operand.Var(param.name) -> Type
-                                .TypeName(name)
-                              Type.TypeName(name)
-                            case _ => ???
+                          val paramTpe = v.value match
+                            case Var("Int")  => Type.Int32
+                            case Var("Str")  => Type.OpaquePointer
+                            case Var("Bool") => Type.Boolean
+                            case Var(x)      => Type.TypeName(x)
+                            case _           => ???
+                          funSymbolTypeMap += Operand.Var(k.get.name) -> paramTpe
+                          paramTpe
                         ),
                         ret match
                           case TypeName("Int")  => Type.Int32
@@ -474,6 +474,9 @@ class Mls2ir {
                           case TypeName(x)      => Type.TypeName(x)
                           case _                => ???
                       ))
+                      funSymbolTypeMap += functionMap
+                      entrySymbolTypeMap += functionMap
+                      symbolTypeMap = funSymbolTypeMap
                       val result: Operand.Var =
                         Operand.Var(scope.allocateRuntimeName(nme.name))
                       varMap += nme.name -> result
@@ -500,7 +503,7 @@ class Mls2ir {
                       bb = funEntry
                       val funRet = translateTerm(term)(funScope)
                       bb.instructions += Instruction.Return(S(funRet))
-                      functionList += funEntry
+                      functionList += ((funEntry,funSymbolTypeMap.toMap))
                       bb = entryBB
                     case _ => ???
                 case Left(IntLit(x)) =>
@@ -530,20 +533,18 @@ class Mls2ir {
   def apply(
       unit: TypingUnit
   ): (
-      List[BasicBlock],
+      List[(BasicBlock,Map[Operand.Var, Type])],
       List[String],
       Map[Type.TypeName, (ListMap[String, Type], Int)],
-      Map[Type.Record, Int],
-      Map[Operand.Var, Type]
+      Map[Type.Record, Int]
   ) =
     translateTypingUnit(unit)(Scope("root"))
     (
-      functionList.toList :+ entryBB,
+      functionList.toList :+ ((entryBB,entrySymbolTypeMap.toMap)) ,
       imports.toList,
       classDefMap.toIterable.zipWithIndex
         .map((pair, i) => pair._1 -> (pair._2, i))
         .toMap,
-      recordDef.zipWithIndex.map((k, v) => k -> v).toMap,
-      symbolTypeMap.toMap
+      recordDef.zipWithIndex.map((k, v) => k -> v).toMap
     )
 }
