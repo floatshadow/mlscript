@@ -60,8 +60,7 @@ log(string1)
 //│ // Output
 //│ c
 
-fun getString():Str = 
-    "MLscript"
+fun getString():Str = "MLscript"
 log(getString())
 //│ fun getString: () -> Str
 //│ undefined

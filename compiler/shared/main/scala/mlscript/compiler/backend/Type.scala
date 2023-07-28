@@ -70,4 +70,4 @@ enum Type:
     case Record(impl)        => impl.toString()
     case Variant(impl)       => impl.toString()
     case Function(args, ret) => s"(${args.mkString(", ")}) -> $ret"
-    case TypeName(name)   => name
+    case TypeName(name)      => name

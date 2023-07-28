@@ -18,7 +18,7 @@ import mlscript.compiler.backend.wasm.ModulePrinter
 import mlscript.compiler.backend.wasm.Function
 import mlscript.SimpleTerm
 import scala.language.implicitConversions
-import scala.collection.mutable.{ListMap,HashMap,LinkedHashMap}
+import scala.collection.mutable.{ListMap, HashMap, LinkedHashMap}
 
 enum ContainingSyntax:
   case IfThenElse
@@ -30,7 +30,7 @@ class Ir2wasm {
   val memoryBoundary = 0
 
   def translate(
-      blocks: Ls[(BasicBlock,Map[Operand.Var, Type])],
+      blocks: Ls[(BasicBlock, Map[Operand.Var, Type])],
       moduleName: String,
       imports: List[String],
       classDefMap: Map[Type.TypeName, (LinkedHashMap[String, Type], Int)],
@@ -40,7 +40,7 @@ class Ir2wasm {
       moduleName.replaceAll("/", "_"),
       imports,
       1,
-      blocks.map((bb,symbolTypeMap) =>
+      blocks.map((bb, symbolTypeMap) =>
         val isMain = bb.name == "entry"
         Function(if isMain then "main" else bb.name, bb.params, isMain) { lh =>
           val paramsTpe =

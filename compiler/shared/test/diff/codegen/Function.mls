@@ -47,9 +47,9 @@ log of incr(2)
 //│     = [Function: incr]
 
 fun fib(x:Int):Int = if x is
-    0 then 0
-    1 then 1
-    else fib(-1+x) + fib(-2+x)
+  0 then 0
+  1 then 1
+  else fib(-1+x) + fib(-2+x)
 log of fib(10)
 //│ fun fib: (x: Int,) -> Int
 //│ undefined
@@ -207,8 +207,8 @@ class Nil() extends List
 class Cons(head:Int, tail:List) extends List
 let list = Cons(1,Cons(3,Cons(5,Cons(7,Nil()))))
 fun sum(x:List):Int = if x is
-    Cons(h,t) then h+sum(t)
-    else 0
+  Cons(h,t) then h+sum(t)
+  else 0
 log of sum(list)
 //│ class List()
 //│ class Nil() extends List
