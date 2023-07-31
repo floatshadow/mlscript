@@ -71,3 +71,17 @@ enum Type:
     case Variant(impl)       => impl.toString()
     case Function(args, ret) => s"(${args.mkString(", ")}) -> $ret"
     case TypeName(name)      => name
+
+def toType(tpe:mlscript.Type): Type = tpe match
+  case mlscript.TypeName("Int") => Type.Int32
+  case mlscript.TypeName("Str") => Type.OpaquePointer
+  case mlscript.TypeName("Bool") => Type.Boolean
+  case mlscript.TypeName(x) => Type.TypeName(x)
+  case _ => ???
+
+def toType(tpe:mlscript.Term): Type = tpe match
+  case mlscript.Var("Int") => Type.Int32
+  case mlscript.Var("Str") => Type.OpaquePointer
+  case mlscript.Var("Bool") => Type.Boolean
+  case mlscript.Var(x) => Type.TypeName(x)
+  case _ => ???

@@ -425,14 +425,7 @@ class Mls2ir {
               )
               val symbolParams = params.get.fields
                 .map { case (name, Fld(_, _, tpe)) =>
-                  // TODO handle type
-                  val paramTpe = tpe match
-                    case Var("Int")  => Type.Int32
-                    case Var("Unit") => Type.Unit
-                    case Var("Bool") => Type.Boolean
-                    case Var("Str")  => Type.OpaquePointer
-                    case trm: Var => entrySymbolTypeMap(Operand.Var(trm.name))
-                    case _        => ???
+                  val paramTpe = toType(tpe)
                   (name.map(_.name).get, paramTpe)
                 }
               entrySymbolTypeMap += Operand.Var(nme.name) -> Type.TypeName(
@@ -458,24 +451,14 @@ class Mls2ir {
                       val funSymbolTypeMap = entrySymbolTypeMap.clone()
                       val ret = tpe
                       val functionMap = Operand.Var(nme.name) -> (Type.Function(
-                        fields.map((k, v) => // TODO better way to convert type
-                          val paramTpe = v.value match
-                            case Var("Int")  => Type.Int32
-                            case Var("Str")  => Type.OpaquePointer
-                            case Var("Bool") => Type.Boolean
-                            case Var(x)      => Type.TypeName(x)
-                            case _           => ???
+                        fields.map((k, v) =>
+                          val paramTpe = toType(v.value)
                           funSymbolTypeMap += Operand.Var(
                             k.get.name
                           ) -> paramTpe
                           paramTpe
                         ),
-                        ret match
-                          case TypeName("Int")  => Type.Int32
-                          case TypeName("Str")  => Type.OpaquePointer
-                          case TypeName("Bool") => Type.Boolean
-                          case TypeName(x)      => Type.TypeName(x)
-                          case _                => ???
+                        toType(ret)
                       ))
                       funSymbolTypeMap += functionMap
                       entrySymbolTypeMap += functionMap
