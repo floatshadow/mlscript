@@ -52,7 +52,7 @@ class DiffTests
   def postParse(output: String => Unit, mode: ModeType, basePath: Ls[Str], testName: Str, unit: TypingUnit): Ls[Str] = Nil
   def postType(output: String => Unit, mode: ModeType, basePath: Ls[Str], testName: Str, unit: TypingUnit, typer: Typer)
         (tpd: typer.TypedTypingUnit): Ls[Str] = Nil
-  
+  def postFile(output: String => Unit, mode: ModeType, basePath: Ls[Str], testName: Str):Unit = ()
   
   private val inParallel = isInstanceOf[ParallelTestExecution]
   
@@ -191,7 +191,7 @@ class DiffTests
     val codeGenTestHelpers = new CodeGenTestHelpers(file, output)
     
     def rec(lines: List[String], mode: Mode): Unit = lines match {
-      case "" :: Nil =>
+      case "" :: Nil => postFile(output,mode,basePath,testName)
       case line :: ls if line.startsWith(":") =>
         out.println(line)
         val newMode = line.tail.takeWhile(!_.isWhitespace) match {

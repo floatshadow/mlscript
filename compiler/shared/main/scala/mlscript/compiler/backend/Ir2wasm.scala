@@ -39,7 +39,6 @@ class Ir2wasm {
     wasm.Module(
       moduleName.replaceAll("/", "_"),
       imports,
-      1,
       blocks.map((bb, symbolTypeMap) =>
         val isMain = bb.name == "entry"
         Function(if isMain then "main" else bb.name, bb.params, isMain) { lh =>

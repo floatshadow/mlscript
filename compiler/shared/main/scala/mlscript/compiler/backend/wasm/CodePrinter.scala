@@ -23,14 +23,26 @@ object Env {
 }
 
 object CodePrinter {
-  private var counterMap = MutMap.empty[String,Int]
+  private var counterMap = MutMap.empty[String, Int]
 
-  def apply(m: Module) =
-    val outDirName = "compiler/shared/test/diff/wasmout"
-    val count = counterMap.getOrElse(m.name,1)
-    counterMap(m.name) = count + 1
+  def apply(testName: String, ms: List[Module]): Unit =
+    val imports: List[String] = ms.flatMap(_.imports).distinct
+    val mainFuns: List[Function] = (ms
+      .flatMap(m => m.functions.filter(_.name == "main"))
+      .zipWithIndex)
+      .map((fun, idx) =>
+        Function(s"${fun.name}_$idx", fun.args, true)(fun.codeGen)
+      )
+    val nonMainFuns: List[Function] =
+      ms.flatMap(m => m.functions.filter(_.name != "main"))
+    val module =
+      Module(testName.split('/')(1), imports, mainFuns ++ nonMainFuns)
+    apply(module)
+
+  def apply(m: Module): Unit =
+    val outDirName = "./compiler/shared/test/diff/wasmout"
     def pathWithExt(ext: String) = s"$outDirName/${nameWithExt(ext)}"
-    def nameWithExt(ext: String) = s"${m.name}_$count.$ext"
+    def nameWithExt(ext: String) = s"${m.name}.$ext"
 
     val (local, inPath) =
       import Env._

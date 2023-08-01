@@ -13,9 +13,8 @@ object ModulePrinter {
     "(module ",
     Indented(Raw(s"(import \"system\" \"mem\" (memory 100))")),
     Indented(Stacked(mod.imports map mkImport)),
-    Indented("(global (mut i32) i32.const 0) " * mod.globals),
+    Indented("(global (mut i32) i32.const 0) "),
     Indented(Stacked(mod.functions map mkFun)),
-    Indented(Raw("(start $main)")),
     ")"
   )
 

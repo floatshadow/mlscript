@@ -1,7 +1,7 @@
 package mlscript.compiler.backend.wasm
 
 // A WebAssembly module
-case class Module(name: String, imports: List[String], globals: Int, functions: List[Function]) {
+case class Module(name: String, imports: List[String], functions: List[Function]) {
 
   import java.io.{File, FileWriter}
 

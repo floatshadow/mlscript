@@ -1,7 +1,7 @@
 const util = require("util");
 const fs = require("fs");
 const path = require("path");
-const wasmFilePath = path.join(__dirname, "../diff/wasmout/codegen_Record_1.wasm");
+const wasmFilePath = path.join(__dirname, "../diff/wasmout/Record.wasm");
 const wasmBinary = fs.readFileSync(wasmFilePath);
 const memory = new WebAssembly.Memory({ initial: 100 });
 
@@ -40,4 +40,6 @@ const importObject = {
 
 var wasmModule = new Uint8Array(wasmBinary);
 
-WebAssembly.instantiate(wasmModule, importObject)
+WebAssembly.instantiate(wasmModule, importObject).then(
+    result => result.instance.exports.main_0()
+)

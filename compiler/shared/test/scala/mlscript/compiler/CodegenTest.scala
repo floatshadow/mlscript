@@ -3,15 +3,25 @@ package compiler
 
 import mlscript.utils.shorthands.*
 import scala.util.control.NonFatal
-import scala.collection.mutable.StringBuilder
+import scala.collection.mutable.{StringBuilder, HashMap}
 import mlscript.codegen.Helpers.inspect as showStructure
 import compiler.backend.Mls2ir
 import mlscript.compiler.backend.Ir2wasm
-import mlscript.compiler.backend.wasm.CodePrinter
-import mlscript.compiler.backend.wasm.ModulePrinter
+import mlscript.compiler.backend.wasm.{CodePrinter, Module, ModulePrinter}
 
 class CodegenTestCompiler extends DiffTests {
   import CodegenTestCompiler.*
+
+  val modules = HashMap[String,Ls[Module]]()
+
+  override def postFile(
+      output: String => Unit,
+      mode: ModeType,
+      basePath: List[Str],
+      testName: Str
+  ):Unit = 
+    CodePrinter(testName,modules.getOrElse(testName,Nil))
+
   override def postType(
       output: String => Unit,
       mode: ModeType,
@@ -31,7 +41,7 @@ class CodegenTestCompiler extends DiffTests {
       recordDefMap
     )
     output(s"\nWASM:\n${ModulePrinter(wasmModule)}\n")
-    CodePrinter(wasmModule)
+    modules(testName) = wasmModule +: modules.getOrElse(testName,Nil)
     outputBuilder.toString().linesIterator.toList
 
   override protected lazy val files = allFiles.filter { file =>
