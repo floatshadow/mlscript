@@ -24,4 +24,8 @@
     i32.load
     local.set $b
   )
+  (export "main" (func $main))
+  (func $main 
+    call $main_0
+  )
 )

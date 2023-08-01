@@ -319,4 +319,11 @@
     i32.const 0
     local.set $h1
   )
+  (export "main" (func $main))
+  (func $main 
+    call $main_0
+    call $main_1
+    call $main_2
+    call $main_3
+  )
 )

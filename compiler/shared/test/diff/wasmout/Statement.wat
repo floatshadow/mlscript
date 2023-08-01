@@ -184,4 +184,8 @@
     i32.const 0
     local.set $s1
   )
+  (export "main" (func $main))
+  (func $main 
+    call $main_0
+  )
 )

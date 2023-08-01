@@ -3,6 +3,7 @@ import mlscript.codegen.CodeGenError
 import scala.collection.mutable.Map as MutMap
 import scala.sys.process._
 import java.io._
+import mlscript.compiler.backend.wasm.WasmInstructions.Call
 
 object Env {
   sealed trait OS
@@ -35,8 +36,12 @@ object CodePrinter {
       )
     val nonMainFuns: List[Function] =
       ms.flatMap(m => m.functions.filter(_.name != "main"))
+    val lh = LocalsHandler()
+    val main = Function("main",Nil,true)(
+      lh => mainFuns.map(fun => Call(fun.name))
+    )
     val module =
-      Module(testName.split('/')(1), imports, mainFuns ++ nonMainFuns)
+      Module(testName.split('/')(1), imports, mainFuns ++ nonMainFuns :+ main)
     apply(module)
 
   def apply(m: Module): Unit =

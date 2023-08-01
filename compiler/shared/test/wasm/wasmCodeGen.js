@@ -41,5 +41,5 @@ const importObject = {
 var wasmModule = new Uint8Array(wasmBinary);
 
 WebAssembly.instantiate(wasmModule, importObject).then(
-    result => result.instance.exports.main_0()
+    result => result.instance.exports.main()
 )

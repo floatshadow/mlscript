@@ -114,4 +114,9 @@
     i32.add
     global.set 0
   )
+  (export "main" (func $main))
+  (func $main 
+    call $main_0
+    call $main_1
+  )
 )
