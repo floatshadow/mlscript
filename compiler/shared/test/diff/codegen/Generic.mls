@@ -40,7 +40,6 @@ Test(0).a
 //│     i32.load
 //│     local.set $b
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ res

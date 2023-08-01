@@ -2,8 +2,8 @@
   (import "system" "mem" (memory 100))
   (func $log (import "system" "log") (param i32 i32))
   (global (mut i32) i32.const 0) 
-  (export "main" (func $main))
-  (func $main (local $e i32)(local $j1 i32)(local $f1 i32)(local $n1 i32)(local $a i32)(local $b1 i32)(local $m i32)(local $i i32)(local $o1 i32)(local $h1 i32)(local $c i32)(local $x11 i32)(local $p1 i32)(local $k i32)(local $x21 i32)(local $g i32)(local $s1 i32)(local $r1 i32)(local $l i32)(local $d1 i32)(local $q1 i32)
+  (export "main_0" (func $main_0))
+  (func $main_0 (local $e i32)(local $j1 i32)(local $f1 i32)(local $n1 i32)(local $a i32)(local $b1 i32)(local $m i32)(local $i i32)(local $o1 i32)(local $h1 i32)(local $c i32)(local $x11 i32)(local $p1 i32)(local $k i32)(local $x21 i32)(local $g i32)(local $s1 i32)(local $r1 i32)(local $l i32)(local $d1 i32)(local $q1 i32)
     i32.const 1
     local.set $x11
     local.get $x11
@@ -184,5 +184,4 @@
     i32.const 0
     local.set $s1
   )
-  (start $main)
 )

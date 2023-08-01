@@ -105,7 +105,6 @@ log of y.second
 //│     i32.const 0
 //│     local.set $h1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ x
@@ -235,7 +234,6 @@ log of y.inside.value
 //│     i32.const 0
 //│     local.set $i1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ x
@@ -299,7 +297,6 @@ log of One(111).first
 //│     i32.const 0
 //│     local.set $c1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ res
@@ -492,7 +489,6 @@ log(z.value)
 //│     i32.const 0
 //│     local.set $i1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ x

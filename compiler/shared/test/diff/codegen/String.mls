@@ -50,7 +50,6 @@ log(string1)
 //│     i32.const 0
 //│     local.set $a1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ string1
@@ -157,7 +156,6 @@ log(getString())
 //│     i32.const 0
 //│     local.set $b1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ res

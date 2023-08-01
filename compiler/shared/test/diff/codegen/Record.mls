@@ -146,7 +146,6 @@ log(y.title)
 //│     i32.const 0
 //│     local.set $f1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ x

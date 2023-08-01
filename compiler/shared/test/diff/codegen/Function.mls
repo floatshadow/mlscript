@@ -40,7 +40,6 @@ log of incr(2)
 //│     i32.const 0
 //│     local.set $b1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ res
@@ -156,7 +155,6 @@ log of fib(10)
 //│     i32.const 0
 //│     local.set $b1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ res
@@ -195,7 +193,6 @@ log of get1()
 //│     i32.const 0
 //│     local.set $b1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ res
@@ -401,7 +398,6 @@ log of sum(list)
 //│     i32.const 0
 //│     local.set $g1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ list
@@ -610,7 +606,6 @@ log(getClass().x)
 //│     i32.const 0
 //│     local.set $k1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ res
@@ -692,7 +687,6 @@ log of Square(3)+Cube(2)
 //│     i32.const 0
 //│     local.set $d1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ res

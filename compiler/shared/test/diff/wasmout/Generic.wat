@@ -2,8 +2,8 @@
   (import "system" "mem" (memory 100))
 
   (global (mut i32) i32.const 0) 
-  (export "main" (func $main))
-  (func $main (local $a i32)(local $b i32)
+  (export "main_0" (func $main_0))
+  (func $main_0 (local $a i32)(local $b i32)
     global.get 0
     local.set $a
     global.get 0
@@ -24,5 +24,4 @@
     i32.load
     local.set $b
   )
-  (start $main)
 )

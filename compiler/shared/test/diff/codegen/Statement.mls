@@ -231,7 +231,6 @@ log(log("unit()"))
 //│     i32.const 0
 //│     local.set $s1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ x1

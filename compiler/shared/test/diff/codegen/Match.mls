@@ -52,7 +52,6 @@ log(x)
 //│     i32.const 0
 //│     local.set $g1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ x
@@ -166,7 +165,6 @@ log(y)
 //│     i32.const 0
 //│     local.set $q1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ x
@@ -321,7 +319,6 @@ if 51 is
 //│       end
 //│     end
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ res
@@ -462,7 +459,6 @@ if x is
 //│       end
 //│     end
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ x
@@ -637,7 +633,6 @@ if l is
 //│       end
 //│     end
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ l
@@ -946,7 +941,6 @@ let length = if pos is
 //│     local.get $b
 //│     local.set $length1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ pos
@@ -1075,7 +1069,6 @@ if x is
 //│       end
 //│     end
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ x
@@ -1758,7 +1751,6 @@ let result = if Three(1,2,3) is
 //│     local.get $b
 //│     local.set $result1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ result
@@ -1986,7 +1978,6 @@ log(res)
 //│     i32.const 0
 //│     local.set $z1
 //│   )
-//│   (start $main)
 //│ )
 //│ 
 //│ x
