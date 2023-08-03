@@ -1,16 +1,16 @@
 const util = require("util");
 const fs = require("fs");
 const path = require("path");
-const wasmFilePath = path.join(__dirname, "../diff/wasmout/Record.wasm");
+const wasmFilePath = path.join(__dirname, "../diff/wasmout/Float.wasm");
 const wasmBinary = fs.readFileSync(wasmFilePath);
 const memory = new WebAssembly.Memory({ initial: 100 });
 
 const importObject = {
     system: {
         mem:memory,
-        log: function (arg,tpe) {
+        logI32: function (arg,tpe) {
             switch(tpe){
-                //TODO Float, Record, Variant, Function, TypeName
+                //TODO Record, Variant, Function, TypeName
                 case 0:
                     console.log("()")
                     break;
@@ -35,6 +35,9 @@ const importObject = {
                     break;
             }
         },
+        logF64: function (value){
+            console.log(value);
+        }
     }
 };
 

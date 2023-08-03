@@ -3,6 +3,7 @@ package mlscript.compiler.backend.wasm
 import mlscript.compiler.backend.wasm.WasmInstructions._
 import mlscript.compiler.backend.wasm.WasmInstructions
 import mlscript.compiler.backend.wasm.Document._
+import mlscript.compiler.backend.Type
 import scala.language.implicitConversions
 
 // Printer for Wasm modules
@@ -19,7 +20,10 @@ object ModulePrinter {
   )
 
   private def mkImport(s: String): Document = s match
-    case "log" => line(List(Raw("(func $log (import \"system\" \"log\") (param i32 i32))")))
+    case "log" => Stacked(List(
+      Raw("(func $logI32 (import \"system\" \"logI32\") (param i32 i32))"),
+      Raw("(func $logF64 (import \"system\" \"logF64\") (param f64))")
+      ))
     case _ => line(List("(import ", s, ")"))
 
   private def mkFun(fh: Function): Document = {
@@ -28,9 +32,19 @@ object ModulePrinter {
     val exportDoc: Document = if (isMain) s"""(export "$name" (func $$$name))""" else ""
     val paramsDoc: Document =line(fh.args.map(arg => Raw(s"(param $$${arg.name} i32) ")))
     val resultDoc: Document = if (isMain) "" else "(result i32) "
-    val localsDoc: Document = Indented(line(
-      fh.locals.filter((k,v) => !v._2).map((k, _) => Raw(s"(local $$$k i32)")).toList
-    ))
+    val localsDoc: Document = Indented(
+      line(
+        fh.locals
+          .filter((k, v) => !v._2)
+          .map((k, v) =>
+            val tpe = v._1 match
+              case Type.Float64 => "f64"
+              case _            => "i32"
+            Raw(s"(local $$$k $tpe)")
+          )
+          .toList
+      )
+    )
 
     stack(
       exportDoc,
@@ -61,7 +75,7 @@ object ModulePrinter {
   private def mkInstr(instr: WasmInstruction): Document = {
     instr match {
       case I32Const(value) => s"i32.const $value"
-      case F32Const(value) => s"f32.const $value"
+      case F64Const(value) => s"f64.const $value"
       case Add => "i32.add"
       case Sub => "i32.sub"
       case Mul => "i32.mul"

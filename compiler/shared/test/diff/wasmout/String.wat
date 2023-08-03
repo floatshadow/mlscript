@@ -1,6 +1,7 @@
 (module 
   (import "system" "mem" (memory 100))
-  (func $log (import "system" "log") (param i32 i32))
+  (func $logI32 (import "system" "logI32") (param i32 i32))
+  (func $logF64 (import "system" "logF64") (param f64))
   (global (mut i32) i32.const 0) 
   (export "main_0" (func $main_0))
   (func $main_0 (local $a1 i32)(local $b1 i32)
@@ -8,7 +9,7 @@
     local.set $a1
     local.get $a1
     i32.const 4
-    call $log
+    call $logI32
     i32.const 0
     local.set $b1
   )
@@ -42,7 +43,7 @@
     local.set $string11
     local.get $string11
     i32.const 4
-    call $log
+    call $logI32
     i32.const 0
     local.set $a1
   )

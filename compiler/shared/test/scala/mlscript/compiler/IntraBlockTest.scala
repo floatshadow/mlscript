@@ -75,14 +75,14 @@ class IntraBlockTest extends munit.FunSuite {
           "blk_0",
           List(),
           ListBuffer(
-            Assignment(Var("x"), IsType(Var("x4"), Float32)),
+            Assignment(Var("x"), IsType(Var("x4"), Float64)),
             Return(Some(Const(0)))
           )
         )
       )
     }
     val expected =
-      "key not found: x4 in instruction Assignment(x,istype x4, f32)"
+      "key not found: x4 in instruction Assignment(x,istype x4, f64)"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -93,13 +93,13 @@ class IntraBlockTest extends munit.FunSuite {
           "blk_0",
           List(),
           ListBuffer(
-            Assignment(Var("x"), Cast(Var("x5"), Float32)),
+            Assignment(Var("x"), Cast(Var("x5"), Float64)),
             Return(Some(Const(0)))
           )
         )
       )
     }
-    val expected = "key not found: x5 in instruction Assignment(x,cast x5, f32)"
+    val expected = "key not found: x5 in instruction Assignment(x,cast x5, f64)"
     assertEquals(thrown.getMessage(), expected)
   }
 

@@ -238,17 +238,48 @@ class Ir2wasm {
               GetGlobal(memoryBoundary) <:> SetLocal(
                 lhs.name
               ) <:> pureValueToWasm(rhs)
-            case Op(Var(op)) =>
-              lh.register(lhs.name, lh.getType(op))
+            case Op(op) =>
+              lh.register(
+                lhs.name,
+                op match
+                  case Var(x)            => lh.getType(x)
+                  case Const(_: Boolean) => Type.Int32
+                  case Const(_: Int)     => Type.Int32
+                  case Const(_: Float)   => Type.Float64
+                  case Const(_: String)  => Type.OpaquePointer
+                  case Unit              => Type.Int32
+              )
               pureValueToWasm(rhs) <:> SetLocal(lhs.name)
             case _ => // TODO
               lh.register(lhs.name, Type.Int32)
               pureValueToWasm(rhs) <:> SetLocal(lhs.name)
           head <:> instrToWasm(instrs.tail)
-        case S(_: Branch)                     => Code(Nil)
-        case S(Unreachable)                   => Code(Nil)
-        case S(_: Match)                      => Code(Nil)
-        case S(_: Return)                     => Code(Nil)
+        case S(_: Branch)   => Code(Nil)
+        case S(Unreachable) => Code(Nil)
+        case S(_: Match)    => Code(Nil)
+        case S(_: Return)   => Code(Nil)
+        case S(Call(result, Var("log"), args)) =>
+          lh.register(result.get.name, Type.Unit)
+          val resultCode: Code = I32Const(0)
+          val typeCode: Code = args.head.getType(symbolTypeMap) match
+            case Type.Unit           => I32Const(0)
+            case Type.Boolean        => I32Const(1)
+            case Type.Int32          => I32Const(2)
+            case Type.Float64        => Code(Nil)
+            case Type.OpaquePointer  => I32Const(4)
+            case Type.Record(_)      => I32Const(5)
+            case Type.Variant(_)     => I32Const(6)
+            case Type.Function(_, _) => I32Const(7)
+            case Type.TypeName(_)    => I32Const(8)
+          val funName = args.head.getType(symbolTypeMap) match
+            case Type.Float64 => "logF64"
+            case _            => "logI32"
+          args.map(operandToWasm) <:>
+            typeCode <:>
+            WasmCall(funName) <:>
+            resultCode <:>
+            SetLocal(result.get.name) <:>
+            instrToWasm(instrs.tail)
         case S(Call(result, Var(name), args)) =>
           // TODO Currently only log() is call, have to handle the different number/type of result variable
           lh.register(
@@ -260,21 +291,7 @@ class Ir2wasm {
               Code(Nil)
             case S(_) => ???
             case N    => I32Const(0)
-          val typeCode: Code = name match
-            case "log" =>
-              args.head.getType(symbolTypeMap) match
-                case Type.Unit           => I32Const(0)
-                case Type.Boolean        => I32Const(1)
-                case Type.Int32          => I32Const(2)
-                case Type.Float32        => I32Const(3)
-                case Type.OpaquePointer  => I32Const(4)
-                case Type.Record(_)      => I32Const(5)
-                case Type.Variant(_)     => I32Const(6)
-                case Type.Function(_, _) => I32Const(7)
-                case Type.TypeName(_)    => I32Const(8)
-            case _ => Code(Nil)
           args.map(operandToWasm) <:>
-            typeCode <:>
             WasmCall(name) <:>
             resultCode <:>
             SetLocal(result.get.name) <:>
@@ -367,7 +384,7 @@ class Ir2wasm {
       case Const(value: Int) =>
         I32Const(value)
       case Const(value: Float) =>
-        F32Const(value)
+        F64Const(value)
       case Const(value: String) =>
         mkString(value)
       case Unit =>

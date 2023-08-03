@@ -169,7 +169,7 @@ object Verifier {
           case (
                 BinOpKind.Add | BinOpKind.Sub | BinOpKind.Mul | BinOpKind.Div |
                 BinOpKind.Rem,
-                Type.Int32 | Type.Float32
+                Type.Int32 | Type.Float64
               ) =>
             (lhst, Set(lhs, rhs))
           case (
@@ -179,10 +179,10 @@ object Verifier {
             (lhst, Set(lhs, rhs))
           case (
                 BinOpKind.Eq | BinOpKind.Ne,
-                Type.Int32 | Type.Float32 | Type.Boolean
+                Type.Int32 | Type.Float64 | Type.Boolean
               ) =>
             (Type.Boolean, Set(lhs, rhs))
-          case (BinOpKind.Lt | BinOpKind.Le, Type.Int32 | Type.Float32) =>
+          case (BinOpKind.Lt | BinOpKind.Le, Type.Int32 | Type.Float64) =>
             (Type.Boolean, Set(lhs, rhs))
           case (_, _) =>
             throw VerificationError(
@@ -191,7 +191,7 @@ object Verifier {
       case PureValue.Neg(value) =>
         val valtype = value.getType(ctx)
         if (
-          valtype != Type.Boolean && valtype != Type.Int32 && valtype != Type.Float32
+          valtype != Type.Boolean && valtype != Type.Int32 && valtype != Type.Float64
         ) throw VerificationError(s"Negation does not accept type ${valtype}")
         else (valtype, Set(value))
       case PureValue.GetField(obj, field) =>

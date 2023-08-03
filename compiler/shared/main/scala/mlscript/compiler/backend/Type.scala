@@ -35,7 +35,7 @@ enum Type:
   case Unit
   case Boolean
   case Int32
-  case Float32
+  case Float64
   case OpaquePointer
   case Record(impl: RecordObj)
   case Variant(impl: VariantObj)
@@ -49,7 +49,7 @@ enum Type:
   def eq(other: Type): Boolean =
     (this, other) match
       case (Unit, Unit) | (Boolean, Boolean) | (Int32, Int32) |
-          (Float32, Float32) | (OpaquePointer, OpaquePointer) =>
+          (Float64, Float64) | (OpaquePointer, OpaquePointer) =>
         true
       case (TypeName(n1), TypeName(n2)) => n1 == n2
       case (Function(args1, ret1), Function(args2, ret2)) =>
@@ -65,7 +65,7 @@ enum Type:
     case Unit                => "()"
     case Boolean             => "bool"
     case Int32               => "i32"
-    case Float32             => "f32"
+    case Float64             => "f64"
     case OpaquePointer       => "Any"
     case Record(impl)        => impl.toString()
     case Variant(impl)       => impl.toString()

@@ -1,6 +1,7 @@
 (module 
   (import "system" "mem" (memory 100))
-  (func $log (import "system" "log") (param i32 i32))
+  (func $logI32 (import "system" "logI32") (param i32 i32))
+  (func $logF64 (import "system" "logF64") (param f64))
   (global (mut i32) i32.const 0) 
   (export "main_0" (func $main_0))
   (func $main_0 (local $e i32)(local $j1 i32)(local $f1 i32)(local $n1 i32)(local $a i32)(local $b1 i32)(local $m i32)(local $i i32)(local $o1 i32)(local $h1 i32)(local $c i32)(local $x11 i32)(local $p1 i32)(local $k i32)(local $x21 i32)(local $g i32)(local $s1 i32)(local $r1 i32)(local $l i32)(local $d1 i32)(local $q1 i32)
@@ -14,7 +15,7 @@
     local.set $a
     local.get $a
     i32.const 2
-    call $log
+    call $logI32
     i32.const 0
     local.set $b1
     i32.const 5
@@ -23,7 +24,7 @@
     local.set $c
     local.get $c
     i32.const 2
-    call $log
+    call $logI32
     i32.const 0
     local.set $d1
     i32.const 5
@@ -32,7 +33,7 @@
     local.set $e
     local.get $e
     i32.const 2
-    call $log
+    call $logI32
     i32.const 0
     local.set $f1
     i32.const 5
@@ -41,7 +42,7 @@
     local.set $g
     local.get $g
     i32.const 2
-    call $log
+    call $logI32
     i32.const 0
     local.set $h1
     i32.const 5
@@ -50,7 +51,7 @@
     local.set $i
     local.get $i
     i32.const 2
-    call $log
+    call $logI32
     i32.const 0
     local.set $j1
     i32.const 5
@@ -67,17 +68,17 @@
     local.set $m
     i32.const -99
     i32.const 2
-    call $log
+    call $logI32
     i32.const 0
     local.set $n1
     i32.const 1
     i32.const 1
-    call $log
+    call $logI32
     i32.const 0
     local.set $o1
     i32.const 0
     i32.const 1
-    call $log
+    call $logI32
     i32.const 0
     local.set $p1
     global.get 0
@@ -126,7 +127,7 @@
     i32.add
     global.set 0
     i32.const 4
-    call $log
+    call $logI32
     i32.const 0
     local.set $q1
     global.get 0
@@ -175,12 +176,12 @@
     i32.add
     global.set 0
     i32.const 4
-    call $log
+    call $logI32
     i32.const 0
     local.set $r1
     local.get $r1
     i32.const 0
-    call $log
+    call $logI32
     i32.const 0
     local.set $s1
   )

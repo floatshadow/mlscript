@@ -1,6 +1,7 @@
 (module 
   (import "system" "mem" (memory 100))
-  (func $log (import "system" "log") (param i32 i32))
+  (func $logI32 (import "system" "logI32") (param i32 i32))
+  (func $logF64 (import "system" "logF64") (param f64))
   (global (mut i32) i32.const 0) 
   (export "main_0" (func $main_0))
   (func $main_0 (local $a i32)(local $z1 i32)(local $o1 i32)(local $x1 i32)(local $h i32)(local $w i32)(local $tmp9 i32)(local $k i32)(local $e i32)(local $l1 i32)(local $n i32)(local $res1 i32)(local $u1 i32)(local $t i32)(local $f1 i32)(local $q i32)(local $b i32)(local $y1 i32)(local $r1 i32)
@@ -50,7 +51,7 @@
               end
               i32.const 30
               i32.const 2
-              call $log
+              call $logI32
               i32.const 0
               local.set $y1
               local.get $y1
@@ -61,7 +62,7 @@
             end
             i32.const 20
             i32.const 2
-            call $log
+            call $logI32
             i32.const 0
             local.set $u1
             local.get $u1
@@ -98,7 +99,7 @@
                 end
                 i32.const 1
                 i32.const 2
-                call $log
+                call $logI32
                 i32.const 0
                 local.set $r1
                 i32.const 3
@@ -109,7 +110,7 @@
               end
               i32.const 0
               i32.const 2
-              call $log
+              call $logI32
               i32.const 0
               local.set $o1
               local.get $o1
@@ -120,7 +121,7 @@
             end
             i32.const 40
             i32.const 2
-            call $log
+            call $logI32
             i32.const 0
             local.set $l1
             local.get $l1
@@ -132,7 +133,7 @@
         end
         i32.const 40
         i32.const 2
-        call $log
+        call $logI32
         i32.const 0
         local.set $f1
         local.get $f1
@@ -145,7 +146,7 @@
     local.set $res1
     local.get $res1
     i32.const 0
-    call $log
+    call $logI32
     i32.const 0
     local.set $z1
   )
@@ -264,7 +265,7 @@
                         if
                           i32.const 5
                           i32.const 2
-                          call $log
+                          call $logI32
                           i32.const 0
                           local.set $dn1
                           local.get $dn1
@@ -274,7 +275,7 @@
                         else
                           i32.const 6
                           i32.const 2
-                          call $log
+                          call $logI32
                           i32.const 0
                           local.set $dk1
                           local.get $dk1
@@ -285,7 +286,7 @@
                       else
                         i32.const 6
                         i32.const 2
-                        call $log
+                        call $logI32
                         i32.const 0
                         local.set $df1
                         local.get $df1
@@ -296,7 +297,7 @@
                     else
                       i32.const 6
                       i32.const 2
-                      call $log
+                      call $logI32
                       i32.const 0
                       local.set $cw1
                       local.get $cw1
@@ -320,7 +321,7 @@
                       if
                         i32.const 4
                         i32.const 2
-                        call $log
+                        call $logI32
                         i32.const 0
                         local.set $cr1
                         local.get $cr1
@@ -330,7 +331,7 @@
                       else
                         i32.const 6
                         i32.const 2
-                        call $log
+                        call $logI32
                         i32.const 0
                         local.set $co1
                         local.get $co1
@@ -341,7 +342,7 @@
                     else
                       i32.const 6
                       i32.const 2
-                      call $log
+                      call $logI32
                       i32.const 0
                       local.set $cj1
                       local.get $cj1
@@ -352,7 +353,7 @@
                   else
                     i32.const 6
                     i32.const 2
-                    call $log
+                    call $logI32
                     i32.const 0
                     local.set $ce1
                     local.get $ce1
@@ -364,7 +365,7 @@
                 end
                 i32.const 6
                 i32.const 2
-                call $log
+                call $logI32
                 i32.const 0
                 local.set $bw1
                 local.get $bw1
@@ -422,7 +423,7 @@
                     if
                       i32.const 3
                       i32.const 2
-                      call $log
+                      call $logI32
                       i32.const 0
                       local.set $bn1
                       local.get $bn1
@@ -432,7 +433,7 @@
                     else
                       i32.const 6
                       i32.const 2
-                      call $log
+                      call $logI32
                       i32.const 0
                       local.set $bk1
                       local.get $bk1
@@ -443,7 +444,7 @@
                   else
                     i32.const 6
                     i32.const 2
-                    call $log
+                    call $logI32
                     i32.const 0
                     local.set $bf1
                     local.get $bf1
@@ -463,7 +464,7 @@
                   if
                     i32.const 2
                     i32.const 2
-                    call $log
+                    call $logI32
                     i32.const 0
                     local.set $ay1
                     local.get $ay1
@@ -473,7 +474,7 @@
                   else
                     i32.const 6
                     i32.const 2
-                    call $log
+                    call $logI32
                     i32.const 0
                     local.set $av1
                     local.get $av1
@@ -484,7 +485,7 @@
                 else
                   i32.const 6
                   i32.const 2
-                  call $log
+                  call $logI32
                   i32.const 0
                   local.set $aq1
                   local.get $aq1
@@ -496,7 +497,7 @@
               end
               i32.const 6
               i32.const 2
-              call $log
+              call $logI32
               i32.const 0
               local.set $al1
               local.get $al1
@@ -543,7 +544,7 @@
                 if
                   i32.const 1
                   i32.const 2
-                  call $log
+                  call $logI32
                   i32.const 0
                   local.set $ad1
                   local.get $ad1
@@ -553,7 +554,7 @@
                 else
                   i32.const 6
                   i32.const 2
-                  call $log
+                  call $logI32
                   i32.const 0
                   local.set $z1
                   local.get $z1
@@ -569,7 +570,7 @@
               if
                 i32.const 0
                 i32.const 2
-                call $log
+                call $logI32
                 i32.const 0
                 local.set $u1
                 local.get $u1
@@ -579,7 +580,7 @@
               else
                 i32.const 6
                 i32.const 2
-                call $log
+                call $logI32
                 i32.const 0
                 local.set $r1
                 local.get $r1
@@ -591,7 +592,7 @@
             end
             i32.const 6
             i32.const 2
-            call $log
+            call $logI32
             i32.const 0
             local.set $m1
             local.get $m1
@@ -603,7 +604,7 @@
         end
         i32.const 6
         i32.const 2
-        call $log
+        call $logI32
         i32.const 0
         local.set $f1
         local.get $f1
@@ -630,7 +631,7 @@
         if
           i32.const 10
           i32.const 2
-          call $log
+          call $logI32
           i32.const 0
           local.set $v1
           local.get $v1
@@ -640,7 +641,7 @@
         else
           i32.const 5
           i32.const 2
-          call $log
+          call $logI32
           i32.const 0
           local.set $s1
           local.get $s1
@@ -657,7 +658,7 @@
         if
           i32.const -10
           i32.const 2
-          call $log
+          call $logI32
           i32.const 0
           local.set $l1
           local.get $l1
@@ -667,7 +668,7 @@
         else
           i32.const -5
           i32.const 2
-          call $log
+          call $logI32
           i32.const 0
           local.set $i1
           local.get $i1
@@ -758,7 +759,7 @@
                   if
                     i32.const 5
                     i32.const 2
-                    call $log
+                    call $logI32
                     i32.const 0
                     local.set $ad1
                     local.get $ad1
@@ -768,7 +769,7 @@
                   else
                     i32.const 1
                     i32.const 2
-                    call $log
+                    call $logI32
                     i32.const 0
                     local.set $z1
                     local.get $z1
@@ -784,7 +785,7 @@
                 if
                   i32.const 13
                   i32.const 2
-                  call $log
+                  call $logI32
                   i32.const 0
                   local.set $al1
                   local.get $al1
@@ -794,7 +795,7 @@
                 else
                   i32.const 1
                   i32.const 2
-                  call $log
+                  call $logI32
                   i32.const 0
                   local.set $ai1
                   local.get $ai1
@@ -810,7 +811,7 @@
               if
                 i32.const 13
                 i32.const 2
-                call $log
+                call $logI32
                 i32.const 0
                 local.set $at1
                 local.get $at1
@@ -820,7 +821,7 @@
               else
                 i32.const 1
                 i32.const 2
-                call $log
+                call $logI32
                 i32.const 0
                 local.set $aq1
                 local.get $aq1
@@ -836,7 +837,7 @@
             if
               i32.const 5
               i32.const 2
-              call $log
+              call $logI32
               i32.const 0
               local.set $u1
               local.get $u1
@@ -846,7 +847,7 @@
             else
               i32.const 1
               i32.const 2
-              call $log
+              call $logI32
               i32.const 0
               local.set $r1
               local.get $r1
@@ -858,7 +859,7 @@
           end
           i32.const 1
           i32.const 2
-          call $log
+          call $logI32
           i32.const 0
           local.set $m1
           local.get $m1
@@ -869,7 +870,7 @@
       else
         i32.const 1
         i32.const 2
-        call $log
+        call $logI32
         i32.const 0
         local.set $f1
         local.get $f1
@@ -938,7 +939,7 @@
                 end
                 i32.const 101
                 i32.const 2
-                call $log
+                call $logI32
                 i32.const 0
                 local.set $s1
                 local.get $s1
@@ -949,7 +950,7 @@
               end
               i32.const 100
               i32.const 2
-              call $log
+              call $logI32
               i32.const 0
               local.set $p1
               local.get $p1
@@ -960,7 +961,7 @@
             end
             i32.const 102
             i32.const 2
-            call $log
+            call $logI32
             i32.const 0
             local.set $v1
             local.get $v1
@@ -971,7 +972,7 @@
           end
           i32.const 103
           i32.const 2
-          call $log
+          call $logI32
           i32.const 0
           local.set $m1
           local.get $m1
@@ -982,7 +983,7 @@
       else
         i32.const 103
         i32.const 2
-        call $log
+        call $logI32
         i32.const 0
         local.set $f1
         local.get $f1
@@ -1035,7 +1036,7 @@
               end
               i32.const 30
               i32.const 2
-              call $log
+              call $logI32
               i32.const 0
               local.set $o1
               local.get $o1
@@ -1046,7 +1047,7 @@
             end
             i32.const 20
             i32.const 2
-            call $log
+            call $logI32
             i32.const 0
             local.set $l1
             local.get $l1
@@ -1057,7 +1058,7 @@
           end
           i32.const 10
           i32.const 2
-          call $log
+          call $logI32
           i32.const 0
           local.set $i1
           local.get $i1
@@ -1068,7 +1069,7 @@
         end
         i32.const 40
         i32.const 2
-        call $log
+        call $logI32
         i32.const 0
         local.set $f1
         local.get $f1
@@ -1118,7 +1119,7 @@
                 end
                 i32.const 54
                 i32.const 2
-                call $log
+                call $logI32
                 i32.const 0
                 local.set $q1
                 local.get $q1
@@ -1129,7 +1130,7 @@
               end
               i32.const 53
               i32.const 2
-              call $log
+              call $logI32
               i32.const 0
               local.set $n1
               local.get $n1
@@ -1140,7 +1141,7 @@
             end
             i32.const 51
             i32.const 2
-            call $log
+            call $logI32
             i32.const 0
             local.set $h1
             local.get $h1
@@ -1151,7 +1152,7 @@
           end
           i32.const 52
           i32.const 2
-          call $log
+          call $logI32
           i32.const 0
           local.set $k1
           local.get $k1
@@ -1162,7 +1163,7 @@
         end
         i32.const 55
         i32.const 2
-        call $log
+        call $logI32
         i32.const 0
         local.set $e1
         local.get $e1
@@ -1224,12 +1225,12 @@
     local.set $y1
     local.get $x1
     i32.const 2
-    call $log
+    call $logI32
     i32.const 0
     local.set $p1
     local.get $y1
     i32.const 2
-    call $log
+    call $logI32
     i32.const 0
     local.set $q1
   )
@@ -1255,7 +1256,7 @@
     local.set $x1
     local.get $x1
     i32.const 2
-    call $log
+    call $logI32
     i32.const 0
     local.set $g1
   )

@@ -19,7 +19,8 @@ log of incr(2)
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
-//│   (func $log (import "system" "log") (param i32 i32))
+//│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
 //│   (func $incr (param $x i32) (result i32) (local $a i32)
@@ -36,7 +37,7 @@ log of incr(2)
 //│     local.set $a1
 //│     local.get $a1
 //│     i32.const 2
-//│     call $log
+//│     call $logI32
 //│     i32.const 0
 //│     local.set $b1
 //│   )
@@ -84,7 +85,8 @@ log of fib(10)
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
-//│   (func $log (import "system" "log") (param i32 i32))
+//│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
 //│   (func $fib (param $x i32) (result i32) (local $e i32)(local $f1 i32)(local $a i32)(local $m i32)(local $i i32)(local $g i32)(local $h1 i32)(local $k i32)(local $d i32)
@@ -151,7 +153,7 @@ log of fib(10)
 //│     local.set $a1
 //│     local.get $a1
 //│     i32.const 2
-//│     call $log
+//│     call $logI32
 //│     i32.const 0
 //│     local.set $b1
 //│   )
@@ -177,7 +179,8 @@ log of get1()
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
-//│   (func $log (import "system" "log") (param i32 i32))
+//│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
 //│   (func $get1 (result i32) 
@@ -189,7 +192,7 @@ log of get1()
 //│     local.set $a1
 //│     local.get $a1
 //│     i32.const 2
-//│     call $log
+//│     call $logI32
 //│     i32.const 0
 //│     local.set $b1
 //│   )
@@ -256,7 +259,8 @@ log of sum(list)
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
-//│   (func $log (import "system" "log") (param i32 i32))
+//│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
 //│   (func $sum (param $x i32) (result i32) (local $t i32)(local $m i32)(local $i i32)(local $l i32)(local $h1 i32)(local $k i32)(local $o i32)(local $n1 i32)(local $f i32)
@@ -394,7 +398,7 @@ log of sum(list)
 //│     local.set $f1
 //│     local.get $f1
 //│     i32.const 2
-//│     call $log
+//│     call $logI32
 //│     i32.const 0
 //│     local.set $g1
 //│   )
@@ -463,7 +467,8 @@ log(getClass().x)
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
-//│   (func $log (import "system" "log") (param i32 i32))
+//│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
 //│   (func $getString (result i32) 
@@ -569,28 +574,28 @@ log(getClass().x)
 //│     local.set $a1
 //│     local.get $a1
 //│     i32.const 4
-//│     call $log
+//│     call $logI32
 //│     i32.const 0
 //│     local.set $b1
 //│     call $getTrue
 //│     local.set $c1
 //│     local.get $c1
 //│     i32.const 1
-//│     call $log
+//│     call $logI32
 //│     i32.const 0
 //│     local.set $d1
 //│     call $getFalse
 //│     local.set $e1
 //│     local.get $e1
 //│     i32.const 1
-//│     call $log
+//│     call $logI32
 //│     i32.const 0
 //│     local.set $f1
 //│     call $getZero
 //│     local.set $g1
 //│     local.get $g1
 //│     i32.const 2
-//│     call $log
+//│     call $logI32
 //│     i32.const 0
 //│     local.set $h1
 //│     call $getClass
@@ -602,7 +607,7 @@ log(getClass().x)
 //│     local.set $j
 //│     local.get $j
 //│     i32.const 2
-//│     call $log
+//│     call $logI32
 //│     i32.const 0
 //│     local.set $k1
 //│   )
@@ -647,7 +652,8 @@ log of Square(3)+Cube(2)
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
-//│   (func $log (import "system" "log") (param i32 i32))
+//│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
 //│   (func $Square (param $x i32) (result i32) (local $a i32)
@@ -683,7 +689,7 @@ log of Square(3)+Cube(2)
 //│     local.set $c
 //│     local.get $c
 //│     i32.const 2
-//│     call $log
+//│     call $logI32
 //│     i32.const 0
 //│     local.set $d1
 //│   )
