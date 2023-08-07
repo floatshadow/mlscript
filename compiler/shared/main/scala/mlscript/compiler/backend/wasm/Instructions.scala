@@ -23,6 +23,17 @@ object WasmInstructions {
   case object Le_s extends WasmInstruction // Signed less-equals
   case object Eq   extends WasmInstruction
   case object Drop extends WasmInstruction // Drops the top value of the stack
+  case object F64Add  extends WasmInstruction
+  case object F64Sub  extends WasmInstruction
+  case object F64Mul  extends WasmInstruction
+  case object F64Div  extends WasmInstruction
+  case object F64Rem  extends WasmInstruction
+  case object F64And  extends WasmInstruction
+  case object F64Or   extends WasmInstruction
+  case object F64Eqz  extends WasmInstruction // Return 1 if operand is 0, 0 otherwise
+  case object F64Lt_s extends WasmInstruction // Signed less-than
+  case object F64Le_s extends WasmInstruction // Signed less-equals
+  case object F64Eq   extends WasmInstruction
 
   // Control instructions
   case object If_void extends WasmInstruction // Marks the beginning of an if-block (with implicit 'then').

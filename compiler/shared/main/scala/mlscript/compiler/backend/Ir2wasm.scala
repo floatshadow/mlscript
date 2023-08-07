@@ -221,7 +221,7 @@ class Ir2wasm {
     ): Code =
       if (getIndex(source) >= getIndex(target) || isMergedNode(target))
         (target.params zip args).map((param, arg) =>
-          lh.register(param.name, Type.Int32) // TODO
+          lh.register(param.name, arg.getType(symbolTypeMap))
           operandToWasm(arg) <:> SetLocal(param.name)
         )
       else
@@ -239,16 +239,10 @@ class Ir2wasm {
                 lhs.name
               ) <:> pureValueToWasm(rhs)
             case Op(op) =>
-              lh.register(
-                lhs.name,
-                op match
-                  case Var(x)            => lh.getType(x)
-                  case Const(_: Boolean) => Type.Int32
-                  case Const(_: Int)     => Type.Int32
-                  case Const(_: Float)   => Type.Float64
-                  case Const(_: String)  => Type.OpaquePointer
-                  case Unit              => Type.Int32
-              )
+              lh.register(lhs.name, op.getType(symbolTypeMap))
+              pureValueToWasm(rhs) <:> SetLocal(lhs.name)
+            case BinOp(_, operand, _) =>
+              lh.register(lhs.name, operand.getType(symbolTypeMap))
               pureValueToWasm(rhs) <:> SetLocal(lhs.name)
             case _ => // TODO
               lh.register(lhs.name, Type.Int32)
@@ -337,19 +331,30 @@ class Ir2wasm {
           <:> SetGlobal(memoryBoundary)
       case Alloc(_) => ???
       case BinOp(kind, lhs, rhs) =>
-        val op = kind match
-          case BinOpKind.Add => Add
-          case BinOpKind.Sub => Sub
-          case BinOpKind.Mul => Mul
-          case BinOpKind.Div => Div
-          case BinOpKind.Rem => Rem
-          case BinOpKind.And => And
-          case BinOpKind.Or  => Or
-          case BinOpKind.Xor => ???
-          case BinOpKind.Eq  => Eq
-          case BinOpKind.Ne  => ???
-          case BinOpKind.Lt  => Lt_s
-          case BinOpKind.Le  => Le_s
+        val op = (kind, lhs.getType(symbolTypeMap)) match
+          case (BinOpKind.Add, Type.Float64) => F64Add
+          case (BinOpKind.Add, _)            => Add
+          case (BinOpKind.Sub, Type.Float64) => F64Sub
+          case (BinOpKind.Sub, _)            => Sub
+          case (BinOpKind.Mul, Type.Float64) => F64Mul
+          case (BinOpKind.Mul, _)            => Mul
+          case (BinOpKind.Div, Type.Float64) => F64Div
+          case (BinOpKind.Div, _)            => Div
+          case (BinOpKind.Rem, _)            => Rem
+          case (BinOpKind.And, Type.Float64) => F64And
+          case (BinOpKind.And, _)            => And
+          case (BinOpKind.Or, Type.Float64)  => F64Or
+          case (BinOpKind.Or, _)             => Or
+          case (BinOpKind.Xor, Type.Float64) => ???
+          case (BinOpKind.Xor, _)            => ???
+          case (BinOpKind.Eq, Type.Float64)  => F64Eq
+          case (BinOpKind.Eq, _)             => Eq
+          case (BinOpKind.Ne, Type.Float64)  => ???
+          case (BinOpKind.Ne, _)             => ???
+          case (BinOpKind.Lt, Type.Float64)  => F64Lt_s
+          case (BinOpKind.Lt, _)             => Lt_s
+          case (BinOpKind.Le, Type.Float64)  => F64Le_s
+          case (BinOpKind.Le, _)             => Le_s
         operandToWasm(lhs) <:> operandToWasm(rhs) <:> op
       case Neg(value) => ???
       case GetField(obj, field) =>

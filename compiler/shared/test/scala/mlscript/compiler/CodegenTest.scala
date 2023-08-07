@@ -20,7 +20,8 @@ class CodegenTestCompiler extends DiffTests {
       basePath: List[Str],
       testName: Str
   ):Unit = 
-    CodePrinter(testName,modules.getOrElse(testName,Nil))
+    try{CodePrinter(testName,modules.getOrElse(testName,Nil))}
+    catch{e => output(s"$e")}
 
   override def postType(
       output: String => Unit,
