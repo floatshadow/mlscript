@@ -4,17 +4,7 @@
   (func $logF64 (import "system" "logF64") (param f64))
   (global (mut i32) i32.const 0) 
   (export "main_0" (func $main_0))
-  (func $main_0 (local $a1 i32)(local $b1 i32)
-    call $getString
-    local.set $a1
-    local.get $a1
-    i32.const 4
-    call $logI32
-    i32.const 0
-    local.set $b1
-  )
-  (export "main_1" (func $main_1))
-  (func $main_1 (local $a1 i32)(local $string11 i32)
+  (func $main_0 (local $a1 i32)(local $string11 i32)
     global.get 0
     i32.const 0
     i32.add
@@ -46,6 +36,16 @@
     call $logI32
     i32.const 0
     local.set $a1
+  )
+  (export "main_1" (func $main_1))
+  (func $main_1 (local $a1 i32)(local $b1 i32)
+    call $getString
+    local.set $a1
+    local.get $a1
+    i32.const 4
+    call $logI32
+    i32.const 0
+    local.set $b1
   )
 
   (func $getString (result i32) 

@@ -42,7 +42,7 @@ class CodegenTestCompiler extends DiffTests {
       recordDefMap
     )
     output(s"\nWASM:\n${ModulePrinter(wasmModule)}\n")
-    modules(testName) = wasmModule +: modules.getOrElse(testName,Nil)
+    modules(testName) =  modules.getOrElse(testName,Nil) :+ wasmModule
     outputBuilder.toString().linesIterator.toList
 
   override protected lazy val files = allFiles.filter { file =>
