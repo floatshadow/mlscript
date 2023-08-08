@@ -20,25 +20,32 @@ object ModulePrinter {
   )
 
   private def mkImport(s: String): Document = s match
-    case "log" => Stacked(List(
-      Raw("(func $logI32 (import \"system\" \"logI32\") (param i32 i32))"),
-      Raw("(func $logF64 (import \"system\" \"logF64\") (param f64))")
-      ))
+    case "log" =>
+      Stacked(
+        List(
+          Raw("(func $logI32 (import \"system\" \"logI32\") (param i32 i32))"),
+          Raw("(func $logF64 (import \"system\" \"logF64\") (param f64))")
+        )
+      )
     case _ => line(List("(import ", s, ")"))
 
   private def mkFun(fh: Function): Document = {
     val name = fh.name
     val isMain = fh.isMain
-    val exportDoc: Document = if (isMain) s"""(export "$name" (func $$$name))""" else ""
-    val paramsDoc: Document =line(fh.args.map(arg => 
-        val tpe = fh.locals(arg.name)._1 match
-          case Type.Float64 => "f64"
-          case _ => "i32"
-        Raw(s"(param $$${arg.name} $tpe) ")
-      ))
-    val resultDoc: Document = if (isMain) "" else fh.retType match
-        case Type.Float64 => "(result f64) "
-        case _ => "(result i32) "
+    val exportDoc: Document =
+      if (isMain) s"""(export "$name" (func $$$name))""" else ""
+    val paramsDoc: Document = line(fh.args.map(arg =>
+      val tpe = fh.locals(arg.name)._1 match
+        case Type.Float64 => "f64"
+        case _            => "i32"
+      Raw(s"(param $$${arg.name} $tpe) ")
+    ))
+    val resultDoc: Document =
+      if (isMain) ""
+      else
+        fh.retType match
+          case Type.Float64 => "(result f64) "
+          case _            => "(result i32) "
     val localsDoc: Document = Indented(
       line(
         fh.locals
@@ -63,67 +70,68 @@ object ModulePrinter {
 
   private def mkCode(code: Code): List[Document] = code.instructions match {
     case Nil => Nil
-    case h :: t => h match {
-      case Else =>
-        Unindented(mkInstr(h)) ::
-        mkCode(t)
-      case End =>
-        Unindented(mkInstr(h)) ::
-        (mkCode(t) map Unindented.apply)
-      case If_void | If_i32 | Block(_,_) | Loop(_) =>
-        mkInstr(h) ::
-        (mkCode(t) map Indented.apply)
-      case _ =>
-        mkInstr(h) ::
-        mkCode(t)
-    }
+    case h :: t =>
+      h match {
+        case Else =>
+          Unindented(mkInstr(h)) ::
+            mkCode(t)
+        case End =>
+          Unindented(mkInstr(h)) ::
+            (mkCode(t) map Unindented.apply)
+        case If_void | If_i32 | Block(_, _) | Loop(_) =>
+          mkInstr(h) ::
+            (mkCode(t) map Indented.apply)
+        case _ =>
+          mkInstr(h) ::
+            mkCode(t)
+      }
   }
 
   private def mkInstr(instr: WasmInstruction): Document = {
     instr match {
-      case I32Const(value) => s"i32.const $value"
-      case F64Const(value) => s"f64.const $value"
-      case Add => "i32.add"
-      case Sub => "i32.sub"
-      case Mul => "i32.mul"
-      case Div => "i32.div_s"
-      case Rem => "i32.rem_s"
-      case And => "i32.and"
-      case Or  => "i32.or"
-      case Eqz => "i32.eqz"
-      case Lt_s => "i32.lt_s"
-      case Le_s => "i32.le_s"
-      case Eq => "i32.eq"
-      case F64Add => "f64.add"
-      case F64Sub => "f64.sub"
-      case F64Mul => "f64.mul"
-      case F64Div => "f64.div"
-      case F64And => "f64.and"
-      case F64Or  => "f64.or"
-      case F64Eqz => "f64.eqz"
-      case F64Lt_s => "f64.lt_s"
-      case F64Le_s => "f64.le_s"
-      case F64Eq => "f64.eq"
-      case Drop => "drop"
-      case If_void => "if"
-      case If_i32 => "if (result i32)"
-      case Else => "else"
-      case Block(label,_) => s"block $$$label"
-      case Loop(label) => s"loop $$$label"
-      case Br(label)=> s"br $$$label"
-      case BrTable(layer) => s"br_table ${(layer to 0 by -1).mkString(" ")}"
-      case Return => "ret"
-      case End => "end"
-      case Call(name) => s"call $$$name"
-      case Unreachable => "unreachable"
-      case GetLocal(name) => s"local.get $$$name"
-      case SetLocal(name) => s"local.set $$$name"
+      case I32Const(value)  => s"i32.const $value"
+      case F64Const(value)  => s"f64.const $value"
+      case Add              => "i32.add"
+      case Sub              => "i32.sub"
+      case Mul              => "i32.mul"
+      case Div              => "i32.div_s"
+      case Rem              => "i32.rem_s"
+      case And              => "i32.and"
+      case Or               => "i32.or"
+      case Eqz              => "i32.eqz"
+      case Lt_s             => "i32.lt_s"
+      case Le_s             => "i32.le_s"
+      case Eq               => "i32.eq"
+      case F64Add           => "f64.add"
+      case F64Sub           => "f64.sub"
+      case F64Mul           => "f64.mul"
+      case F64Div           => "f64.div"
+      case F64And           => "f64.and"
+      case F64Or            => "f64.or"
+      case F64Eqz           => "f64.eqz"
+      case F64Lt_s          => "f64.lt_s"
+      case F64Le_s          => "f64.le_s"
+      case F64Eq            => "f64.eq"
+      case Drop             => "drop"
+      case If_void          => "if"
+      case If_i32           => "if (result i32)"
+      case Else             => "else"
+      case Block(label, _)  => s"block $$$label"
+      case Loop(label)      => s"loop $$$label"
+      case Br(label)        => s"br $$$label"
+      case BrTable(layer)   => s"br_table ${(layer to 0 by -1).mkString(" ")}"
+      case Return           => "ret"
+      case End              => "end"
+      case Call(name)       => s"call $$$name"
+      case Unreachable      => "unreachable"
+      case GetLocal(name)   => s"local.get $$$name"
+      case SetLocal(name)   => s"local.set $$$name"
       case GetGlobal(index) => s"global.get $index"
       case SetGlobal(index) => s"global.set $index"
-      case Store => "i32.store"
-      case Load => "i32.load"
-      case Store8 => "i32.store8"
-      case Load8_u => "i32.load8_u"
+      case Store            => "i32.store"
+      case Load             => "i32.load"
+      case Store8           => "i32.store8"
+      case Load8_u          => "i32.load8_u"
       case Comment(s) =>
         Stacked(s.split('\n').toList.map(s => Raw(s";; $s")))
     }

@@ -38,8 +38,8 @@ object CodePrinter {
     val nonMainFuns: List[Function] =
       ms.flatMap(m => m.functions.filter(_.name != "main"))
     val lh = LocalsHandler()
-    val main = Function("main",Nil,true,Type.Unit)(
-      lh => mainFuns.map(fun => Call(fun.name))
+    val main = Function("main", Nil, true, Type.Unit)(lh =>
+      mainFuns.map(fun => Call(fun.name))
     )
     val module =
       Module(testName.split('/')(1), imports, mainFuns ++ nonMainFuns :+ main)

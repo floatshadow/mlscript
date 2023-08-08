@@ -1,7 +1,11 @@
 package mlscript.compiler.backend.wasm
 
 // A WebAssembly module
-case class Module(name: String, imports: List[String], functions: List[Function]) {
+case class Module(
+    name: String,
+    imports: List[String],
+    functions: List[Function]
+) {
 
   import java.io.{File, FileWriter}
 
@@ -48,10 +52,13 @@ case class Module(name: String, imports: List[String], functions: List[Function]
           |
           |      fetchAndInstantiate('$moduleFile', importObject).then(function(instance) {
           |""".stripMargin ++
-          functions.filter(_.isMain).map { f =>
-              s"        instance.exports.${f.name}();\n"
-          }.mkString ++
-            """|      });
+        functions
+          .filter(_.isMain)
+          .map { f =>
+            s"        instance.exports.${f.name}();\n"
+          }
+          .mkString ++
+        """|      });
                 |    </script>
                 |  </body>
                 |
@@ -120,10 +127,13 @@ case class Module(name: String, imports: List[String], functions: List[Function]
          |
          |loadWebAssembly('$moduleFile', importObject).then(function(instance) {
          |""".stripMargin ++
-      functions.filter(_.isMain).map { f =>
-        s"  instance.exports.${f.name}();\n"
-      }.mkString ++
-       """  rl.close();
+        functions
+          .filter(_.isMain)
+          .map { f =>
+            s"  instance.exports.${f.name}();\n"
+          }
+          .mkString ++
+        """  rl.close();
          |}).catch( function(error) {
          |  rl.close();
          |  process.exit(1)
@@ -134,8 +144,9 @@ case class Module(name: String, imports: List[String], functions: List[Function]
     fw.flush()
   }
 
-  /** JavaScript object containing the values to be imported into the WASM instance.
-    * Requires a waitInput(), log(line) and exit() function to be in scope.
+  /** JavaScript object containing the values to be imported into the WASM
+    * instance. Requires a waitInput(), log(line) and exit() function to be in
+    * scope.
     */
   private def importObject: String =
     s"""const importObject = {
