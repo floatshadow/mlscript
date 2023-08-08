@@ -30,7 +30,7 @@ class Ir2wasm {
   val memoryBoundary = 0
 
   def translate(
-      blocks: Ls[(BasicBlock, Map[Operand.Var, Type])],
+      blocks: Ls[(BasicBlock, Map[Operand.Var, Type], Type)],
       moduleName: String,
       imports: List[String],
       classDefMap: Map[Type.TypeName, (LinkedHashMap[String, Type], Int)],
@@ -39,9 +39,14 @@ class Ir2wasm {
     wasm.Module(
       moduleName.replaceAll("/", "_"),
       imports,
-      blocks.map((bb, symbolTypeMap) =>
+      blocks.map((bb, symbolTypeMap, retType) =>
         val isMain = bb.name == "entry"
-        Function(if isMain then "main" else bb.name, bb.params, isMain) { lh =>
+        Function(
+          if isMain then "main" else bb.name,
+          bb.params,
+          isMain,
+          retType
+        ) { lh =>
           val paramsTpe =
             if (bb.params.size == 0)
               Nil
@@ -241,8 +246,14 @@ class Ir2wasm {
             case Op(op) =>
               lh.register(lhs.name, op.getType(symbolTypeMap))
               pureValueToWasm(rhs) <:> SetLocal(lhs.name)
-            case BinOp(_, operand, _) =>
-              lh.register(lhs.name, operand.getType(symbolTypeMap))
+            case BinOp(kind, operand, _) =>
+              val tpe = kind match
+                case BinOpKind.Eq => Type.Boolean
+                case BinOpKind.Ne => Type.Boolean
+                case BinOpKind.Lt => Type.Boolean
+                case BinOpKind.Le => Type.Boolean
+                case _            => operand.getType(symbolTypeMap)
+              lh.register(lhs.name, tpe)
               pureValueToWasm(rhs) <:> SetLocal(lhs.name)
             case _ => // TODO
               lh.register(lhs.name, Type.Int32)
@@ -275,21 +286,18 @@ class Ir2wasm {
             SetLocal(result.get.name) <:>
             instrToWasm(instrs.tail)
         case S(Call(result, Var(name), args)) =>
-          // TODO Currently only log() is call, have to handle the different number/type of result variable
-          lh.register(
-            result.get.name,
-            Type.Unit
-          ) // TODO get the type of function result
-          val resultCode: Code = symbolTypeMap.get(Var(name)) match
-            case S(Type.Function(_, _)) =>
-              Code(Nil)
-            case S(_) => ???
-            case N    => I32Const(0)
-          args.map(operandToWasm) <:>
-            WasmCall(name) <:>
-            resultCode <:>
-            SetLocal(result.get.name) <:>
-            instrToWasm(instrs.tail)
+          symbolTypeMap(Var(name)) match
+            case Type.Function(_, ret) =>
+              lh.register(result.get.name, ret)
+              val resultCode: Code = symbolTypeMap.get(Var(name)) match
+                case S(Type.Function(_, _)) =>
+                  Code(Nil)
+                case S(_) => ???
+                case N    => I32Const(0)
+              args.map(operandToWasm) <:> WasmCall(name) <:>
+                resultCode <:> SetLocal(result.get.name) <:>
+                instrToWasm(instrs.tail)
+            case _ => throw CodeGenError(s"Undefined function $name")
         case S(SetField(obj, field, value)) =>
           val offset = lh.getType(obj.name) match
             case tpe: Type.TypeName =>
@@ -331,7 +339,7 @@ class Ir2wasm {
           <:> SetGlobal(memoryBoundary)
       case Alloc(_) => ???
       case BinOp(kind, lhs, rhs) =>
-        val op = (kind, lhs.getType(symbolTypeMap)) match
+        val op: Code = (kind, lhs.getType(symbolTypeMap)) match
           case (BinOpKind.Add, Type.Float64) => F64Add
           case (BinOpKind.Add, _)            => Add
           case (BinOpKind.Sub, Type.Float64) => F64Sub

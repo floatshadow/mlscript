@@ -12,16 +12,16 @@ import mlscript.compiler.backend.wasm.{CodePrinter, Module, ModulePrinter}
 class CodegenTestCompiler extends DiffTests {
   import CodegenTestCompiler.*
 
-  val modules = HashMap[String,Ls[Module]]()
+  val modules = HashMap[String, Ls[Module]]()
 
   override def postFile(
       output: String => Unit,
       mode: ModeType,
       basePath: List[Str],
       testName: Str
-  ):Unit = 
-    try{CodePrinter(testName,modules.getOrElse(testName,Nil))}
-    catch{e => output(s"$e")}
+  ): Unit =
+    try { CodePrinter(testName, modules.getOrElse(testName, Nil)) }
+    catch { e => output(s"$e") }
 
   override def postType(
       output: String => Unit,
@@ -33,7 +33,7 @@ class CodegenTestCompiler extends DiffTests {
   )(tpd: typer.TypedTypingUnit): List[Str] =
     val outputBuilder = StringBuilder()
     val (blocks, imports, classDefMap, recordDefMap) = new Mls2ir().apply(unit)
-    blocks.foreach((bb, _) => output(s"${bb.name} IR:\n${bb.printIR}"))
+    blocks.foreach((bb, _, retType) => output(s"${bb.name} IR:\n${bb.printIR}"))
     val wasmModule = new Ir2wasm().translate(
       blocks,
       testName,
@@ -42,7 +42,7 @@ class CodegenTestCompiler extends DiffTests {
       recordDefMap
     )
     output(s"\nWASM:\n${ModulePrinter(wasmModule)}\n")
-    modules(testName) =  modules.getOrElse(testName,Nil) :+ wasmModule
+    modules(testName) = modules.getOrElse(testName, Nil) :+ wasmModule
     outputBuilder.toString().linesIterator.toList
 
   override protected lazy val files = allFiles.filter { file =>

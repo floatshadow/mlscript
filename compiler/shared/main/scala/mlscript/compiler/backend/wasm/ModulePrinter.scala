@@ -30,8 +30,15 @@ object ModulePrinter {
     val name = fh.name
     val isMain = fh.isMain
     val exportDoc: Document = if (isMain) s"""(export "$name" (func $$$name))""" else ""
-    val paramsDoc: Document =line(fh.args.map(arg => Raw(s"(param $$${arg.name} i32) ")))
-    val resultDoc: Document = if (isMain) "" else "(result i32) "
+    val paramsDoc: Document =line(fh.args.map(arg => 
+        val tpe = fh.locals(arg.name)._1 match
+          case Type.Float64 => "f64"
+          case _ => "i32"
+        Raw(s"(param $$${arg.name} $tpe) ")
+      ))
+    val resultDoc: Document = if (isMain) "" else fh.retType match
+        case Type.Float64 => "(result f64) "
+        case _ => "(result i32) "
     val localsDoc: Document = Indented(
       line(
         fh.locals

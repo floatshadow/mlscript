@@ -21,7 +21,7 @@ class Mls2ir {
   val entrySymbolTypeMap = HashMap[Operand.Var, Type]()
   var bb = entryBB
   var symbolTypeMap = HashMap[Operand.Var, Type]()
-  var functionList = ListBuffer[(BasicBlock, Map[Operand.Var, Type])]()
+  var functionList = ListBuffer[(BasicBlock, Map[Operand.Var, Type], Type)]()
   var imports = ListBuffer[String]() // TODO handle MLscript buildin function
 
   def makeCall(name: Str, fn: Operand, args: List[Operand])(implicit
@@ -47,10 +47,16 @@ class Mls2ir {
     bb.instructions += Instruction.Assignment(result, value)
     // TODO getType in ir.scala
     val tpe: Type = value match
-      case PureValue.Op(op)           => op.getType(symbolTypeMap.toMap)
-      case PureValue.Alloc(ty)        => ty
-      case PureValue.BinOp(_, lhs, _) => lhs.getType(symbolTypeMap.toMap)
-      case PureValue.Neg(value)       => value.getType(symbolTypeMap.toMap)
+      case PureValue.Op(op)    => op.getType(symbolTypeMap.toMap)
+      case PureValue.Alloc(ty) => ty
+      case PureValue.BinOp(kind, lhs, _) =>
+        kind match
+          case BinOpKind.Eq => Type.Boolean
+          case BinOpKind.Ne => Type.Boolean
+          case BinOpKind.Lt => Type.Boolean
+          case BinOpKind.Le => Type.Boolean
+          case _            => lhs.getType(symbolTypeMap.toMap)
+      case PureValue.Neg(value) => value.getType(symbolTypeMap.toMap)
       case PureValue.GetField(obj, field) =>
         obj.getType(symbolTypeMap.toMap) match
           case tpNme: Type.TypeName =>
@@ -68,10 +74,16 @@ class Mls2ir {
     val result: Operand.Var = Operand.Var(scope.allocateRuntimeName)
     // TODO Handle scoping
     val tpe = value match
-      case PureValue.Op(op)           => op.getType(symbolTypeMap.toMap)
-      case PureValue.Alloc(ty)        => ty
-      case PureValue.BinOp(_, lhs, _) => lhs.getType(symbolTypeMap.toMap)
-      case PureValue.Neg(value)       => value.getType(symbolTypeMap.toMap)
+      case PureValue.Op(op)    => op.getType(symbolTypeMap.toMap)
+      case PureValue.Alloc(ty) => ty
+      case PureValue.BinOp(kind, lhs, _) =>
+        kind match
+          case BinOpKind.Eq => Type.Boolean
+          case BinOpKind.Ne => Type.Boolean
+          case BinOpKind.Lt => Type.Boolean
+          case BinOpKind.Le => Type.Boolean
+          case _            => lhs.getType(symbolTypeMap.toMap)
+      case PureValue.Neg(value) => value.getType(symbolTypeMap.toMap)
       case PureValue.GetField(obj, field) =>
         obj.getType(symbolTypeMap.toMap) match
           case tpNme: Type.TypeName =>
@@ -483,7 +495,11 @@ class Mls2ir {
                       bb = funEntry
                       val funRet = translateTerm(term)(funScope)
                       bb.instructions += Instruction.Return(S(funRet))
-                      functionList += ((funEntry, funSymbolTypeMap.toMap))
+                      functionList += ((
+                        funEntry,
+                        funSymbolTypeMap.toMap,
+                        toType(ret)
+                      ))
                       bb = entryBB
                     case _ => ???
                 case Left(IntLit(x)) =>
@@ -513,14 +529,14 @@ class Mls2ir {
   def apply(
       unit: TypingUnit
   ): (
-      List[(BasicBlock, Map[Operand.Var, Type])],
+      List[(BasicBlock, Map[Operand.Var, Type], Type)],
       List[String],
       Map[Type.TypeName, (LinkedHashMap[String, Type], Int)],
       Map[Type.Record, Int]
   ) =
     translateTypingUnit(unit)(Scope("root"))
     (
-      functionList.toList :+ ((entryBB, entrySymbolTypeMap.toMap)),
+      functionList.toList :+ ((entryBB, entrySymbolTypeMap.toMap, Type.Unit)),
       imports.toList,
       classDefMap.toIterable.zipWithIndex
         .map((pair, i) => pair._1 -> (pair._2, i))
