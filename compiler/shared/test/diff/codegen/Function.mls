@@ -1,51 +1,147 @@
 :NewParser
 :NewDefs
 
+log of "Function Test 1"
 fun incr(x:Int):Int = x+1
 log of incr(2)
 //│ fun incr: (x: Int,) -> Int
 //│ undefined
 //│ incr IR:
 //│ Basic Block incr (x):
-//│   a = Add x, 1
-//│   return a
+//│   b = Add x, 1
+//│   return b
 //│ 
 //│ entry IR:
 //│ Basic Block entry ():
-//│   a1 = call incr (2)
-//│   b1 = call log (a1)
+//│   a1 = call log (Function Test 1)
+//│   b1 = call incr (2)
+//│   c1 = call log (b1)
 //│ 
 //│ 
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
 //│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logI64 (import "system" "logI64") (param i64))
 //│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
-//│   (func $incr (param $x i32) (result i32) (local $a i32)
+//│   (func $incr (param $x i64) (result i64) (local $b i64) 
 //│     local.get $x
-//│     i32.const 1
-//│     i32.add
-//│     local.set $a
-//│     local.get $a
+//│     i64.const 1
+//│     i64.add
+//│     local.set $b
+//│     local.get $b
 //│   )
 //│   (export "main" (func $main))
-//│   (func $main (local $a1 i32)(local $b1 i32)
+//│   (func $main (local $a1 i32) (local $c1 i32) (local $b1 i64) 
+//│     global.get 0
+//│     i32.const 0
+//│     i32.add
+//│     i32.const 70
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 1
+//│     i32.add
+//│     i32.const 117
+//│     i32.store8
+//│     global.get 0
 //│     i32.const 2
-//│     call $incr
-//│     local.set $a1
-//│     local.get $a1
-//│     i32.const 2
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 3
+//│     i32.add
+//│     i32.const 99
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 5
+//│     i32.add
+//│     i32.const 105
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 6
+//│     i32.add
+//│     i32.const 111
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 7
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 8
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 9
+//│     i32.add
+//│     i32.const 84
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 10
+//│     i32.add
+//│     i32.const 101
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 11
+//│     i32.add
+//│     i32.const 115
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 12
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 13
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 14
+//│     i32.add
+//│     i32.const 49
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 15
+//│     i32.add
+//│     i32.const 0
+//│     i32.store8
+//│     global.get 0
+//│     global.get 0
+//│     i32.const 16
+//│     i32.add
+//│     global.set 0
+//│     i32.const 4
 //│     call $logI32
 //│     i32.const 0
+//│     local.set $a1
+//│     i64.const 2
+//│     call $incr
 //│     local.set $b1
+//│     local.get $b1
+//│     call $logI64
+//│     i32.const 0
+//│     local.set $c1
 //│   )
 //│ )
 //│ 
 //│ res
+//│     = undefined
+//│ // Output
+//│ Function Test 1
+//│ res
 //│     = [Function: incr]
 
+log of "Function Test 2"
 fun fib(x:Int):Int = if x is
   0 then 0
   1 then 1
@@ -56,112 +152,207 @@ log of fib(10)
 //│ fib IR:
 //│ Basic Block fib (x):
 //│   match x
-//│     0 -> j ()
-//│     1 -> l ()
-//│     _ -> c ()
-//│ Basic Block j ():
-//│   k = 0
-//│   br b (k)
-//│ Basic Block l ():
-//│   m = 1
-//│   br b (m)
-//│ Basic Block c ():
-//│   e = Add -1, x
-//│   f1 = call fib (e)
-//│   g = Add -2, x
-//│   h1 = call fib (g)
-//│   i = Add f1, h1
-//│   d = i
-//│   br b (d)
-//│ Basic Block b (a):
-//│   return a
+//│     0 -> k ()
+//│     1 -> m ()
+//│     _ -> d ()
+//│ Basic Block k ():
+//│   l = 0
+//│   br c (l)
+//│ Basic Block m ():
+//│   n = 1
+//│   br c (n)
+//│ Basic Block d ():
+//│   f = Add -1, x
+//│   g1 = call fib (f)
+//│   h = Add -2, x
+//│   i1 = call fib (h)
+//│   j = Add g1, i1
+//│   e = j
+//│   br c (e)
+//│ Basic Block c (b):
+//│   return b
 //│ 
 //│ entry IR:
 //│ Basic Block entry ():
-//│   a1 = call fib (10)
-//│   b1 = call log (a1)
+//│   a1 = call log (Function Test 2)
+//│   b1 = call fib (10)
+//│   c1 = call log (b1)
 //│ 
 //│ 
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
 //│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logI64 (import "system" "logI64") (param i64))
 //│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
-//│   (func $fib (param $x i32) (result i32) (local $e i32)(local $f1 i32)(local $a i32)(local $m i32)(local $i i32)(local $g i32)(local $h1 i32)(local $k i32)(local $d i32)
+//│   (func $fib (param $x i64) (result i64) (local $e i64) (local $n i64) (local $j i64) (local $f i64) (local $g1 i64) (local $i1 i64) (local $b i64) (local $l i64) (local $h i64) 
 //│     block $fib
-//│       block $c
-//│         block $j
-//│           block $l
+//│       block $d
+//│         block $k
+//│           block $m
 //│             block $Match_x
 //│               local.get $x
-//│               i32.const 0
-//│               i32.eq
+//│               i64.const 0
+//│               i64.eq
 //│               i32.const 1
 //│               i32.mul
 //│               local.get $x
-//│               i32.const 1
-//│               i32.eq
+//│               i64.const 1
+//│               i64.eq
 //│               i32.const 2
 //│               i32.mul
 //│               i32.add
 //│               br_table 2 1 0
 //│             end
-//│             i32.const 1
-//│             local.set $m
-//│             local.get $m
-//│             local.set $a
-//│             br $c
+//│             i64.const 1
+//│             local.set $n
+//│             local.get $n
+//│             local.set $b
+//│             br $d
 //│           end
-//│           i32.const 0
-//│           local.set $k
-//│           local.get $k
-//│           local.set $a
-//│           br $c
+//│           i64.const 0
+//│           local.set $l
+//│           local.get $l
+//│           local.set $b
+//│           br $d
 //│         end
-//│         i32.const -1
+//│         i64.const -1
 //│         local.get $x
-//│         i32.add
+//│         i64.add
+//│         local.set $f
+//│         local.get $f
+//│         call $fib
+//│         local.set $g1
+//│         i64.const -2
+//│         local.get $x
+//│         i64.add
+//│         local.set $h
+//│         local.get $h
+//│         call $fib
+//│         local.set $i1
+//│         local.get $g1
+//│         local.get $i1
+//│         i64.add
+//│         local.set $j
+//│         local.get $j
 //│         local.set $e
 //│         local.get $e
-//│         call $fib
-//│         local.set $f1
-//│         i32.const -2
-//│         local.get $x
-//│         i32.add
-//│         local.set $g
-//│         local.get $g
-//│         call $fib
-//│         local.set $h1
-//│         local.get $f1
-//│         local.get $h1
-//│         i32.add
-//│         local.set $i
-//│         local.get $i
-//│         local.set $d
-//│         local.get $d
-//│         local.set $a
+//│         local.set $b
 //│       end
 //│     end
-//│     local.get $a
+//│     local.get $b
 //│   )
 //│   (export "main" (func $main))
-//│   (func $main (local $a1 i32)(local $b1 i32)
-//│     i32.const 10
-//│     call $fib
-//│     local.set $a1
-//│     local.get $a1
+//│   (func $main (local $a1 i32) (local $c1 i32) (local $b1 i64) 
+//│     global.get 0
+//│     i32.const 0
+//│     i32.add
+//│     i32.const 70
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 1
+//│     i32.add
+//│     i32.const 117
+//│     i32.store8
+//│     global.get 0
 //│     i32.const 2
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 3
+//│     i32.add
+//│     i32.const 99
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 5
+//│     i32.add
+//│     i32.const 105
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 6
+//│     i32.add
+//│     i32.const 111
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 7
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 8
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 9
+//│     i32.add
+//│     i32.const 84
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 10
+//│     i32.add
+//│     i32.const 101
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 11
+//│     i32.add
+//│     i32.const 115
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 12
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 13
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 14
+//│     i32.add
+//│     i32.const 50
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 15
+//│     i32.add
+//│     i32.const 0
+//│     i32.store8
+//│     global.get 0
+//│     global.get 0
+//│     i32.const 16
+//│     i32.add
+//│     global.set 0
+//│     i32.const 4
 //│     call $logI32
 //│     i32.const 0
+//│     local.set $a1
+//│     i64.const 10
+//│     call $fib
 //│     local.set $b1
+//│     local.get $b1
+//│     call $logI64
+//│     i32.const 0
+//│     local.set $c1
 //│   )
 //│ )
 //│ 
 //│ res
+//│     = undefined
+//│ // Output
+//│ Function Test 2
+//│ res
 //│     = [Function: fib]
 
+log of "Function Test 3"
 fun get1():Int = 1
 log of get1()
 //│ fun get1: () -> Int
@@ -172,36 +363,131 @@ log of get1()
 //│ 
 //│ entry IR:
 //│ Basic Block entry ():
-//│   a1 = call get1 ()
-//│   b1 = call log (a1)
+//│   a1 = call log (Function Test 3)
+//│   b1 = call get1 ()
+//│   c1 = call log (b1)
 //│ 
 //│ 
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
 //│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logI64 (import "system" "logI64") (param i64))
 //│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
-//│   (func $get1 (result i32) 
-//│     i32.const 1
+//│   (func $get1 (result i64) 
+//│     i64.const 1
 //│   )
 //│   (export "main" (func $main))
-//│   (func $main (local $a1 i32)(local $b1 i32)
-//│     call $get1
-//│     local.set $a1
-//│     local.get $a1
+//│   (func $main (local $a1 i32) (local $c1 i32) (local $b1 i64) 
+//│     global.get 0
+//│     i32.const 0
+//│     i32.add
+//│     i32.const 70
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 1
+//│     i32.add
+//│     i32.const 117
+//│     i32.store8
+//│     global.get 0
 //│     i32.const 2
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 3
+//│     i32.add
+//│     i32.const 99
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 5
+//│     i32.add
+//│     i32.const 105
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 6
+//│     i32.add
+//│     i32.const 111
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 7
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 8
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 9
+//│     i32.add
+//│     i32.const 84
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 10
+//│     i32.add
+//│     i32.const 101
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 11
+//│     i32.add
+//│     i32.const 115
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 12
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 13
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 14
+//│     i32.add
+//│     i32.const 51
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 15
+//│     i32.add
+//│     i32.const 0
+//│     i32.store8
+//│     global.get 0
+//│     global.get 0
+//│     i32.const 16
+//│     i32.add
+//│     global.set 0
+//│     i32.const 4
 //│     call $logI32
 //│     i32.const 0
+//│     local.set $a1
+//│     call $get1
 //│     local.set $b1
+//│     local.get $b1
+//│     call $logI64
+//│     i32.const 0
+//│     local.set $c1
 //│   )
 //│ )
 //│ 
 //│ res
+//│     = undefined
+//│ // Output
+//│ Function Test 3
+//│ res
 //│     = [Function: get1]
 
 //FIXME handle class inheritance
+log of "Function Test 4"
 class List()
 class Nil() extends List
 class Cons(head:Int, tail:List) extends List
@@ -210,60 +496,67 @@ fun sum(x:List):Int = if x is
   Cons(h,t) then h+sum(t)
   else 0
 log of sum(list)
+// fun atIndex(ls:List,idx:Int):Int = if ls is
+  // Cons(h,t) then if (idx==0) then h else atIndex(t,idx-1)
+  // else 0
+// log of atIndex(list,1)
 //│ class List()
 //│ class Nil() extends List
 //│ class Cons(head: Int, tail: List) extends List
 //│ let list: Cons
 //│ fun sum: (x: List,) -> Int
-//│ undefined
+//│ ()
 //│ sum IR:
 //│ Basic Block sum (x):
 //│   match x
-//│     Cons -> j ()
-//│     _ -> h ()
+//│     Cons -> l ()
+//│     _ -> j ()
+//│ Basic Block l ():
+//│   m = cast x, Cons
+//│   n = getfield m, head
+//│   h1 = n
+//│   o = getfield m, tail
+//│   t = o
+//│   q1 = call sum (t)
+//│   r = Add h1, q1
+//│   p = r
+//│   br i (p)
 //│ Basic Block j ():
-//│   k = getfield x, head
-//│   h1 = k
-//│   l = getfield x, tail
-//│   t = l
-//│   n1 = call sum (t)
-//│   o = Add h1, n1
-//│   m = o
-//│   br g (m)
-//│ Basic Block h ():
-//│   i = 0
-//│   br g (i)
-//│ Basic Block g (f):
-//│   return f
+//│   k = 0
+//│   br i (k)
+//│ Basic Block i (h):
+//│   return h
 //│ 
 //│ entry IR:
 //│ Basic Block entry ():
-//│   a = alloc Nil
-//│   b = alloc Cons
-//│   setfield b.head = 7
-//│   setfield b.tail = a
+//│   a1 = call log (Function Test 4)
+//│   b = alloc Nil
 //│   c = alloc Cons
-//│   setfield c.head = 5
+//│   setfield c.head = 7
 //│   setfield c.tail = b
 //│   d = alloc Cons
-//│   setfield d.head = 3
+//│   setfield d.head = 5
 //│   setfield d.tail = c
 //│   e = alloc Cons
-//│   setfield e.head = 1
+//│   setfield e.head = 3
 //│   setfield e.tail = d
-//│   list1 = e
-//│   f1 = call sum (list1)
-//│   g1 = call log (f1)
+//│   f = alloc Cons
+//│   setfield f.head = 1
+//│   setfield f.tail = e
+//│   g = f
+//│   h1 = call sum (g)
+//│   i1 = call log (h1)
 //│ 
 //│ 
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
 //│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logI64 (import "system" "logI64") (param i64))
 //│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
-//│   (func $sum (param $x i32) (result i32) (local $t i32)(local $m i32)(local $i i32)(local $l i32)(local $h1 i32)(local $k i32)(local $o i32)(local $n1 i32)(local $f i32)
+//│   (func $sum (param $x i32) (result i64) (local $n i64) (local $t i32) (local $m i32) (local $p i64) (local $h1 i64) (local $h i64) (local $r i64) (local $q1 i64) (local $k i64) (local $o i32) 
 //│     block $sum
 //│       local.get $x
 //│       i32.load
@@ -271,43 +564,134 @@ log of sum(list)
 //│       i32.eq
 //│       if
 //│         local.get $x
+//│         local.set $m
+//│         local.get $m
 //│         i32.const 4
 //│         i32.add
-//│         i32.load
-//│         local.set $k
-//│         local.get $k
+//│         i64.load
+//│         local.set $n
+//│         local.get $n
 //│         local.set $h1
-//│         local.get $x
-//│         i32.const 8
+//│         local.get $m
+//│         i32.const 12
 //│         i32.add
 //│         i32.load
-//│         local.set $l
-//│         local.get $l
+//│         local.set $o
+//│         local.get $o
 //│         local.set $t
 //│         local.get $t
 //│         call $sum
-//│         local.set $n1
+//│         local.set $q1
 //│         local.get $h1
-//│         local.get $n1
-//│         i32.add
-//│         local.set $o
-//│         local.get $o
-//│         local.set $m
-//│         local.get $m
-//│         local.set $f
+//│         local.get $q1
+//│         i64.add
+//│         local.set $r
+//│         local.get $r
+//│         local.set $p
+//│         local.get $p
+//│         local.set $h
 //│       else
-//│         i32.const 0
-//│         local.set $i
-//│         local.get $i
-//│         local.set $f
+//│         i64.const 0
+//│         local.set $k
+//│         local.get $k
+//│         local.set $h
 //│       end
 //│     end
-//│     local.get $f
+//│     local.get $h
 //│   )
 //│   (export "main" (func $main))
-//│   (func $main (local $e i32)(local $f1 i32)(local $a i32)(local $g1 i32)(local $list1 i32)(local $b i32)(local $c i32)(local $d i32)
+//│   (func $main (local $e i32) (local $f i32) (local $i1 i32) (local $b i32) (local $g i32) (local $h1 i64) (local $d i32) (local $c i32) (local $a1 i32) 
 //│     global.get 0
-//│     local.set $a
+//│     i32.const 0
+//│     i32.add
+//│     i32.const 70
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 1
+//│     i32.add
+//│     i32.const 117
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 2
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 3
+//│     i32.add
+//│     i32.const 99
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 5
+//│     i32.add
+//│     i32.const 105
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 6
+//│     i32.add
+//│     i32.const 111
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 7
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 8
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 9
+//│     i32.add
+//│     i32.const 84
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 10
+//│     i32.add
+//│     i32.const 101
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 11
+//│     i32.add
+//│     i32.const 115
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 12
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 13
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 14
+//│     i32.add
+//│     i32.const 52
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 15
+//│     i32.add
+//│     i32.const 0
+//│     i32.store8
+//│     global.get 0
+//│     global.get 0
+//│     i32.const 16
+//│     i32.add
+//│     global.set 0
+//│     i32.const 4
+//│     call $logI32
+//│     i32.const 0
+//│     local.set $a1
+//│     global.get 0
+//│     local.set $b
 //│     global.get 0
 //│     i32.const 0
 //│     i32.store
@@ -316,40 +700,21 @@ log of sum(list)
 //│     i32.add
 //│     global.set 0
 //│     global.get 0
-//│     local.set $b
-//│     global.get 0
-//│     i32.const 1
-//│     i32.store
-//│     global.get 0
-//│     i32.const 12
-//│     i32.add
-//│     global.set 0
-//│     local.get $b
-//│     i32.const 4
-//│     i32.add
-//│     i32.const 7
-//│     i32.store
-//│     local.get $b
-//│     i32.const 8
-//│     i32.add
-//│     local.get $a
-//│     i32.store
-//│     global.get 0
 //│     local.set $c
 //│     global.get 0
 //│     i32.const 1
 //│     i32.store
 //│     global.get 0
-//│     i32.const 12
+//│     i32.const 16
 //│     i32.add
 //│     global.set 0
 //│     local.get $c
 //│     i32.const 4
 //│     i32.add
-//│     i32.const 5
-//│     i32.store
+//│     i64.const 7
+//│     i64.store
 //│     local.get $c
-//│     i32.const 8
+//│     i32.const 12
 //│     i32.add
 //│     local.get $b
 //│     i32.store
@@ -359,16 +724,16 @@ log of sum(list)
 //│     i32.const 1
 //│     i32.store
 //│     global.get 0
-//│     i32.const 12
+//│     i32.const 16
 //│     i32.add
 //│     global.set 0
 //│     local.get $d
 //│     i32.const 4
 //│     i32.add
-//│     i32.const 3
-//│     i32.store
+//│     i64.const 5
+//│     i64.store
 //│     local.get $d
-//│     i32.const 8
+//│     i32.const 12
 //│     i32.add
 //│     local.get $c
 //│     i32.store
@@ -378,37 +743,64 @@ log of sum(list)
 //│     i32.const 1
 //│     i32.store
 //│     global.get 0
-//│     i32.const 12
+//│     i32.const 16
 //│     i32.add
 //│     global.set 0
 //│     local.get $e
 //│     i32.const 4
 //│     i32.add
-//│     i32.const 1
-//│     i32.store
+//│     i64.const 3
+//│     i64.store
 //│     local.get $e
-//│     i32.const 8
+//│     i32.const 12
 //│     i32.add
 //│     local.get $d
 //│     i32.store
+//│     global.get 0
+//│     local.set $f
+//│     global.get 0
+//│     i32.const 1
+//│     i32.store
+//│     global.get 0
+//│     i32.const 16
+//│     i32.add
+//│     global.set 0
+//│     local.get $f
+//│     i32.const 4
+//│     i32.add
+//│     i64.const 1
+//│     i64.store
+//│     local.get $f
+//│     i32.const 12
+//│     i32.add
 //│     local.get $e
-//│     local.set $list1
-//│     local.get $list1
+//│     i32.store
+//│     local.get $f
+//│     local.set $g
+//│     local.get $g
 //│     call $sum
-//│     local.set $f1
-//│     local.get $f1
-//│     i32.const 2
-//│     call $logI32
+//│     local.set $h1
+//│     local.get $h1
+//│     call $logI64
 //│     i32.const 0
-//│     local.set $g1
+//│     local.set $i1
 //│   )
 //│ )
 //│ 
+//│ res
+//│     = undefined
+//│ // Output
+//│ Function Test 4
 //│ list
 //│      = Cons {}
 //│ res
 //│     = [Function: sum]
+//│ res
+//│     = undefined
+//│ // Output
+//│ 16
 
+log of "Function Test 5"
 fun getString():Str = "MLscript"
 fun getTrue():Bool = true
 fun getFalse():Bool = false
@@ -445,29 +837,31 @@ log(getClass().x)
 //│ 
 //│ getClass IR:
 //│ Basic Block getClass ():
-//│   a = alloc Foo
-//│   setfield a.x = 10
-//│   return a
+//│   b = alloc Foo
+//│   setfield b.x = 10
+//│   return b
 //│ 
 //│ entry IR:
 //│ Basic Block entry ():
-//│   a1 = call getString ()
-//│   b1 = call log (a1)
-//│   c1 = call getTrue ()
-//│   d1 = call log (c1)
-//│   e1 = call getFalse ()
-//│   f1 = call log (e1)
-//│   g1 = call getZero ()
-//│   h1 = call log (g1)
-//│   i1 = call getClass ()
-//│   j = getfield i1, x
-//│   k1 = call log (j)
+//│   a1 = call log (Function Test 5)
+//│   b1 = call getString ()
+//│   c1 = call log (b1)
+//│   d1 = call getTrue ()
+//│   e1 = call log (d1)
+//│   f1 = call getFalse ()
+//│   g1 = call log (f1)
+//│   h1 = call getZero ()
+//│   i1 = call log (h1)
+//│   j1 = call getClass ()
+//│   k = getfield j1, x
+//│   l1 = call log (k)
 //│ 
 //│ 
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
 //│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logI64 (import "system" "logI64") (param i64))
 //│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
@@ -547,72 +941,163 @@ log(getClass().x)
 //│     i32.const 0
 //│   )
 //│ 
-//│   (func $getZero (result i32) 
-//│     i32.const 0
+//│   (func $getZero (result i64) 
+//│     i64.const 0
 //│   )
 //│ 
-//│   (func $getClass (result i32) (local $a i32)
+//│   (func $getClass (result i32) (local $b i32) 
 //│     global.get 0
-//│     local.set $a
+//│     local.set $b
 //│     global.get 0
 //│     i32.const 0
 //│     i32.store
+//│     global.get 0
+//│     i32.const 12
+//│     i32.add
+//│     global.set 0
+//│     local.get $b
+//│     i32.const 4
+//│     i32.add
+//│     i64.const 10
+//│     i64.store
+//│     local.get $b
+//│   )
+//│   (export "main" (func $main))
+//│   (func $main (local $l1 i32) (local $j1 i32) (local $e1 i32) (local $f1 i32) (local $b1 i32) (local $g1 i32) (local $h1 i64) (local $a1 i32) (local $d1 i32) (local $k i64) (local $c1 i32) (local $i1 i32) 
+//│     global.get 0
+//│     i32.const 0
+//│     i32.add
+//│     i32.const 70
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 1
+//│     i32.add
+//│     i32.const 117
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 2
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 3
+//│     i32.add
+//│     i32.const 99
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 5
+//│     i32.add
+//│     i32.const 105
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 6
+//│     i32.add
+//│     i32.const 111
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 7
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
 //│     global.get 0
 //│     i32.const 8
 //│     i32.add
-//│     global.set 0
-//│     local.get $a
-//│     i32.const 4
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 9
 //│     i32.add
+//│     i32.const 84
+//│     i32.store8
+//│     global.get 0
 //│     i32.const 10
-//│     i32.store
-//│     local.get $a
-//│   )
-//│   (export "main" (func $main))
-//│   (func $main (local $e1 i32)(local $j i32)(local $f1 i32)(local $b1 i32)(local $g1 i32)(local $h1 i32)(local $k1 i32)(local $a1 i32)(local $d1 i32)(local $c1 i32)(local $i1 i32)
-//│     call $getString
-//│     local.set $a1
-//│     local.get $a1
+//│     i32.add
+//│     i32.const 101
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 11
+//│     i32.add
+//│     i32.const 115
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 12
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 13
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 14
+//│     i32.add
+//│     i32.const 53
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 15
+//│     i32.add
+//│     i32.const 0
+//│     i32.store8
+//│     global.get 0
+//│     global.get 0
+//│     i32.const 16
+//│     i32.add
+//│     global.set 0
 //│     i32.const 4
 //│     call $logI32
 //│     i32.const 0
+//│     local.set $a1
+//│     call $getString
 //│     local.set $b1
-//│     call $getTrue
+//│     local.get $b1
+//│     i32.const 4
+//│     call $logI32
+//│     i32.const 0
 //│     local.set $c1
-//│     local.get $c1
-//│     i32.const 1
-//│     call $logI32
-//│     i32.const 0
+//│     call $getTrue
 //│     local.set $d1
-//│     call $getFalse
-//│     local.set $e1
-//│     local.get $e1
+//│     local.get $d1
 //│     i32.const 1
 //│     call $logI32
 //│     i32.const 0
+//│     local.set $e1
+//│     call $getFalse
 //│     local.set $f1
-//│     call $getZero
-//│     local.set $g1
-//│     local.get $g1
-//│     i32.const 2
+//│     local.get $f1
+//│     i32.const 1
 //│     call $logI32
 //│     i32.const 0
+//│     local.set $g1
+//│     call $getZero
 //│     local.set $h1
-//│     call $getClass
+//│     local.get $h1
+//│     call $logI64
+//│     i32.const 0
 //│     local.set $i1
-//│     local.get $i1
+//│     call $getClass
+//│     local.set $j1
+//│     local.get $j1
 //│     i32.const 4
 //│     i32.add
-//│     i32.load
-//│     local.set $j
-//│     local.get $j
-//│     i32.const 2
-//│     call $logI32
+//│     i64.load
+//│     local.set $k
+//│     local.get $k
+//│     call $logI64
 //│     i32.const 0
-//│     local.set $k1
+//│     local.set $l1
 //│   )
 //│ )
 //│ 
+//│ res
+//│     = undefined
+//│ // Output
+//│ Function Test 5
 //│ res
 //│     = [Function: getString]
 //│ res
@@ -624,6 +1109,7 @@ log(getClass().x)
 //│ res
 //│     = [Function: getClass]
 
+log of "Function Test 6"
 fun Square(x:Int):Int = x*x
 fun Cube(x:Int):Int = x*x*x
 log of Square(3)+Cube(2)
@@ -632,68 +1118,303 @@ log of Square(3)+Cube(2)
 //│ undefined
 //│ Square IR:
 //│ Basic Block Square (x):
-//│   a = Mul x, x
-//│   return a
+//│   b = Mul x, x
+//│   return b
 //│ 
 //│ Cube IR:
 //│ Basic Block Cube (x):
-//│   a = Mul x, x
-//│   b = Mul a, x
-//│   return b
+//│   b = Mul x, x
+//│   c = Mul b, x
+//│   return c
 //│ 
 //│ entry IR:
 //│ Basic Block entry ():
-//│   a1 = call Square (3)
-//│   b1 = call Cube (2)
-//│   c = Add a1, b1
-//│   d1 = call log (c)
+//│   a1 = call log (Function Test 6)
+//│   b1 = call Square (3)
+//│   c1 = call Cube (2)
+//│   d = Add b1, c1
+//│   e1 = call log (d)
 //│ 
 //│ 
 //│ WASM:
 //│ (module 
 //│   (import "system" "mem" (memory 100))
 //│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logI64 (import "system" "logI64") (param i64))
 //│   (func $logF64 (import "system" "logF64") (param f64))
 //│   (global (mut i32) i32.const 0) 
 //│ 
-//│   (func $Square (param $x i32) (result i32) (local $a i32)
+//│   (func $Square (param $x i64) (result i64) (local $b i64) 
 //│     local.get $x
 //│     local.get $x
-//│     i32.mul
-//│     local.set $a
-//│     local.get $a
-//│   )
-//│ 
-//│   (func $Cube (param $x i32) (result i32) (local $a i32)(local $b i32)
-//│     local.get $x
-//│     local.get $x
-//│     i32.mul
-//│     local.set $a
-//│     local.get $a
-//│     local.get $x
-//│     i32.mul
+//│     i64.mul
 //│     local.set $b
 //│     local.get $b
 //│   )
-//│   (export "main" (func $main))
-//│   (func $main (local $a1 i32)(local $c i32)(local $d1 i32)(local $b1 i32)
-//│     i32.const 3
-//│     call $Square
-//│     local.set $a1
-//│     i32.const 2
-//│     call $Cube
-//│     local.set $b1
-//│     local.get $a1
-//│     local.get $b1
-//│     i32.add
+//│ 
+//│   (func $Cube (param $x i64) (result i64) (local $b i64) (local $c i64) 
+//│     local.get $x
+//│     local.get $x
+//│     i64.mul
+//│     local.set $b
+//│     local.get $b
+//│     local.get $x
+//│     i64.mul
 //│     local.set $c
 //│     local.get $c
+//│   )
+//│   (export "main" (func $main))
+//│   (func $main (local $e1 i32) (local $b1 i64) (local $c1 i64) (local $a1 i32) (local $d i64) 
+//│     global.get 0
+//│     i32.const 0
+//│     i32.add
+//│     i32.const 70
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 1
+//│     i32.add
+//│     i32.const 117
+//│     i32.store8
+//│     global.get 0
 //│     i32.const 2
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 3
+//│     i32.add
+//│     i32.const 99
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 5
+//│     i32.add
+//│     i32.const 105
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 6
+//│     i32.add
+//│     i32.const 111
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 7
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 8
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 9
+//│     i32.add
+//│     i32.const 84
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 10
+//│     i32.add
+//│     i32.const 101
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 11
+//│     i32.add
+//│     i32.const 115
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 12
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 13
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 14
+//│     i32.add
+//│     i32.const 54
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 15
+//│     i32.add
+//│     i32.const 0
+//│     i32.store8
+//│     global.get 0
+//│     global.get 0
+//│     i32.const 16
+//│     i32.add
+//│     global.set 0
+//│     i32.const 4
 //│     call $logI32
 //│     i32.const 0
-//│     local.set $d1
+//│     local.set $a1
+//│     i64.const 3
+//│     call $Square
+//│     local.set $b1
+//│     i64.const 2
+//│     call $Cube
+//│     local.set $c1
+//│     local.get $b1
+//│     local.get $c1
+//│     i64.add
+//│     local.set $d
+//│     local.get $d
+//│     call $logI64
+//│     i32.const 0
+//│     local.set $e1
 //│   )
 //│ )
 //│ 
 //│ res
+//│     = undefined
+//│ // Output
+//│ Function Test 6
+//│ res
 //│     = [Function: Square]
+
+log of "Function Test 7"
+fun addition(x:Int,y:Int):Int = x+y
+log of addition(6,7)
+//│ fun addition: (x: Int, y: Int,) -> Int
+//│ undefined
+//│ addition IR:
+//│ Basic Block addition (x, y):
+//│   b = Add x, y
+//│   return b
+//│ 
+//│ entry IR:
+//│ Basic Block entry ():
+//│   a1 = call log (Function Test 7)
+//│   b1 = call addition (6, 7)
+//│   c1 = call log (b1)
+//│ 
+//│ 
+//│ WASM:
+//│ (module 
+//│   (import "system" "mem" (memory 100))
+//│   (func $logI32 (import "system" "logI32") (param i32 i32))
+//│   (func $logI64 (import "system" "logI64") (param i64))
+//│   (func $logF64 (import "system" "logF64") (param f64))
+//│   (global (mut i32) i32.const 0) 
+//│ 
+//│   (func $addition (param $x i64) (param $y i64) (result i64) (local $b i64) 
+//│     local.get $x
+//│     local.get $y
+//│     i64.add
+//│     local.set $b
+//│     local.get $b
+//│   )
+//│   (export "main" (func $main))
+//│   (func $main (local $a1 i32) (local $c1 i32) (local $b1 i64) 
+//│     global.get 0
+//│     i32.const 0
+//│     i32.add
+//│     i32.const 70
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 1
+//│     i32.add
+//│     i32.const 117
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 2
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 3
+//│     i32.add
+//│     i32.const 99
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 4
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 5
+//│     i32.add
+//│     i32.const 105
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 6
+//│     i32.add
+//│     i32.const 111
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 7
+//│     i32.add
+//│     i32.const 110
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 8
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 9
+//│     i32.add
+//│     i32.const 84
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 10
+//│     i32.add
+//│     i32.const 101
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 11
+//│     i32.add
+//│     i32.const 115
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 12
+//│     i32.add
+//│     i32.const 116
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 13
+//│     i32.add
+//│     i32.const 32
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 14
+//│     i32.add
+//│     i32.const 55
+//│     i32.store8
+//│     global.get 0
+//│     i32.const 15
+//│     i32.add
+//│     i32.const 0
+//│     i32.store8
+//│     global.get 0
+//│     global.get 0
+//│     i32.const 16
+//│     i32.add
+//│     global.set 0
+//│     i32.const 4
+//│     call $logI32
+//│     i32.const 0
+//│     local.set $a1
+//│     i64.const 6
+//│     i64.const 7
+//│     call $addition
+//│     local.set $b1
+//│     local.get $b1
+//│     call $logI64
+//│     i32.const 0
+//│     local.set $c1
+//│   )
+//│ )
+//│ 
+//│ res
+//│     = undefined
+//│ // Output
+//│ Function Test 7
+//│ res
+//│     = [Function: addition]

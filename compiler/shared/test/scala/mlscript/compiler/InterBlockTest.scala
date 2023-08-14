@@ -37,7 +37,7 @@ class InterBlockTest extends munit.FunSuite {
         "blk_1",
         List(),
         ListBuffer(
-          Assignment(Var("x1"), Alloc(Int32)),
+          Assignment(Var("x1"), Alloc(Int64)),
           Branch(blk_2, List(Var("x0"), Var("x1")))
         )
       )
@@ -45,7 +45,7 @@ class InterBlockTest extends munit.FunSuite {
         "blk_0",
         List(),
         ListBuffer(
-          Assignment(Var("x0"), Alloc(Int32)),
+          Assignment(Var("x0"), Alloc(Int64)),
           Branch(blk_1, List(Var("x0")))
         )
       )
@@ -139,7 +139,7 @@ class InterBlockTest extends munit.FunSuite {
         "blk_1",
         List(),
         ListBuffer(
-          Assignment(Var("x0"), Alloc(Int32)),
+          Assignment(Var("x0"), Alloc(Int64)),
           Return(None)
         )
       )

@@ -164,7 +164,7 @@ class IntraBlockTest extends munit.FunSuite {
           List(),
           ListBuffer(
             Assignment(Var("x"), BinOp(Add, Var("y"), Var("y"))),
-            Assignment(Var("y"), Alloc(Int32)),
+            Assignment(Var("y"), Alloc(Int64)),
             Return(Some(Var("x")))
           )
         )
@@ -181,7 +181,7 @@ class IntraBlockTest extends munit.FunSuite {
           "blk_0",
           List(),
           ListBuffer(
-            Assignment(Var("y"), Alloc(Int32)),
+            Assignment(Var("y"), Alloc(Int64)),
             Assignment(Var("x"), BinOp(Add, Var("y"), Var("y"))),
             Assignment(Var("x"), BinOp(Add, Var("y"), Var("y"))),
             Return(Some(Var("x")))
@@ -223,7 +223,7 @@ class IntraBlockTest extends munit.FunSuite {
         )
       )
     }
-    val expected = "Inconsistent type in binary operator found: Add i32 bool"
+    val expected = "Inconsistent type in binary operator found: Add i64 bool"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -273,8 +273,8 @@ class IntraBlockTest extends munit.FunSuite {
           "blk_0",
           List(),
           ListBuffer(
-            Assignment(Var("x1"), Alloc(MutMap("id" -> Int32))),
-            Assignment(Var("x2"), Alloc(MutMap("id" -> Int32))),
+            Assignment(Var("x1"), Alloc(MutMap("id" -> Int64))),
+            Assignment(Var("x2"), Alloc(MutMap("id" -> Int64))),
             Assignment(Var("y"), BinOp(Eq, Var("x1"), Var("x2"))),
             Return(Some(Const(0)))
           )
@@ -282,7 +282,7 @@ class IntraBlockTest extends munit.FunSuite {
       )
     }
     val expected =
-      "Inconsistent type in binary operator found: Eq {id: i32} {id: i32}"
+      "Inconsistent type in binary operator found: Eq {id: i64} {id: i64}"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -293,8 +293,8 @@ class IntraBlockTest extends munit.FunSuite {
           "blk_0",
           List(),
           ListBuffer(
-            Assignment(Var("x1"), Alloc(MutMap("id" -> Int32))),
-            Assignment(Var("x2"), Alloc(Int32)),
+            Assignment(Var("x1"), Alloc(MutMap("id" -> Int64))),
+            Assignment(Var("x2"), Alloc(Int64)),
             Assignment(Var("y"), BinOp(Eq, Var("x1"), Var("x2"))),
             Return(Some(Const(0)))
           )
@@ -302,7 +302,7 @@ class IntraBlockTest extends munit.FunSuite {
       )
     }
     val expected =
-      "Inconsistent type in binary operator found: Eq {id: i32} i32"
+      "Inconsistent type in binary operator found: Eq {id: i64} i64"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -347,14 +347,14 @@ class IntraBlockTest extends munit.FunSuite {
           "blk_0",
           List(),
           ListBuffer(
-            Assignment(Var("x"), Alloc(Int32)),
+            Assignment(Var("x"), Alloc(Int64)),
             Assignment(Var("y"), GetField(Var("x"), "id")),
             Return(Some(Const(0)))
           )
         )
       )
     }
-    val expected = "GetField is not allowed in type i32"
+    val expected = "GetField is not allowed in type i64"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -365,14 +365,14 @@ class IntraBlockTest extends munit.FunSuite {
           "blk_0",
           List(),
           ListBuffer(
-            Assignment(Var("x"), Alloc(MutMap("id" -> Int32))),
+            Assignment(Var("x"), Alloc(MutMap("id" -> Int64))),
             Assignment(Var("y"), GetField(Var("x"), "name")),
             Return(Some(Const(0)))
           )
         )
       )
     }
-    val expected = "{id: i32} does not contain field name"
+    val expected = "{id: i64} does not contain field name"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -383,14 +383,14 @@ class IntraBlockTest extends munit.FunSuite {
           "blk_0",
           List(),
           ListBuffer(
-            Assignment(Var("x"), Alloc(Int32)),
+            Assignment(Var("x"), Alloc(Int64)),
             Assignment(Var("y"), IsVariant(Var("x"), "people")),
             Return(Some(Const(0)))
           )
         )
       )
     }
-    val expected = "IsVariant is not allowed in type i32"
+    val expected = "IsVariant is not allowed in type i64"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -401,14 +401,14 @@ class IntraBlockTest extends munit.FunSuite {
           "blk_0",
           List(),
           ListBuffer(
-            Assignment(Var("x"), Alloc(Int32)),
+            Assignment(Var("x"), Alloc(Int64)),
             Assignment(Var("y"), AsVariant(Var("x"), "people")),
             Return(Some(Const(0)))
           )
         )
       )
     }
-    val expected = "AsVariant is not allowed in type i32"
+    val expected = "AsVariant is not allowed in type i64"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -425,9 +425,9 @@ class IntraBlockTest extends munit.FunSuite {
                 Variant(
                   VariantObj(
                     MutMap(
-                      "people" -> Some(MutMap("age" -> Int32)),
+                      "people" -> Some(MutMap("age" -> Int64)),
                       "adult" -> Some(
-                        MutMap("age" -> Int32, "marriage" -> Boolean)
+                        MutMap("age" -> Int64, "marriage" -> Boolean)
                       )
                     )
                   )
@@ -441,7 +441,7 @@ class IntraBlockTest extends munit.FunSuite {
       )
     }
     val expected =
-      "<adult: {age: i32, marriage: bool} | people: {age: i32}> does not contain variant child"
+      "<adult: {age: i64, marriage: bool} | people: {age: i64}> does not contain variant child"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -454,7 +454,7 @@ class IntraBlockTest extends munit.FunSuite {
           ListBuffer(
             Assignment(
               Var("record"),
-              Alloc(Record(RecordObj(MutMap("id" -> Int32))))
+              Alloc(Record(RecordObj(MutMap("id" -> Int64))))
             ),
             SetField(Var("record"), "id", Const(false)),
             Return(Some(Const(0)))
@@ -462,7 +462,7 @@ class IntraBlockTest extends munit.FunSuite {
         )
       )
     }
-    val expected = "record.id expected type:i32 Found:bool"
+    val expected = "record.id expected type:i64 Found:bool"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -475,7 +475,7 @@ class IntraBlockTest extends munit.FunSuite {
           ListBuffer(
             Assignment(
               Var("record"),
-              Alloc(Record(RecordObj(MutMap("id" -> Int32))))
+              Alloc(Record(RecordObj(MutMap("id" -> Int64))))
             ),
             SetField(Var("record"), "name", Const(false)),
             Return(Some(Const(0)))
@@ -483,7 +483,7 @@ class IntraBlockTest extends munit.FunSuite {
         )
       )
     }
-    val expected = "{id: i32} does not contain field name"
+    val expected = "{id: i64} does not contain field name"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -496,7 +496,7 @@ class IntraBlockTest extends munit.FunSuite {
           ListBuffer(
             Assignment(
               Var("record"),
-              Alloc(Int32)
+              Alloc(Int64)
             ),
             SetField(Var("record"), "name", Const(false)),
             Return(Some(Const(0)))
@@ -504,7 +504,7 @@ class IntraBlockTest extends munit.FunSuite {
         )
       )
     }
-    val expected = "SetField is not allowed in type i32"
+    val expected = "SetField is not allowed in type i64"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -517,7 +517,7 @@ class IntraBlockTest extends munit.FunSuite {
           ListBuffer(
             Assignment(
               Var("fun"),
-              Alloc(Function(List(Type.Int32), Type.Unit))
+              Alloc(Function(List(Type.Int64), Type.Unit))
             ),
             Call(Some(Var("x")), Var("fun"), List(Const(1))),
             Assignment(Var("y"), Neg(Var("x"))),
@@ -558,13 +558,13 @@ class IntraBlockTest extends munit.FunSuite {
           "blk_0",
           List(),
           ListBuffer(
-            Assignment(Var("x"), Alloc(Int32))
+            Assignment(Var("x"), Alloc(Int64))
           )
         )
       )
     }
     val expected =
-      "Unterminated basic block. The block ends with instruction: Assignment(x,alloc i32)"
+      "Unterminated basic block. The block ends with instruction: Assignment(x,alloc i64)"
     assertEquals(thrown.getMessage(), expected)
   }
 
@@ -575,10 +575,10 @@ class IntraBlockTest extends munit.FunSuite {
           "blk_0",
           List(),
           ListBuffer(
-            Assignment(Var("y"), Alloc(Type.Int32)),
+            Assignment(Var("y"), Alloc(Type.Int64)),
             Assignment(
               Var("fn"),
-              Alloc(Type.Function(List(Type.Int32, Type.Int32), Type.Boolean))
+              Alloc(Type.Function(List(Type.Int64, Type.Int64), Type.Boolean))
             ),
             Call(Some(Var("x")), Var("fn"), List(Var("y"), Const(10)))
           )
@@ -599,7 +599,7 @@ class IntraBlockTest extends munit.FunSuite {
           ListBuffer(
             Assignment(
               Var("record"),
-              Alloc(MutMap("id" -> Int32))
+              Alloc(MutMap("id" -> Int64))
             ),
             SetField(Var("record"), "id", Const(123))
           )
