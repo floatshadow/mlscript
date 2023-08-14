@@ -154,10 +154,12 @@ class Ir2wasm {
                           lh.getIsParam(op)
                         )
                     case _ => ()
-
+                  val eqInstr = key.getType(symbolTypeMap) match
+                    case Type.Int64 => I64Eq
+                    case _ => I32Eq
                   operandToWasm(value) <:> getLoad(value) <:> operandToWasm(
                     key
-                  ) <:> Eq <:>
+                  ) <:> eqInstr <:>
                     If_void <:> doBranch(source, thenBlock, thenArgs)(
                       context,
                       thenlh
@@ -204,15 +206,18 @@ class Ir2wasm {
         case Nil =>
           val comparison: List[Code] =
             conditions.zipWithIndex.map((cond, idx) =>
+              val eqInstr = cond.getType(symbolTypeMap) match
+                case Type.Int64 => I64Eq
+                case _ => I32Eq
               operandToWasm(value) <:> getLoad(value) <:>
                 operandToWasm(cond) <:>
-                Eq <:>
+                eqInstr <:>
                 I32Const(idx + 1) <:>
-                Mul
+                I32Mul
             )
           Block(s"Match_$value", Nil) <:>
             comparison.head <:>
-            comparison.tail.map(_ <:> Add) <:>
+            comparison.tail.map(_ <:> I32Add) <:>
             BrTable(conditions.length) <:>
             End
 
@@ -255,8 +260,8 @@ class Ir2wasm {
                 case _            => operand.getType(symbolTypeMap)
               lh.register(lhs.name, tpe)
               pureValueToWasm(rhs) <:> SetLocal(lhs.name)
-            case _ => // TODO
-              lh.register(lhs.name, Type.Int32)
+            case _ =>
+              lh.register(lhs.name, lhs.getType(symbolTypeMap))
               pureValueToWasm(rhs) <:> SetLocal(lhs.name)
           head <:> instrToWasm(instrs.tail)
         case S(_: Branch)   => Code(Nil)
@@ -269,7 +274,7 @@ class Ir2wasm {
           val typeCode: Code = args.head.getType(symbolTypeMap) match
             case Type.Unit           => I32Const(0)
             case Type.Boolean        => I32Const(1)
-            case Type.Int32          => I32Const(2)
+            case Type.Int64          => Code(Nil)
             case Type.Float64        => Code(Nil)
             case Type.OpaquePointer  => I32Const(4)
             case Type.Record(_)      => I32Const(5)
@@ -278,6 +283,7 @@ class Ir2wasm {
             case Type.TypeName(_)    => I32Const(8)
           val funName = args.head.getType(symbolTypeMap) match
             case Type.Float64 => "logF64"
+            case Type.Int64   => "logI64"
             case _            => "logI32"
           args.map(operandToWasm) <:>
             typeCode <:>
@@ -299,17 +305,30 @@ class Ir2wasm {
                 instrToWasm(instrs.tail)
             case _ => throw CodeGenError(s"Undefined function $name")
         case S(SetField(obj, field, value)) =>
-          val offset = lh.getType(obj.name) match
+          val offset = lh.getType(obj.name) match //TODO i64 should be 8
             case tpe: Type.TypeName =>
-              (classDefMap(tpe)._1.toList.indexWhere(_._1 == field) + 1) * 4
+              val fields = classDefMap(tpe)._1
+              val idx = fields.toList.indexWhere(_._1 == field)
+              4 + fields.take(idx).map{
+                case (_,Type.Int64) => 8
+                case _ => 4
+              }.sum
             case Type.Record(recObj) =>
-              (recObj.fields.toList.indexWhere(_._1 == field) + 1) * 4
+              val fields = recObj.fields
+              val idx = fields.toList.indexWhere(_._1 == field)
+              4 + fields.take(idx).map{
+                case (_,Type.Int64) => 8
+                case _ => 4
+              }.sum
             case _ => ???
+          val store = value.getType(symbolTypeMap) match
+            case Type.Int64 => I64Store
+            case _ => I32Store
           GetLocal(obj.name) <:>
             I32Const(offset) <:>
-            Add <:>
+            I32Add <:>
             operandToWasm(value) <:>
-            Store <:>
+            store <:>
             instrToWasm(instrs.tail)
         case S(instr) =>
           ??? // TODO
@@ -322,63 +341,92 @@ class Ir2wasm {
       case Op(op) => operandToWasm(op)
       case Alloc(tpe: Type.TypeName) =>
         val (args, classId) = classDefMap(tpe)
+        val offset = 4 + args.map{
+          case (_,Type.Int64) => 8
+          case _ => 4
+        }.sum
         GetGlobal(memoryBoundary)
           <:> I32Const(classId)
-          <:> Store
+          <:> I32Store
           <:> GetGlobal(memoryBoundary)
-          <:> I32Const((args.size + 1) * 4)
-          <:> Add
+          <:> I32Const(offset)
+          <:> I32Add
           <:> SetGlobal(memoryBoundary)
       case Alloc(obj: Type.Record) =>
+        val offset = 4 + obj.impl.fields.map{
+          case (_,Type.Int64) => 8
+          case _ => 4
+        }.sum
         GetGlobal(memoryBoundary)
           <:> I32Const(recordDefMap(obj))
-          <:> Store
+          <:> I32Store
           <:> GetGlobal(memoryBoundary)
-          <:> I32Const((obj.impl.fields.size + 1) * 4)
-          <:> Add
+          <:> I32Const(offset)
+          <:> I32Add
           <:> SetGlobal(memoryBoundary)
       case Alloc(_) => ???
       case BinOp(kind, lhs, rhs) =>
         val op: Code = (kind, lhs.getType(symbolTypeMap)) match
           case (BinOpKind.Add, Type.Float64) => F64Add
-          case (BinOpKind.Add, _)            => Add
+          case (BinOpKind.Add, Type.Int64)   => I64Add
+          case (BinOpKind.Add, _)            => I32Add
           case (BinOpKind.Sub, Type.Float64) => F64Sub
-          case (BinOpKind.Sub, _)            => Sub
+          case (BinOpKind.Sub, Type.Int64) => I64Sub
+          case (BinOpKind.Sub, _)            => I32Sub
           case (BinOpKind.Mul, Type.Float64) => F64Mul
-          case (BinOpKind.Mul, _)            => Mul
+          case (BinOpKind.Mul, Type.Int64) => I64Mul
+          case (BinOpKind.Mul, _)            => I32Mul
           case (BinOpKind.Div, Type.Float64) => F64Div
-          case (BinOpKind.Div, _)            => Div
-          case (BinOpKind.Rem, _)            => Rem
+          case (BinOpKind.Div, _)            => I64Div
+          case (BinOpKind.Rem, _)            => I64Rem
           case (BinOpKind.And, Type.Float64) => F64And
-          case (BinOpKind.And, _)            => And
+          case (BinOpKind.And, _)            => I32And
           case (BinOpKind.Or, Type.Float64)  => F64Or
-          case (BinOpKind.Or, _)             => Or
+          case (BinOpKind.Or, _)             => I32Or
           case (BinOpKind.Xor, Type.Float64) => ???
           case (BinOpKind.Xor, _)            => ???
           case (BinOpKind.Eq, Type.Float64)  => F64Eq
-          case (BinOpKind.Eq, _)             => Eq
+          case (BinOpKind.Eq, Type.Int64)    => I64Eq
+          case (BinOpKind.Eq, _)             => I32Eq
           case (BinOpKind.Ne, Type.Float64)  => ???
           case (BinOpKind.Ne, _)             => ???
           case (BinOpKind.Lt, Type.Float64)  => F64Lt_s
-          case (BinOpKind.Lt, _)             => Lt_s
+          case (BinOpKind.Lt, _)             => I64Lt_s
           case (BinOpKind.Le, Type.Float64)  => F64Le_s
-          case (BinOpKind.Le, _)             => Le_s
+          case (BinOpKind.Le, _)             => I64Le_s
         operandToWasm(lhs) <:> operandToWasm(rhs) <:> op
       case Neg(value) => ???
       case GetField(obj, field) =>
         val (name, tpe) = obj match
           case Var(str) => (str, lh.getType(str))
           case _        => ??? // TODO record type
-        val offset = tpe match
+        val (offset,load) = tpe match
           case tpe: Type.TypeName =>
-            val (args, classId) = classDefMap(tpe)
-            (args.map(_._1).toList.indexOf(field) + 1) * 4
+            val fields = classDefMap(tpe)._1
+            val idx = fields.keys.toList.indexOf(field)
+            val offset = 4 + fields.take(idx).map{
+              case (_,Type.Int64) => 8
+              case _ => 4
+            }.sum
+            val load = fields.get(field) match
+              case S(Type.Int64) => I64Load
+              case _ => I32Load
+            (offset,load)
           case Type.Record(recObj) =>
-            (recObj.fields.map(_._1).toList.indexOf(field) + 1) * 4
-          case _ => 4
-        GetLocal(name) <:> I32Const(offset) <:> Add <:> Load
+            val fields = recObj.fields
+            val idx = fields.keys.toList.indexOf(field)
+            val offset = 4 + fields.take(idx).map{
+              case (_,Type.Int64) => 8
+              case _ => 4
+            }.sum
+            val load = fields.get(field) match
+              case S(Type.Int64) => I64Load
+              case _ => I32Load
+            (offset,load)
+          case _ => ???
+        GetLocal(name) <:> I32Const(offset) <:> I32Add <:> load
       case IsType(obj, ty)         => ???
-      case Cast(obj, ty)           => ???
+      case Cast(obj, ty)           => operandToWasm(obj)
       case IsVariant(obj, variant) => ???
       case AsVariant(obj, variant) => ???
 
@@ -395,7 +443,7 @@ class Ir2wasm {
       case Const(value: Boolean) =>
         I32Const(if (value) 1 else 0)
       case Const(value: Int) =>
-        I32Const(value)
+        I64Const(value)
       case Const(value: Float) =>
         F64Const(value)
       case Const(value: String) =>
@@ -411,7 +459,7 @@ class Ir2wasm {
     def getLoad(op: Operand)(implicit lh: LocalsHandler): Code = op match
       case Var(name) =>
         lh.getType(name) match
-          case Type.TypeName(_) => Load
+          case Type.TypeName(_) => I32Load
           case _                => Code(Nil)
       case _ => Code(Nil)
 
@@ -423,14 +471,14 @@ class Ir2wasm {
 
       val setChars: Code =
         for ((c, ind) <- completeS.zipWithIndex.toList) yield {
-          GetGlobal(memoryBoundary) <:> I32Const(ind) <:> Add <:>
+          GetGlobal(memoryBoundary) <:> I32Const(ind) <:> I32Add <:>
             I32Const(c.toInt) <:> Store8
         }
 
       val setMemory: Code =
         GetGlobal(memoryBoundary) <:> GetGlobal(memoryBoundary) <:> I32Const(
           size + padding
-        ) <:> Add <:>
+        ) <:> I32Add <:>
           SetGlobal(memoryBoundary)
 
       setChars <:> setMemory

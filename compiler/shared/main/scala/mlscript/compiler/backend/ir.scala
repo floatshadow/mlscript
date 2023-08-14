@@ -20,7 +20,7 @@ enum Operand:
 
   def getType(implicit ctx: Map[Operand.Var, Type]): Type = this match
     case Const(value: Boolean) => Type.Boolean
-    case Const(value: Int)     => Type.Int32
+    case Const(value: Int)     => Type.Int64
     case Const(value: Float)   => Type.Float64
     case Const(value: String)  => Type.OpaquePointer
     case Unit                  => Type.Unit

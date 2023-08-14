@@ -8,21 +8,32 @@ object WasmInstructions {
 
   // Load an int32 constant to the stack
   case class I32Const(value: Int) extends WasmInstruction
+  case class I64Const(value: Int) extends WasmInstruction
   case class F64Const(value: Float) extends WasmInstruction
 
-  // Numeric/logical instructions (all take i32 operands)
-  case object Add extends WasmInstruction
-  case object Sub extends WasmInstruction
-  case object Mul extends WasmInstruction
-  case object Div extends WasmInstruction
-  case object Rem extends WasmInstruction
-  case object And extends WasmInstruction
-  case object Or extends WasmInstruction
-  case object Eqz
-      extends WasmInstruction // Return 1 if operand is 0, 0 otherwise
-  case object Lt_s extends WasmInstruction // Signed less-than
-  case object Le_s extends WasmInstruction // Signed less-equals
-  case object Eq extends WasmInstruction
+  // Numeric/logical instructions
+  case object I32Add extends WasmInstruction
+  case object I32Sub extends WasmInstruction
+  case object I32Mul extends WasmInstruction
+  case object I32Div extends WasmInstruction
+  case object I32Rem extends WasmInstruction
+  case object I32And extends WasmInstruction
+  case object I32Or extends WasmInstruction
+  case object I32Eqz extends WasmInstruction
+  case object I32Lt_s extends WasmInstruction
+  case object I32Le_s extends WasmInstruction
+  case object I32Eq extends WasmInstruction
+  case object I64Add extends WasmInstruction
+  case object I64Sub extends WasmInstruction
+  case object I64Mul extends WasmInstruction
+  case object I64Div extends WasmInstruction
+  case object I64Rem extends WasmInstruction
+  case object I64And extends WasmInstruction
+  case object I64Or extends WasmInstruction
+  case object I64Eqz extends WasmInstruction
+  case object I64Lt_s extends WasmInstruction
+  case object I64Le_s extends WasmInstruction
+  case object I64Eq extends WasmInstruction
   case object Drop extends WasmInstruction // Drops the top value of the stack
   case object F64Add extends WasmInstruction
   case object F64Sub extends WasmInstruction
@@ -66,10 +77,12 @@ object WasmInstructions {
   case class SetGlobal(index: Int) extends WasmInstruction
 
   // Memory
-  // Stores an i32 to memory. Expects memory address, then stored value as operands
-  case object Store extends WasmInstruction
-  // Loads an i32 to memory. Expects memory address as operand
-  case object Load extends WasmInstruction
+  // Stores an i32/i64 to memory. Expects memory address, then stored value as operands
+  case object I32Store extends WasmInstruction
+  case object I64Store extends WasmInstruction
+  // Loads an i32/i64 to memory. Expects memory address as operand
+  case object I32Load extends WasmInstruction
+  case object I64Load extends WasmInstruction
   // Stores a single byte to memory (the least significant byte of the operand)
   // Operands expected are like Store
   case object Store8 extends WasmInstruction

@@ -42,7 +42,7 @@ class Mls2ir {
       scope: Scope
   ): Operand.Var =
     scope.declareValue(name, Some(false), false) // FIXME byvaluerec, islambda
-    val result: Operand.Var = Operand.Var(scope.allocateRuntimeName(name))
+    val result: Operand.Var = Operand.Var(scope.allocateRuntimeName)
     varMap += name -> result
     bb.instructions += Instruction.Assignment(result, value)
     // TODO getType in ir.scala
@@ -62,7 +62,8 @@ class Mls2ir {
           case tpNme: Type.TypeName =>
             classDefMap(tpNme).get(field) match
               case S(tpe) => tpe
-              case N      => Type.Unit // TODO handle casting
+              case N      => ??? // TODO handle casting
+          case _ => ???
       case PureValue.IsType(_, ty)         => Type.Boolean
       case PureValue.Cast(_, ty)           => ty
       case PureValue.IsVariant(_, variant) => Type.Boolean
@@ -299,7 +300,22 @@ class Mls2ir {
     flatten(caseOf.cases).foreach(_ match
       case (S(pat), body) =>
         val thenBB = BasicBlock(scope.allocateRuntimeName(), Nil, ListBuffer())
+        val varMapPair = pat match
+          //TODO skip Var(keyword)
+          case Var("true") => N
+          case Var("false") => N
+          case Var(name) => 
+            val original = translateTerm(caseOf.trm)
+            val casted:Operand.Var = Operand.Var(scope.allocateRuntimeName())
+            val castTpe = Type.TypeName(name)
+            val pair = varMap.find(_._2 == original).get
+            symbolTypeMap += casted -> castTpe
+            varMap += pair._1 -> casted
+            thenBB.instructions += Instruction.Assignment(casted,PureValue.Cast(original,castTpe))
+            S(pair)
+          case _ => N
         translateChild(body, thenBB, joinBB)
+        varMapPair.foreach(varMap += _)
         childern += pat -> (thenBB, Nil)
       case (N, body) =>
         val elseBB =
@@ -501,7 +517,7 @@ class Mls2ir {
                         toType(ret)
                       ))
                       bb = entryBB
-                    case _ => ???
+                    case _ => ??? // TODO type inference of function result
                 case Left(IntLit(x)) =>
                   throw CodeGenError(s"$x; ${x.getClass}")
                 case _ =>

@@ -24,6 +24,7 @@ object ModulePrinter {
       Stacked(
         List(
           Raw("(func $logI32 (import \"system\" \"logI32\") (param i32 i32))"),
+          Raw("(func $logI64 (import \"system\" \"logI64\") (param i64))"),
           Raw("(func $logF64 (import \"system\" \"logF64\") (param f64))")
         )
       )
@@ -37,6 +38,7 @@ object ModulePrinter {
     val paramsDoc: Document = line(fh.args.map(arg =>
       val tpe = fh.locals(arg.name)._1 match
         case Type.Float64 => "f64"
+        case Type.Int64   => "i64"
         case _            => "i32"
       Raw(s"(param $$${arg.name} $tpe) ")
     ))
@@ -45,6 +47,7 @@ object ModulePrinter {
       else
         fh.retType match
           case Type.Float64 => "(result f64) "
+          case Type.Int64   => "(result i64) "
           case _            => "(result i32) "
     val localsDoc: Document = Indented(
       line(
@@ -53,8 +56,9 @@ object ModulePrinter {
           .map((k, v) =>
             val tpe = v._1 match
               case Type.Float64 => "f64"
+              case Type.Int64 => "i64"
               case _            => "i32"
-            Raw(s"(local $$$k $tpe)")
+            Raw(s"(local $$$k $tpe) ")
           )
           .toList
       )
@@ -90,18 +94,30 @@ object ModulePrinter {
   private def mkInstr(instr: WasmInstruction): Document = {
     instr match {
       case I32Const(value)  => s"i32.const $value"
+      case I64Const(value)  => s"i64.const $value"
       case F64Const(value)  => s"f64.const $value"
-      case Add              => "i32.add"
-      case Sub              => "i32.sub"
-      case Mul              => "i32.mul"
-      case Div              => "i32.div_s"
-      case Rem              => "i32.rem_s"
-      case And              => "i32.and"
-      case Or               => "i32.or"
-      case Eqz              => "i32.eqz"
-      case Lt_s             => "i32.lt_s"
-      case Le_s             => "i32.le_s"
-      case Eq               => "i32.eq"
+      case I32Add              => "i32.add"
+      case I32Sub              => "i32.sub"
+      case I32Mul              => "i32.mul"
+      case I32Div              => "i32.div_s"
+      case I32Rem              => "i32.rem_s"
+      case I32And              => "i32.and"
+      case I32Or               => "i32.or"
+      case I32Eqz              => "i32.eqz"
+      case I32Lt_s             => "i32.lt_s"
+      case I32Le_s             => "i32.le_s"
+      case I32Eq               => "i32.eq"
+      case I64Add              => "i64.add"
+      case I64Sub              => "i64.sub"
+      case I64Mul              => "i64.mul"
+      case I64Div              => "i64.div_s"
+      case I64Rem              => "i64.rem_s"
+      case I64And              => "i64.and"
+      case I64Or               => "i64.or"
+      case I64Eqz              => "i64.eqz"
+      case I64Lt_s             => "i64.lt_s"
+      case I64Le_s             => "i64.le_s"
+      case I64Eq               => "i64.eq"
       case F64Add           => "f64.add"
       case F64Sub           => "f64.sub"
       case F64Mul           => "f64.mul"
@@ -128,8 +144,10 @@ object ModulePrinter {
       case SetLocal(name)   => s"local.set $$$name"
       case GetGlobal(index) => s"global.get $index"
       case SetGlobal(index) => s"global.set $index"
-      case Store            => "i32.store"
-      case Load             => "i32.load"
+      case I32Store            => "i32.store"
+      case I32Load             => "i32.load"
+      case I64Store            => "i64.store"
+      case I64Load             => "i64.load"
       case Store8           => "i32.store8"
       case Load8_u          => "i32.load8_u"
       case Comment(s) =>

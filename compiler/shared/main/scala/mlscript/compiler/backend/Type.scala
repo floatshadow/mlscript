@@ -34,7 +34,7 @@ class VariantObj(val variants: Map[String, Option[Type.Record]]):
 enum Type:
   case Unit
   case Boolean
-  case Int32
+  case Int64
   case Float64
   case OpaquePointer
   case Record(impl: RecordObj)
@@ -48,7 +48,7 @@ enum Type:
   // runtime type may be different.
   def eq(other: Type): Boolean =
     (this, other) match
-      case (Unit, Unit) | (Boolean, Boolean) | (Int32, Int32) |
+      case (Unit, Unit) | (Boolean, Boolean) | (Int64, Int64) |
           (Float64, Float64) | (OpaquePointer, OpaquePointer) =>
         true
       case (TypeName(n1), TypeName(n2)) => n1 == n2
@@ -64,7 +64,7 @@ enum Type:
   override def toString(): String = this match
     case Unit                => "()"
     case Boolean             => "bool"
-    case Int32               => "i32"
+    case Int64               => "i64"
     case Float64             => "f64"
     case OpaquePointer       => "Any"
     case Record(impl)        => impl.toString()
@@ -73,7 +73,7 @@ enum Type:
     case TypeName(name)      => name
 
 def toType(tpe: mlscript.Type): Type = tpe match
-  case mlscript.TypeName("Int")  => Type.Int32
+  case mlscript.TypeName("Int")  => Type.Int64
   case mlscript.TypeName("Str")  => Type.OpaquePointer
   case mlscript.TypeName("Bool") => Type.Boolean
   case mlscript.TypeName("Num")  => Type.Float64
@@ -81,7 +81,7 @@ def toType(tpe: mlscript.Type): Type = tpe match
   case _                         => ???
 
 def toType(tpe: mlscript.Term): Type = tpe match
-  case mlscript.Var("Int")  => Type.Int32
+  case mlscript.Var("Int")  => Type.Int64
   case mlscript.Var("Str")  => Type.OpaquePointer
   case mlscript.Var("Bool") => Type.Boolean
   case mlscript.Var("Num")  => Type.Float64

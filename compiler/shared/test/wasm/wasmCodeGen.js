@@ -35,6 +35,9 @@ const importObject = {
                     break;
             }
         },
+        logI64: function (value){
+            console.log(value.toString());
+        },
         logF64: function (value){
             console.log(value);
         }
