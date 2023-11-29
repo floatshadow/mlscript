@@ -158,6 +158,22 @@ class GraphOptimizer:
           case node @ _ => node |> unexpected_node
         }
 
+      // explicit namespace of class field
+      // s.Get[A](args..) => A.Get(s, ..args)
+      case App(
+        member @ Sel(Var(clsName), Var(fld)), 
+        xs @ Tup((_ -> Fld(_, Var(s))) :: _)) if clsName.isCapitalized =>
+        buildResultFromTerm(xs) {
+          case Result(Ref(name) :: args) =>
+            val v = gensym()
+            val cls = clsctx(clsName)
+            
+            LetExpr(v,
+              SelectMember(name, cls, fld, args),
+              v |> ref |> sresult |> k)
+          case node @ _ => node |> unexpected_node
+        }
+
       case App(f, xs @ Tup(_)) =>
         buildResultFromTerm(f) {
         case Result(Ref(f) :: Nil) if fnctx.contains(f.str) => buildResultFromTerm(xs) {
@@ -358,6 +374,16 @@ class GraphOptimizer:
           1,
           buildResultFromTerm(body) { x => x }
         )
+      case NuFunDef(None, Var(name), None, Nil, L(body)) =>
+        given Ctx = ctx ++ Ls("this" -> Name("this"))
+        name -> GODef(
+          genfid(),
+          name,
+          false,
+          Ls(),
+          1,
+          buildResultFromTerm(body) { x => x }
+        )
       case x @ _ => throw GraphOptimizingError(f"unsupported class method $x")
 
   private def getClassInfoUniverse
@@ -374,7 +400,7 @@ class GraphOptimizer:
         end if
         // params, name should be guaranteed before handle inheritence and method
         val scls = sclsctx(name)
-        val paramsName = scls.fields map { x => gensym(x) }
+        val paramsName = scls.fields map { x => Name(x) }
         given Ctx = ctx ++ scls.fields.zip(paramsName)
         // parent constructor definitions
         val pcd = parents.map(updateClassInfoParentsUniverse)

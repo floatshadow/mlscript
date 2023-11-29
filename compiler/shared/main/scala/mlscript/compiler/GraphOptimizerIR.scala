@@ -33,7 +33,7 @@ class GOProgram(
     val t2 = defs.toArray
     Sorting.quickSort(t1)
     Sorting.quickSort(t2)
-    s"GOProgram({${t1.mkString(",")}}, {\n${t2.mkString("\n")}\n},\n$main)"
+    s"GOProgram({${t1.mkString("\n")}\n}, {\n${t2.mkString("\n")}\n},\n$main)"
   def accept_visitor(v: GOVisitor) = v.visit(this)
   def accept_iterator(v: GOIterator) = v.iterate(this)
 
@@ -61,7 +61,7 @@ case class ClassInfo(
   }
   override def hashCode: Int = id
   override def toString: String =
-    s"ClassInfo($id, $ident, [${fields mkString ","}])"
+    s"ClassInfo($id, $ident, [${fields mkString ","}]) [${members.keys.mkString(",")}] {\n${methods.values.mkString("\n")}}"
   def accept_visitor(v: GOVisitor) = v.visit(this)
   def accept_iterator(v: GOIterator) = v.iterate(this)
 
@@ -177,6 +177,7 @@ enum GOExpr:
   case Literal(lit: Lit) extends GOExpr, TrivialExpr
   case CtorApp(name: ClassInfo, args: Ls[TrivialExpr]) extends GOExpr
   case Select(name: Name, cls: ClassInfo, field: Str)
+  case SelectMember(name: Name, cls: ClassInfo, member: Str, args: Ls[TrivialExpr])
   case BasicOp(name: Str, args: Ls[TrivialExpr])
   // TODO: depreceted: the following will be deleted
   case Lambda(name: Ls[Name], body: GONode)
@@ -194,6 +195,10 @@ enum GOExpr:
       raw(name) <#> raw("(") <#> raw(args |> show_args) <#> raw(")")
     case Select(Name(s), _, fld) =>
       raw(s) <#> raw(".") <#> raw(fld)
+    case SelectMember(Name(s), ClassInfo(_, name, _), member, args) =>
+      raw(s) <#> raw(".") <#> raw(member) <#> 
+      raw("[") <#> raw(name) <#> raw("]") <#>
+      raw("(") <#> raw(args |> show_args) <#> raw(")")
     case BasicOp(name: Str, args) =>
       raw(name) <#> raw("(") <#> raw(args |> show_args) <#> raw(")")
     case Lambda(name, body) =>
@@ -211,6 +216,7 @@ enum GOExpr:
     case x: BasicOp => v.visit(x)
     case x: Lambda => v.visit(x)
     case x: Apply => v.visit(x)
+    case x: SelectMember => v.visit(x)
 
   def accept_iterator(v: GOIterator): Unit = this match
     case x: Ref => v.iterate(x)
@@ -220,6 +226,7 @@ enum GOExpr:
     case x: BasicOp => v.iterate(x)
     case x: Lambda => v.iterate(x)
     case x: Apply => v.iterate(x)
+    case x: SelectMember => v.iterate(x)
     
 enum GONode:
   // Terminal forms:
@@ -322,6 +329,8 @@ trait GOVisitor extends GOTrivialExprVisitor:
     case CtorApp(cls, xs)            => CtorApp(cls.accept_visitor(this), xs.map(_.accept_visitor(this)))
   def visit(x: Select): GOExpr       = x match
     case Select(x, cls, field)       => Select(x.accept_use_visitor(this), cls.accept_visitor(this), field)
+  def visit(x: SelectMember): GOExpr = x match
+    case SelectMember(s, cls, field, args) => SelectMember(s.accept_use_visitor(this), cls.accept_visitor(this), field, args.map(_.accept_visitor(this)))
   def visit(x: BasicOp): GOExpr      = x match
     case BasicOp(op, xs)             => BasicOp(op, xs.map(_.accept_visitor(this)))
   def visit(x: Lambda): GOExpr       = x match
@@ -373,6 +382,8 @@ trait GOIterator extends GOTrivialExprIterator:
     case CtorApp(cls, xs)              => cls.accept_iterator(this); xs.foreach(_.accept_iterator(this))
   def iterate(x: Select): Unit         = x match
     case Select(x, cls, field)         => x.accept_use_iterator(this); cls.accept_iterator(this)
+  def iterate(x: SelectMember): Unit   = x match
+    case SelectMember(s, cls, field, args) => s.accept_use_iterator(this); cls.accept_iterator(this); args.foreach(_.accept_iterator(this))
   def iterate(x: BasicOp): Unit        = x match
     case BasicOp(op, xs)               => xs.foreach(_.accept_iterator(this))
   def iterate(x: Lambda): Unit         = x match
