@@ -1,0 +1,129 @@
+:NewParser
+:ParseOnly
+
+:GraphOpt
+class A(x) {
+    val field = 1
+    fun add(value) = x + value
+    fun add2(value) = A.x(this) + value
+    fun Get = A.field(this)
+}
+class B(y, z) extends A(y + 1)
+class C extends A
+fun foo(t) =
+    B.x(t)
+foo(B(1, 2))
+//│ |#class| |A|(|x|)| |{|→|#val| |field| |#=| |1|↵|#fun| |add|(|value|)| |#=| |x| |+| |value|↵|#fun| |add2|(|value|)| |#=| |A|.x|(|this|)| |+| |value|↵|#fun| |Get| |#=| |A|.field|(|this|)|←|↵|}|↵|#class| |B|(|y|,| |z|)| |#extends| |A|(|y| |+| |1|)|↵|#class| |C| |#extends| |A|↵|#fun| |foo|(|t|)| |#=|→|B|.x|(|t|)|←|↵|foo|(|B|(|1|,| |2|)|)|
+//│ Parsed: {class A(x,) {let field = 1; fun add = (value,) => +(x,)(value,); fun add2 = (value,) => +((A).x(this,),)(value,); fun Get = (A).field(this,)}; class B(y, z,): A(+(y,)(1,),) {}; class C: A {}; fun foo = (t,) => {(B).x(t,)}; foo(B(1, 2,),)}
+//│ Parsed:
+//│ TypingUnit(NuTypeDef(class, A, (), Tup(_: Var(x)), (), None, None, TypingUnit(NuFunDef(Some(false), field, None, [], IntLit(1)), NuFunDef(None, add, None, [], Lam(Tup(_: Var(value)), App(App(Var(+), Tup(_: Var(x))), Tup(_: Var(value))))), NuFunDef(None, add2, None, [], Lam(Tup(_: Var(value)), App(App(Var(+), Tup(_: App(Sel(Var(A), x), Tup(_: Var(this))))), Tup(_: Var(value))))), NuFunDef(None, Get, None, [], App(Sel(Var(A), field), Tup(_: Var(this)))))), NuTypeDef(class, B, (), Tup(_: Var(y), _: Var(z)), (App(Var(A), Tup(_: App(App(Var(+), Tup(_: Var(y))), Tup(_: IntLit(1)))))), None, None, TypingUnit()), NuTypeDef(class, C, (), Tup(), (Var(A)), None, None, TypingUnit()), NuFunDef(None, foo, None, [], Lam(Tup(_: Var(t)), Blk(...))), App(Var(foo), Tup(_: App(Var(B), Tup(_: IntLit(1), _: IntLit(2))))))
+//│ 
+//│ GraphOpt:
+//│ GOProgram({ClassInfo(0, A, [x]) [field] {
+//│ Def(0, add, [value%0], [{}], 
+//│ [None], 1, 
+//│ let x%0 = +(x,value%0)
+//│   in x%0
+//│ )
+//│ Def(1, add2, [value%1], [{}], 
+//│ [None], 1, 
+//│ let x%1 = this.x[A]()
+//│   in let x%2 = +(x%1,value%1)
+//│     in x%2
+//│ )
+//│ Def(2, Get, [], [{}], 
+//│ [None], 1, 
+//│ let x%3 = this.field[A]()
+//│   in x%3
+//│ )}
+//│ ClassInfo(1, B, [y,z]) [] {
+//│ }
+//│ ClassInfo(2, C, []) [] {
+//│ }
+//│ }, {
+//│ Def(3, foo, [t%0], [{}], 
+//│ [None], 1, 
+//│ let x%5 = t%0.x[B]()
+//│   in x%5
+//│ )
+//│ },
+//│ let x%6 = B(1,2)
+//│   in let* (x%7) = foo(x%6)
+//│     in x%7)
+//│ 
+//│ Promoted ------------------------------------
+//│ GOProgram({ClassInfo(0, A, [x]) [field] {
+//│ Def(0, add, [value%0], [{}], 
+//│ [None], 1, 
+//│ let x%0 = +(x,value%0)
+//│   in x%0
+//│ )
+//│ Def(1, add2, [value%1], [{}], 
+//│ [None], 1, 
+//│ let x%1 = this.x[A]()
+//│   in let x%2 = +(x%1,value%1)
+//│     in x%2
+//│ )
+//│ Def(2, Get, [], [{}], 
+//│ [None], 1, 
+//│ let x%3 = this.field[A]()
+//│   in x%3
+//│ )}
+//│ ClassInfo(1, B, [y,z]) [] {
+//│ }
+//│ ClassInfo(2, C, []) [] {
+//│ }
+//│ }, {
+//│ Def(3, foo, [t%0], [{EDirect}], 
+//│ [None], 1, 
+//│ let x%5 = t%0.x[B]()
+//│   in x%5
+//│ )
+//│ },
+//│ let x%6 = B(1,2)
+//│   in let* (x%7) = foo(x%6)
+//│     in x%7)
+
+
+:GraphOpt
+class A
+class B
+fun foo(t) =
+    A.Get(t)
+foo(A)
+//│ |#class| |A|↵|#class| |B|↵|#fun| |foo|(|t|)| |#=|→|A|.Get|(|t|)|←|↵|foo|(|A|)|
+//│ Parsed: {class A {}; class B {}; fun foo = (t,) => {(A).Get(t,)}; foo(A,)}
+//│ Parsed:
+//│ TypingUnit(NuTypeDef(class, A, (), Tup(), (), None, None, TypingUnit()), NuTypeDef(class, B, (), Tup(), (), None, None, TypingUnit()), NuFunDef(None, foo, None, [], Lam(Tup(_: Var(t)), Blk(...))), App(Var(foo), Tup(_: Var(A))))
+//│ 
+//│ GraphOpt:
+//│ GOProgram({ClassInfo(0, A, []) [] {
+//│ }
+//│ ClassInfo(1, B, []) [] {
+//│ }
+//│ }, {
+//│ Def(0, foo, [t%0], [{}], 
+//│ [None], 1, 
+//│ let x%0 = t%0.Get[A]()
+//│   in x%0
+//│ )
+//│ },
+//│ let x%1 = A()
+//│   in let* (x%2) = foo(x%1)
+//│     in x%2)
+//│ 
+//│ Promoted ------------------------------------
+//│ GOProgram({ClassInfo(0, A, []) [] {
+//│ }
+//│ ClassInfo(1, B, []) [] {
+//│ }
+//│ }, {
+//│ Def(0, foo, [t%0], [{EDirect}], 
+//│ [None], 1, 
+//│ let x%0 = t%0.Get[A]()
+//│   in x%0
+//│ )
+//│ },
+//│ let x%1 = A()
+//│   in let* (x%2) = foo(x%1)
+//│     in x%2)
