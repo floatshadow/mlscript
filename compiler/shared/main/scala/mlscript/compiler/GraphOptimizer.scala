@@ -31,6 +31,9 @@ class GraphOptimizer:
     counter.update(s, count + 1)
     Name(tmp)
   }
+  private def rmsym(s: Str = "x") = {
+    counter.remove(s)
+  }
 
   private var fid = 0
   private def genfid() = {
@@ -296,7 +299,106 @@ class GraphOptimizer:
         name,
         Ls(),
       )
+    // class inheritence and method
+    case NuTypeDef(Cls, TypeName(name), Nil, S(Tup(args)), N, N, parents, N, N, TypingUnit(_)) =>
+      ClassInfo(gencid(),
+        name,
+        args map {
+          case N -> Fld(FldFlags.empty, Var(name)) => name
+          case _ => throw GraphOptimizingError("unsupported field")
+        }
+      )
+    case NuTypeDef(Cls, TypeName(name), Nil, N, N, N, parents, N, N, TypingUnit(_)) =>
+      ClassInfo(gencid(),
+        name,
+        Ls()
+      )
+
     case x @ _ => throw GraphOptimizingError(f"unsupported NuTypeDef $x")
+
+  // general handler of class inheritence
+  private def updateClassInfoParentsUniverse
+    (using ctx: Ctx, sclsctx: ClassCtx, fldctx: FieldCtx, fnctx: FnCtx, opctx: OpCtx)
+    (tm: Term) = tm match
+      case Var(name) if name.isCapitalized =>
+        name -> None
+      case App(Var(name), xs @ Tup(_)) if name.isCapitalized =>
+        // parent constructor body node
+        val pcb = buildResultFromTerm(xs) { x => x }
+        name -> S(pcb)
+      case term => term |> unexpected_term
+
+  // general handler of class fields
+  private def updateClassInfoFieldsUniverse
+    (using ctx: Ctx, sclsctx: ClassCtx, fldctx: FieldCtx, fnctx: FnCtx, opctx: OpCtx)
+    (nfd: Statement) = nfd match
+      case NuFunDef(S(false), Var(name), None, Nil, L(body)) =>
+        val fcb = buildResultFromTerm(body) { x => x }
+        name -> fcb
+
+      case x @ _ => throw GraphOptimizingError(f"unsupported class field $x")
+
+  // general handler of class methods
+  private def updateClassInfoMethodsUniverse
+    (using ctx: Ctx, sclsctx: ClassCtx, fldctx: FieldCtx, fnctx: FnCtx, opctx: OpCtx)
+    (nfd: Statement) = nfd match
+      case NuFunDef(None, Var(name), None, Nil, L(Lam(Tup(fparams), body))) =>
+        val pstrs = fparams map {
+          case N -> Fld(FldFlags.empty, Var(x)) => x
+          case _ => throw GraphOptimizingError("unsupported field")
+        }
+        val pnames = pstrs.map { x => gensym(x) }
+        // method param name mapping, with extra "this"
+        given Ctx = ctx ++ (("this" -> Name("this")) +: pstrs.zip(pnames))
+        name -> GODef(
+          genfid(),
+          name,
+          false,
+          pnames,
+          1,
+          buildResultFromTerm(body) { x => x }
+        )
+      case x @ _ => throw GraphOptimizingError(f"unsupported class method $x")
+
+  private def getClassInfoUniverse
+    (ctx: Ctx, sclsctx: ClassCtx, fldctx: FieldCtx, fnctx: FnCtx, opctx: OpCtx)
+    (ntd: Statement): ClassInfo = ntd match
+      case NuTypeDef(Cls, TypeName(name), Nil, params, N, N, parents, N, N, TypingUnit(entities)) =>
+        given ClassCtx = sclsctx
+        given FieldCtx = fldctx
+        given FnCtx = fnctx
+        given OpCtx = opctx
+
+        if parents.size > 1 then
+          throw GraphOptimizingError("unsupported inheriting from more than 1 class")
+        end if
+        // params, name should be guaranteed before handle inheritence and method
+        val scls = sclsctx(name)
+        val paramsName = scls.fields map { x => gensym(x) }
+        given Ctx = ctx ++ scls.fields.zip(paramsName)
+        // parent constructor definitions
+        val pcd = parents.map(updateClassInfoParentsUniverse)
+
+        val grouped = entities groupBy {
+          case ntd: NuTypeDef => 0
+          case nmd: NuFunDef if nmd.isLetRec.isEmpty => 1
+          case nfd: NuFunDef if nfd.isLetRec.contains(false) => 2
+          case x @ _ => throw GraphOptimizingError(f"unsupported class member category $x")
+        }
+
+        val methods = grouped.getOrElse(1, Nil)
+        val fields = grouped.getOrElse(2, Nil)
+
+        val fid = fields.map(updateClassInfoFieldsUniverse)
+        val md = methods.map(updateClassInfoMethodsUniverse)
+
+        scls.parents = pcd.toMap
+        scls.members = fid.toMap
+        scls.methods = md.toMap
+
+        scls
+
+      case x @ _ => throw GraphOptimizingError(f"unsupported NuTypeDef $x")
 
   private def checkDuplicateField(ctx: Set[Str], cls: ClassInfo): Set[Str] =
     val u = cls.fields.toSet intersect ctx
@@ -332,14 +434,22 @@ class GraphOptimizer:
       val fldctx: FieldCtx = cls.flatMap { case ClassInfo(_, name, fields) => fields.map { fld => (fld, (name, clsctx(name))) } }.toMap
       val namestrs = grouped.getOrElse(1, Nil).map(getDefinitionName)
       val fnctx = namestrs.toSet
+      val opctx = ((), ops)
       var ctx = namestrs.zip(namestrs.map(x => Name(x))).toMap
       ctx = ctx ++ ops.map { op => (op, Name(op)) }.toList
 
+      val gcls = grouped.getOrElse(0, Nil).map(
+        // temporary ctx
+        getClassInfoUniverse(ctx, clsctx, fldctx, fnctx, opctx)
+      )
+      val gclsinfo = gcls.toSet
+      val gclsctx: ClassCtx = gcls.map{ case ClassInfo(_, name, _) => name }.zip(gcls).toMap
+
       given Ctx = ctx
-      given ClassCtx = clsctx
+      given ClassCtx = gclsctx
       given FieldCtx = fldctx
       given FnCtx = fnctx
-      given OpCtx = ((), ops)
+      given OpCtx = opctx
       val defs: Set[GODef] = grouped.getOrElse(1, Nil).map(buildDefFromNuFunDef).toSet
      
       val terms: Ls[Term] = grouped.getOrElse(2, Nil).map( {
@@ -354,7 +464,7 @@ class GraphOptimizer:
       
       fixCrossReferences(main, defs)
       validate(main, defs, false)
-      GOProgram(clsinfo, defs, main)
+      GOProgram(gclsinfo, defs, main)
 
   private class FixCrossReferences(defs: Set[GODef]) extends GOIterator:
     override def iterate(x: LetCall) = x match
