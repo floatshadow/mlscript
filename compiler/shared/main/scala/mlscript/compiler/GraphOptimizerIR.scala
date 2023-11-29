@@ -49,6 +49,12 @@ case class ClassInfo(
   val ident: Str,
   val fields: Ls[Str],
 ):
+  var parents: Map[Str, Opt[GONode]] = Map()
+  // `fields`: params of class
+  // `members`: fields of class
+  // `methods`: methods of class
+  var members: Map[Str, GONode] = Map()
+  var methods: Map[Str, GODef] = Map()
   override def equals(o: Any): Bool = o match {
     case o: ClassInfo if this.isInstanceOf[ClassInfo] => o.id == id
     case _ => false
