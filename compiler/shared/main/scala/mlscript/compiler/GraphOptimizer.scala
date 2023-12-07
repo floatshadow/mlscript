@@ -51,6 +51,14 @@ class GraphOptimizer:
     tmp
   }
 
+  private def genClsFldSym(c: Str, s: Str) =
+    Name(s"$c@$s")
+  private def revertClsFldSym(s: Str): (Str, Str) =
+    val n = s.lastIndexOf("@")
+    val (cls, suffix) = s.splitAt(n)
+    val fld = suffix.stripPrefix("@")
+    (cls, fld)
+
   private final val ref = x => Ref(x)
   final val result = x => Result(x)
   private final val sresult = (x: TrivialExpr) => Result(List(x))
@@ -116,6 +124,13 @@ class GraphOptimizer:
             v |> ref |> sresult |> k)
         else
           ctx.get(name) match {
+            case Some(Name(x)) if x.isCapitalized =>
+              val (clsName, fldName) = revertClsFldSym(x)
+              val cls = clsctx(clsName)
+              val v = gensym()
+              LetExpr(v,
+                Select(Name("this"), cls, fldName), 
+                v |> ref |> sresult |> k)
             case Some(x) => x |> ref |> sresult |> k
             case _ => throw GraphOptimizingError(s"unknown name $name in $ctx")
           }
@@ -339,8 +354,8 @@ class GraphOptimizer:
 
   // general handler of class inheritence
   private def updateClassInfoParentsUniverse
-    (using ctx: Ctx, sclsctx: ClassCtx, fldctx: FieldCtx, fnctx: FnCtx, opctx: OpCtx)
-    (tm: Term) = tm match
+    (using sclsctx: ClassCtx, fldctx: FieldCtx, fnctx: FnCtx, opctx: OpCtx)
+    (ctx: Ctx)(tm: Term) = tm match
       case Var(name) if name.isCapitalized =>
         if !sclsctx.contains(name) then
           throw GraphOptimizingError(s"unknown class $name")
@@ -349,6 +364,7 @@ class GraphOptimizer:
         if !sclsctx.contains(name) then
           throw GraphOptimizingError(s"unknown class $name")
         // parent constructor body node
+        given Ctx = ctx
         val pcb = buildResultFromTerm(xs) {
           case res @ Result(args) =>
             val pcls = sclsctx(name)
@@ -360,16 +376,6 @@ class GraphOptimizer:
         }
         name -> S(pcb)
       case term => term |> unexpected_term
-
-  // general handler of class fields
-  private def updateClassInfoFieldsUniverse
-    (using ctx: Ctx, sclsctx: ClassCtx, fldctx: FieldCtx, fnctx: FnCtx, opctx: OpCtx)
-    (nfd: Statement) = nfd match
-      case NuFunDef(S(false), Var(name), None, Nil, L(body)) =>
-        val fcb = buildResultFromTerm(body) { x => x }
-        name -> fcb
-
-      case x @ _ => throw GraphOptimizingError(f"unsupported class field $x")
 
   // general handler of common class methods
   private def updateClassInfoMethodsUniverse
@@ -424,9 +430,10 @@ class GraphOptimizer:
         // params, name should be guaranteed before handle inheritence and method
         val scls = sclsctx(name)
         val paramsName = scls.fields map { x => Name(x) }
-        given Ctx = ctx ++ scls.fields.zip(paramsName)
+        val paramCtx = ctx ++ scls.fields.zip(paramsName)
         // parent constructor definitions
-        val pcd = parents.map(updateClassInfoParentsUniverse)
+        // as constructor is plain function, use plain ctx
+        val pcd = parents.map(updateClassInfoParentsUniverse(paramCtx))
 
         val grouped = entities groupBy {
           case ntd: NuTypeDef => 0
@@ -438,7 +445,18 @@ class GraphOptimizer:
         val methods = grouped.getOrElse(1, Nil)
         val fields = grouped.getOrElse(2, Nil)
 
-        val fid = fields.map(updateClassInfoFieldsUniverse)
+        var fieldNames = Ls[Str]()
+        val fid = fields.map {
+          case NuFunDef(S(false), Var(name), None, Nil, L(body)) =>
+            fieldNames = fieldNames :+ name
+            given Ctx = paramCtx ++ fieldNames.map(x => x -> genClsFldSym(scls.ident, x))
+            val fcb = buildResultFromTerm(body) { x => x }
+            name -> fcb
+          case x @ _ => throw GraphOptimizingError(f"unsupported class field $x")
+        }
+
+        val classInnerMembers = scls.fields ++ fieldNames
+        given Ctx = ctx ++ classInnerMembers.map (x => x -> genClsFldSym(scls.ident, x))
         val md = methods.map(updateClassInfoMethodsUniverse)
 
         scls.parents = pcd.toMap

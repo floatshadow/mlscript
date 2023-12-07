@@ -402,7 +402,7 @@ class WasmBackend(
           val pctor = getOrGenerateCtor(pcls)
           pthis ++ pargs ++ Ls(Call(pctorName), Comment(f"ctor parent ${pcls.ident}"))
       }
-      println(s"class ${cls.ident} virtual: ${layoutAux.hasVirtual}")
+      // println(s"class ${cls.ident} virtual: ${layoutAux.hasVirtual}")
       val pvtbc = if layoutAux.hasVirtual then
         val pvtboff = layoutAux.getPVtableOffset
         val vtbOffset = this.vtableCtx(cls.ident)._1
