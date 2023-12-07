@@ -342,8 +342,12 @@ class GraphOptimizer:
     (using ctx: Ctx, sclsctx: ClassCtx, fldctx: FieldCtx, fnctx: FnCtx, opctx: OpCtx)
     (tm: Term) = tm match
       case Var(name) if name.isCapitalized =>
+        if !sclsctx.contains(name) then
+          throw GraphOptimizingError(s"unknown class $name")
         name -> None
       case App(Var(name), xs @ Tup(_)) if name.isCapitalized =>
+        if !sclsctx.contains(name) then
+          throw GraphOptimizingError(s"unknown class $name")
         // parent constructor body node
         val pcb = buildResultFromTerm(xs) {
           case res @ Result(args) =>
@@ -371,7 +375,7 @@ class GraphOptimizer:
   private def updateClassInfoMethodsUniverse
     (using ctx: Ctx, sclsctx: ClassCtx, fldctx: FieldCtx, fnctx: FnCtx, opctx: OpCtx)
     (nfd: Statement) = nfd match
-      case NuFunDef(None, Var(name), None, Nil, L(Lam(Tup(fparams), body))) =>
+      case fun @ NuFunDef(None, Var(name), None, Nil, L(Lam(Tup(fparams), body))) =>
         val pstrs = fparams map {
           case N -> Fld(FldFlags.empty, Var(x)) => x
           case _ => throw GraphOptimizingError("unsupported field")
@@ -379,7 +383,7 @@ class GraphOptimizer:
         val pnames = pstrs.map { x => gensym(x) }
         // method param name mapping, with extra "this"
         given Ctx = ctx ++ (("this" -> Name("this")) +: pstrs.zip(pnames))
-        name -> GODef(
+        val mdef = GODef(
           genfid(),
           name,
           false,
@@ -387,9 +391,11 @@ class GraphOptimizer:
           1,
           buildResultFromTerm(body) { x => x }
         )
-      case NuFunDef(None, Var(name), None, Nil, L(body)) =>
+        mdef.isVirtual = fun.isVirtual
+        name -> mdef
+      case fun @ NuFunDef(None, Var(name), None, Nil, L(body)) =>
         given Ctx = ctx ++ Ls("this" -> Name("this"))
-        name -> GODef(
+        val mdef = GODef(
           genfid(),
           name,
           false,
@@ -397,6 +403,8 @@ class GraphOptimizer:
           1,
           buildResultFromTerm(body) { x => x }
         )
+        mdef.isTrivial = fun.isVirtual
+        name -> mdef
       case x @ _ => throw GraphOptimizingError(f"unsupported class method $x")
 
   private def getClassInfoUniverse

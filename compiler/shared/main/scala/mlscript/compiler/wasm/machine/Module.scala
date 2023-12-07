@@ -6,7 +6,9 @@ import os.*
 class Module(
   val name: String,
   val imports: List[String],
-  val functions: List[MachineFunction]
+  val functions: List[MachineFunction],
+  val tables: List[(Int, List[String])],
+  val types: Map[String, Type]
 ) {
 
   import java.io.{File, FileWriter}

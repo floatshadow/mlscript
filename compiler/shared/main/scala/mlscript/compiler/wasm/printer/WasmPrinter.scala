@@ -14,6 +14,8 @@ object WasmPrinter:
       // some test case `out of bounds memory access` if only 1 page
       "(memory (export \"mem\") 100)" |> raw,
       stack(mod.imports map mkImport),
+      stack(mod.types.toList map mkType),
+      stack(mod.tables |> mkTable),
       "(global (mut i32) i32.const 0) " |> raw,
       stack(mod.functions map mkFunction)
     )),
@@ -22,6 +24,28 @@ object WasmPrinter:
 
   def mkImport(s: String): Document =
     raw("(import") <:> raw(s) <#>  raw(")")
+  
+  private def mkTableInner(offset: Int, tbl: List[String]) =
+    raw(s"(;${offset};) ") <#> raw(s"${tbl.map(x => s"$$$x") mkString(" ")}")
+
+  def mkTable(tbl: List[(Int, List[String])]) =
+    val tblSize = tbl.foldLeft(0) {
+      case (size, (_, subtbl)) => size + subtbl.size
+    }
+    stack(
+      raw(s"(table ${tblSize} funcref)"),
+      stack(
+        raw("(elem (i32.const 0)"),
+        indent(
+          stack(tbl.map(mkTableInner))
+        ),
+        raw(")")
+      )
+    )
+
+
+  def mkType(name: String, mtype: Type) =
+    raw(s"(type $$${name} $mtype)")
 
   def mkFunction(function: MachineFunction): Document =
     val name = function.name

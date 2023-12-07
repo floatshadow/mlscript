@@ -102,10 +102,37 @@ class WasmBackend(
   // TODO: some functions are hard to encode in graph-ir,
   // e.g. class constructors, we manully generate wasm code.
   var blackMagicFnCtx: Map[Str, MachineFunction] = Map()
+  // global vtable
+  var vtableCtx: Map[Str, (Int, Ls[(Str, MethodInfo)])] = Map()
+  // global type table for `call_indirect`
+  var typeCtx: Map[Str, MachineType] = Map()
 
   def nameMangling(clsName: Str, methodName: Str) =
     s"_Z${clsName}_${methodName}"
-  
+  def vtableMangling(clsName: Str) =
+    s"_ZVT_${clsName}"
+  def typeNameMangling(clsName: Str, methodName: Str) =
+    s"_ZTYP_${clsName}_${methodName}"
+  def getFunctionType(godef: GODef) =
+    val params = godef.params
+    val resultNum = godef.resultNum
+    val paramTy = List.fill(params.size)(MachineType.defaultNumType)
+    val resultTy = List.fill(resultNum)(MachineType.defaultNumType)
+    MachineType.FuncType(paramTy, resultTy)
+  def lowerVtable() =
+    val sortedtbl = this.vtableCtx.values.toList sortBy {
+      case (elemOffset, _) => elemOffset
+    }
+    sortedtbl map {
+      case (elemOffset, tblItems) =>
+        val tblFunRefs = tblItems map {
+          case (methodName, methodInfo) =>
+            val mdef = fDefCtx(methodInfo.fid)
+            mdef.name
+        }
+        (elemOffset, tblFunRefs)
+    }
+
   protected def promoteMethod(cls: ClassInfo, mdef: GODef) =
     val id = mdef.id
     val name = mdef.name
@@ -123,15 +150,34 @@ class WasmBackend(
     )
 
   protected def preprocess(goprog: GOProgram): Unit =
+    RecordObj.clearCache()
     val classes = goprog.classes
     val defs = goprog.defs
     this.clsctx = this.clsctx ++ classes.map(cls => (cls.ident -> cls)).toMap
     this.fDefCtx = this.fDefCtx ++ defs.map(fdef => (fdef.id -> fdef)).toMap
     // promote methods
-
     val methods = classes.toList.flatMap(
       cls => cls.methods.values.map(mdef => promoteMethod(cls, mdef)))
     this.fDefCtx = this.fDefCtx ++ methods.map(mdef => (mdef.id -> mdef))
+
+    // generate vtable and type table
+    var vtableSize = 0
+    classes.toList.foreach {
+      cls =>
+        val classAux = RecordObj.from(this.clsctx, cls)
+        this.typeCtx = this.typeCtx ++ classAux.getVtable.map {
+          case(name, methodInfo) =>
+            val mdef = this.fDefCtx(methodInfo.fid)
+            val methodTy = getFunctionType(mdef)
+            val mangleName = typeNameMangling(cls.ident, name)
+            mangleName -> methodTy
+        }
+        if classAux.hasVirtual then
+          val elemOffset = vtableSize
+          vtableSize += classAux.getVtable.size
+          this.vtableCtx = this.vtableCtx.updated(cls.ident, (elemOffset, classAux.getVtable))
+        end if
+    }
 
     val main = GODef(
       -1, // invalid id
@@ -142,7 +188,6 @@ class WasmBackend(
       goprog.main
     )
     this.fDefCtx = this.fDefCtx.updated(-1, main)
-    RecordObj.clearCache()
 
   protected def translateTrivialExprUnbox(expr: TrivialExpr) = expr match
     case Ref(Name(name)) => Ls(GetLocal(name), I32Load)
@@ -171,12 +216,23 @@ class WasmBackend(
       val layoutAux = RecordObj.from(clsctx, cls)
       layoutAux.getMemberUniverse(member) match
         case L(method) =>
-          val mdef = fDefCtx(method.fid)
-          val symbolName = mdef.name
-          val argsInstr = GetLocal(refName) +: // `this` pointer
-                          args.flatMap(arg => translateTrivialExpr(arg))
-          argsInstr ++ Ls(Call(symbolName), 
-                          Comment(s"call method ${member} of object ${refName}"))
+          if !method.isVirtual then
+            val mdef = fDefCtx(method.fid)
+            val symbolName = mdef.name
+            val argsInstr = GetLocal(refName) +: // `this` pointer
+                            args.flatMap(arg => translateTrivialExpr(arg))
+            argsInstr ++ Ls(Call(symbolName), 
+                            Comment(s"call method ${member} of object ${refName}"))
+          else
+            val (vtboff, vtb) = this.vtableCtx(cls.ident)
+            val methodIndex = vtb.indexWhere { _._1 == member}
+            val methodTyName = typeNameMangling(cls.ident, method.methodName)
+            val pvtboff = layoutAux.getPVtableOffset
+            val argsInstr = GetLocal(refName) +: // `this` pointer
+                            args.flatMap(arg => translateTrivialExpr(arg))
+            argsInstr ++ Ls(GetLocal(refName), I32Const(pvtboff), I32Add, I32Load, Comment(s"method ${method.methodName} offset"),
+                            I32Const(vtboff), Comment(s"class vtable ${cls.ident} offset"), I32Add,
+                            CallIndrect(methodTyName))
         case R(offset) => 
           Ls(GetLocal(refName), I32Const(offset), I32Add, I32Load, 
              Comment(s"select field ${member} of object ${refName}"))
@@ -312,7 +368,9 @@ class WasmBackend(
     wasm.Module(
       moduleName,
       List(), // empty imports
-      functions ++ synthFunctions
+      functions ++ synthFunctions,
+      lowerVtable(),
+      this.typeCtx
     )
   
   private def getOrGenerateCtor(cls: ClassInfo): MachineFunction =
@@ -342,6 +400,21 @@ class WasmBackend(
           val pctor = getOrGenerateCtor(pcls)
           pthis ++ pargs ++ Ls(Call(pctorName), Comment(f"ctor parent ${pcls.ident}"))
       }
+      println(s"class ${cls.ident} virtual: ${layoutAux.hasVirtual}")
+      val pvtbc = if layoutAux.hasVirtual then
+        val pvtboff = layoutAux.getPVtableOffset
+        val vtbOffset = this.vtableCtx(cls.ident)._1
+        Ls(
+          GetLocal("this"),
+          I32Const(pvtboff),
+          I32Add,
+          I32Const(vtbOffset),
+          I32Store,
+          Comment(s"vtable pointer class ${cls.ident}")
+        )
+      else
+        Ls()
+
       // store params
       val paramc = params flatMap { paramName =>
         Ls(
@@ -376,7 +449,7 @@ class WasmBackend(
         paramsType,
         localsType,
         retType,
-        (pc ++ paramc ++ fc).toList
+        (pc ++ pvtbc ++ paramc ++ fc).toList
       )
       this.blackMagicFnCtx = this.blackMagicFnCtx.updated(ctorName, machineF)
       // TODO: use better way to recover locals

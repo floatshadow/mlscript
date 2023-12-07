@@ -9,7 +9,7 @@ import scala.collection.immutable.{List, Map, VectorMap}
 import scala.collection.mutable.ListBuffer
 
 case class MethodInfo(
-  clsName: Str,
+  clsName: Str, // this cls identify the actual source class of this method
   methodName: Str,
   fid: Int,
   isVirtual: Bool
@@ -23,9 +23,16 @@ class RecordObj(
 ):
   def apply(name: String): Option[Type] = ???
 
-  def buildVtable() = ???
+  def buildVtable() =
+    methods.toList.filter(m => m._2.isVirtual)
 
   lazy val vtable: Ls[(String, MethodInfo)] = buildVtable()
+  def getVtable = this.vtable
+
+  def hasVirtual = this.vtable.nonEmpty
+
+  def getVtableIndex(name: Str): Int =
+    vtable.indexWhere {_._1 == name}
 
   def containsField(name: Str): Bool =
     // assume params, fields have no name conflict
@@ -49,15 +56,20 @@ class RecordObj(
       throw WasmBackendError(s"member $name does not exist in $this")
 
   def size: Int =
-    RecordObj.headerSize + fields.size * RecordObj.defaultFieldSize
+    val pvtb = if hasVirtual then RecordObj.defaultFieldSize else 0
+    RecordObj.headerSize + pvtb + fields.size * RecordObj.defaultFieldSize
 
   def getFieldOffset(name: String): Int =
     val index = fields.indexWhere { _._1 == name }
-    RecordObj.headerSize + index * RecordObj.defaultFieldSize
+    val pvtb = if hasVirtual then RecordObj.defaultFieldSize else 0
+    RecordObj.headerSize + pvtb + index * RecordObj.defaultFieldSize
   
   // ad hoc overload only for opaque record e.g. LetCall
   def getFieldOffset(index: Int) : Int =
     RecordObj.headerSize + index * RecordObj.defaultFieldSize
+  
+  def getPVtableOffset: Int =
+    RecordObj.headerSize
   
   def getParentOffet(name: Str): Int =
     // in our case class have at most 1 parent.
@@ -66,11 +78,12 @@ class RecordObj(
     0
   
   override def toString: String =
-    f"{fields: (${fields.toMap.keys.mkString(",")}), methods: (${methods.keys.mkString(",")})}\n"
+    f"{fields: (${fields.toMap.keys.mkString(",")}), methods: (${methods.keys.mkString(",")}), vtable: (${vtable.map(_._1) mkString ","})}\n"
 
 
 object RecordObj:
   final val headerSize = 4
+  final val pvtableSize = 4
   final val defaultFieldSize = 4
   var recordCache = Map[Str, RecordObj]()
 
@@ -101,7 +114,7 @@ object RecordObj:
             wcls.ident,
             name,
             mdef.id,
-            false,
+            mdef.isVirtual,
           )
       }
       val parents = wcls.parents.keys.toList flatMap {
@@ -121,6 +134,7 @@ object RecordObj:
       val methodLayout = collectMethod(clsctx, cls)
       val layoutAux = RecordObj(fieldsLayout, methodLayout)
       recordCache = recordCache.updated(cls.ident, layoutAux)
+      // println(s"cache status: $recordCache")
       layoutAux
 
   def opaque(numFields: Int) =
@@ -151,6 +165,7 @@ enum Type:
   case Float32 extends Type, ValueType
   case Float64 extends Type, ValueType
   case Record(impl: ClassInfo)
+  case FuncType(params: Ls[Type], ret: Ls[Type])
 
   override def toString(): String = show
 
@@ -166,6 +181,11 @@ enum Type:
       raw(classinfo.ident)
       <#> raw("(") <#> raw(classinfo.fields map {x => x.toString()} mkString(","))
       <#> raw(")")
+    case FuncType(params, ret) =>
+      raw("(func ") <#>
+      line(params.map {x => raw(s"(param $x)")}) <:>
+      line(ret.map {x => raw(s"(result $x)")}) <#>
+      raw(")")
 
 object Type:
   // TODO: GraphOptimizer does not support type 

@@ -66,6 +66,7 @@ enum MachineInstr:
   // Jump to "label", which MUST be the label of an enclosing structure
   case BrTable(labels: Ls[Int])
   case Call(name: Str)
+  case CallIndrect(typeName: Str)
   case Return
   case Unreachable // Always fails the program
 
@@ -145,6 +146,7 @@ enum MachineInstr:
       case Return           => "ret" |> raw
       case End              => "end" |> raw
       case Call(name)       => s"call $$$name" |> raw
+      case CallIndrect(typeName) => s"(call_indirect (type $$$typeName))" |> raw
       case Unreachable      => "unreachable" |> raw
       case GetLocal(name)   => s"local.get $$$name" |> raw
       case SetLocal(name)   => s"local.set $$$name" |> raw
