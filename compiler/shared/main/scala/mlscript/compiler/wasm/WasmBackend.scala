@@ -146,6 +146,7 @@ class WasmBackend(
       false,
       Name("this") +: params,
       resultNum,
+      None,
       body
     )
 
@@ -185,6 +186,7 @@ class WasmBackend(
       false,
       Ls(),
       1, // return only one value (may be pointer)
+      None,
       goprog.main
     )
     this.fDefCtx = this.fDefCtx.updated(-1, main)

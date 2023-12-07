@@ -389,6 +389,7 @@ class GraphOptimizer:
           false,
           pnames,
           1,
+          None,
           buildResultFromTerm(body) { x => x }
         )
         mdef.isVirtual = fun.isVirtual
@@ -401,9 +402,10 @@ class GraphOptimizer:
           false,
           Ls(),
           1,
+          None,
           buildResultFromTerm(body) { x => x }
         )
-        mdef.isTrivial = fun.isVirtual
+        mdef.isVirtual = fun.isVirtual
         name -> mdef
       case x @ _ => throw GraphOptimizingError(f"unsupported class method $x")
 
