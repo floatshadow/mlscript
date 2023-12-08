@@ -85,9 +85,6 @@ object RecordObj:
   final val headerSize = 4
   final val pvtableSize = 4
   final val defaultFieldSize = 4
-  var recordCache = Map[Str, RecordObj]()
-
-  def clearCache(): Unit = recordCache = Map[Str, RecordObj]()
 
   private def collectField(clsctx: Map[Str, ClassInfo], cls: ClassInfo): Ls[(String, Type)] =
     def collectFieldRec(wcls: ClassInfo): Ls[Str] =
@@ -127,15 +124,10 @@ object RecordObj:
 
 
   def from(clsctx: Map[Str, ClassInfo], cls: ClassInfo) =
-    if recordCache.contains(cls.ident) then
-      recordCache(cls.ident)
-    else
-      val fieldsLayout = collectField(clsctx, cls)
-      val methodLayout = collectMethod(clsctx, cls)
-      val layoutAux = RecordObj(fieldsLayout, methodLayout)
-      recordCache = recordCache.updated(cls.ident, layoutAux)
-      // println(s"cache status: $recordCache")
-      layoutAux
+    val fieldsLayout = collectField(clsctx, cls)
+    val methodLayout = collectMethod(clsctx, cls)
+    val layoutAux = RecordObj(fieldsLayout, methodLayout)
+    layoutAux
 
   def opaque(numFields: Int) =
     val fields = List.range(0, numFields) map { index => (index.toString() -> Type.defaultNumType)}

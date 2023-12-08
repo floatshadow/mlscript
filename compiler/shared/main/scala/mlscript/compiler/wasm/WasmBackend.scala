@@ -106,6 +106,7 @@ class WasmBackend(
   var vtableCtx: Map[Str, (Int, Ls[(Str, MethodInfo)])] = Map()
   // global type table for `call_indirect`
   var typeCtx: Map[Str, MachineType] = Map()
+  var layoutCtx: Map[Str, RecordObj] = Map()
 
   def nameMangling(clsName: Str, methodName: Str) =
     s"_Z${clsName}_${methodName}"
@@ -151,7 +152,6 @@ class WasmBackend(
     )
 
   protected def preprocess(goprog: GOProgram): Unit =
-    RecordObj.clearCache()
     val classes = goprog.classes
     val defs = goprog.defs
     this.clsctx = this.clsctx ++ classes.map(cls => (cls.ident -> cls)).toMap
@@ -178,6 +178,7 @@ class WasmBackend(
           vtableSize += classAux.getVtable.size
           this.vtableCtx = this.vtableCtx.updated(cls.ident, (elemOffset, classAux.getVtable))
         end if
+        this.layoutCtx = this.layoutCtx.updated(cls.ident, classAux)
     }
 
     val main = GODef(
@@ -210,12 +211,12 @@ class WasmBackend(
     case Select(Name(refName), scls, field) =>
       // ad hoc, as select method is built before getClassInfoUniverse
       val cls = clsctx(scls.ident)
-      val recordAux = RecordObj.from(clsctx, cls)
+      val recordAux = layoutCtx(cls.ident)
       val offset = recordAux.getFieldOffset(field)
       Ls(GetLocal(refName), I32Const(offset), I32Add, I32Load)
     case SelectMember(Name(refName), scls, member, args) =>
       val cls = clsctx(scls.ident)
-      val layoutAux = RecordObj.from(clsctx, cls)
+      val layoutAux = layoutCtx(cls.ident)
       layoutAux.getMemberUniverse(member) match
         case L(method) =>
           if !method.isVirtual then
@@ -226,14 +227,14 @@ class WasmBackend(
             argsInstr ++ Ls(Call(symbolName), 
                             Comment(s"call method ${member} of object ${refName}"))
           else
-            val (vtboff, vtb) = this.vtableCtx(cls.ident)
+            val (_, vtb) = this.vtableCtx(cls.ident)
             val methodIndex = vtb.indexWhere { _._1 == member}
             val methodTyName = typeNameMangling(cls.ident, method.methodName)
             val pvtboff = layoutAux.getPVtableOffset
             val argsInstr = GetLocal(refName) +: // `this` pointer
                             args.flatMap(arg => translateTrivialExpr(arg))
-            argsInstr ++ Ls(GetLocal(refName), I32Const(pvtboff), I32Add, I32Load, Comment(s"method ${method.methodName} offset"),
-                            I32Const(vtboff), Comment(s"class vtable ${cls.ident} offset"), I32Add,
+            argsInstr ++ Ls(GetLocal(refName), I32Const(pvtboff), I32Add, I32Load, Comment(s"class vtable ${cls.ident} offset"), 
+                            I32Const(methodIndex), Comment(s"method ${method.methodName} offset"), I32Add,
                             CallIndrect(methodTyName))
         case R(offset) => 
           Ls(GetLocal(refName), I32Const(offset), I32Add, I32Load, 
@@ -387,7 +388,7 @@ class WasmBackend(
       val fields = cls.members
       val parents = cls.parents
 
-      val layoutAux = RecordObj.from(clsctx, cls)
+      val layoutAux = layoutCtx(cls.ident)
       val instrs = ListBuffer[MachineInstr]()
       // construct parent
       val pc = parents flatMap {
@@ -467,7 +468,7 @@ class WasmBackend(
     rhs match
       case CtorApp(scls, args) =>
         val cls = clsctx(scls.ident)
-        val recordAux = RecordObj.from(clsctx, cls)
+        val recordAux = layoutCtx(cls.ident)
         val objSize = recordAux.size
         ctorInstrs ++= Ls(GetGlobal(0), SetLocal(bindName))
         ctorInstrs ++= Ls(GetGlobal(0), I32Const(objSize), I32Add, SetGlobal(0))
