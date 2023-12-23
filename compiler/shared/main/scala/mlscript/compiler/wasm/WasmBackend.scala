@@ -8,6 +8,7 @@ import mlscript.utils.shorthands.*
 import mlscript.*
 
 import collection.mutable.{Map => MutMap, Set => MutSet, ListBuffer}
+import mlscript.JSCodeHelpers.`throw`
 
 
 final case class WasmBackendError(message: String) extends Exception(message)
@@ -20,6 +21,7 @@ class WasmBackend(
   import MachineInstr.*
   import GOExpr.*
   import GONode.*
+  import ClassMember.*
 
   case class JoinPoint(
     params: Ls[Name], 
@@ -218,7 +220,7 @@ class WasmBackend(
       val cls = clsctx(scls.ident)
       val layoutAux = layoutCtx(cls.ident)
       layoutAux.getMemberUniverse(member) match
-        case L(method) =>
+        case S(ClassMethod(method)) =>
           if !method.isVirtual then
             val mdef = fDefCtx(method.fid)
             val symbolName = mdef.name
@@ -236,9 +238,12 @@ class WasmBackend(
             argsInstr ++ Ls(GetLocal(refName), I32Const(pvtboff), I32Add, I32Load, Comment(s"class vtable ${cls.ident} offset"), 
                             I32Const(methodIndex), Comment(s"method ${method.methodName} offset"), I32Add,
                             CallIndrect(methodTyName))
-        case R(offset) => 
+        case S(ClassField(offset)) => 
           Ls(GetLocal(refName), I32Const(offset), I32Add, I32Load, 
              Comment(s"select field ${member} of object ${refName}"))
+        case S(TraitMethod(traitName, method)) => ???
+        case None =>
+          throw WasmBackendError(s"invalid member ${member} for class ${cls.ident}")
       
     case BasicOp(operator, args) =>
       val argsInstr = args flatMap {arg => translateTrivialExpr(arg)}

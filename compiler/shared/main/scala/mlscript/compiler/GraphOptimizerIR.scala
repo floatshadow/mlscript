@@ -44,6 +44,10 @@ implicit object GODefOrdering extends Ordering[GODef] {
   def compare(a: GODef, b: GODef) = a.id.compare(b.id)
 }
 
+sealed trait ObjDefKind
+case object ClsKind extends ObjDefKind
+case object TraitKind extends ObjDefKind
+
 case class ClassInfo(
   val id: Int,
   val ident: Str,
@@ -55,6 +59,7 @@ case class ClassInfo(
   // `methods`: methods of class
   var members: Map[Str, GONode] = Map()
   var methods: Map[Str, GODef] = Map()
+  var kind: ObjDefKind = ClsKind
   override def equals(o: Any): Bool = o match {
     case o: ClassInfo if this.isInstanceOf[ClassInfo] => o.id == id
     case _ => false

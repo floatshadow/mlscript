@@ -1,6 +1,7 @@
 package mlscript.compiler.wasm
 
 import mlscript.compiler.ClassInfo
+import mlscript.compiler.{ClsKind, TraitKind}
 import mlscript.utils.*
 import mlscript.utils.shorthands.*
 
@@ -15,12 +16,21 @@ case class MethodInfo(
   isVirtual: Bool
 )
 
+
+enum ClassMember:
+  case ClassField(offset: Int)
+  case ClassMethod(method: MethodInfo)
+  case TraitMethod(traitName: Str, method: MethodInfo)
+
 // mlscript class is encoded as a record with some field
 // handle memory layout
 class RecordObj(
   fields: Ls[(String, Type)], 
-  methods: Map[String, MethodInfo]
+  methods: Map[String, MethodInfo],
+  traits: Ls[(String, Map[String, MethodInfo])]
 ):
+  import ClassMember.*
+
   def apply(name: String): Option[Type] = ???
 
   def buildVtable() =
@@ -34,26 +44,37 @@ class RecordObj(
   def getVtableIndex(name: Str): Int =
     vtable.indexWhere {_._1 == name}
 
-  def containsField(name: Str): Bool =
+  private def containsField(name: Str): Bool =
     // assume params, fields have no name conflict
     fields.toMap.contains(name)
-  
-  def containsMethod(name: Str): Bool =
+
+  private def containsMethod(name: Str): Bool =
     methods.contains(name)
 
-  def contains(name: Str): Bool =
-    containsField(name) || containsMethod(name)
-
-  def getMethod(name: Str): MethodInfo =
+  private def getMethod(name: Str): MethodInfo =
     methods(name)
-
-  def getMemberUniverse(name: Str): MethodInfo \/ Int =
-    if containsMethod(name) then
-      L(getMethod(name))
-    else if containsField(name) then
-      R(getFieldOffset(name))
+  
+  private def searchTraitMethod(name: Str): Opt[ClassMember] =
+    val search = traits collect {
+      case (traitName, traitMethods) =>
+        traitMethods.get(name) match
+          case S(impl) => (traitName, impl)        
+    }
+    if search.size > 1 then
+      throw WasmBackendError(s"try to invoke $name, but find multiple candidate implementation")
+    
+    if search.size == 1 then
+      S(TraitMethod(search.head._1, search.head._2))
     else
-      throw WasmBackendError(s"member $name does not exist in $this")
+      None
+
+  def getMemberUniverse(name: Str): Opt[ClassMember] =
+    if containsMethod(name) then
+      S(ClassMethod(getMethod(name)))
+    else if containsField(name) then
+      S(ClassField(getFieldOffset(name)))
+    else 
+      searchTraitMethod(name)
 
   def size: Int =
     val pvtb = if hasVirtual then RecordObj.defaultFieldSize else 0
@@ -84,18 +105,22 @@ class RecordObj(
 object RecordObj:
   final val headerSize = 4
   final val pvtableSize = 4
+  final val itableSize = 4
   final val defaultFieldSize = 4
-
+ 
+  // assume trait contains only methods
   private def collectField(clsctx: Map[Str, ClassInfo], cls: ClassInfo): Ls[(String, Type)] =
     def collectFieldRec(wcls: ClassInfo): Ls[Str] =
       val params = wcls.fields
       val fields = wcls.members.keys.toList
-      val parents = wcls.parents.keys.toList flatMap { 
+      val base = wcls.parents.keys.toList flatMap { 
         pname =>
           val pcls = clsctx(pname)
-          collectFieldRec(pcls)
+          pcls.kind match
+            case ClsKind =>
+              collectFieldRec(pcls)
       }
-      parents ++ params ++ fields
+      base ++ params ++ fields
     val fieldNames = collectFieldRec(cls)
     val numFields = fieldNames.size
     fieldNames.zip(List.fill(numFields)(Type.defaultNumType))
@@ -114,24 +139,66 @@ object RecordObj:
             mdef.isVirtual,
           )
       }
-      val parents = wcls.parents.keys.toList flatMap {
+      val base = wcls.parents.keys.toList flatMap {
         pname =>
           val pcls = clsctx(pname)
-          collectMethodRec(pcls)
+          pcls.kind match
+            case ClsKind =>
+              collectMethodRec(pcls)
       }
-      parents ++ methods
+      base ++ methods
     collectMethodRec(cls).toMap
+  
+  // decouple implemented trait methods from methods lists,
+  // it returns class defined methods and full lists of implemented/inherited trait methods
+  private def decoupleImplFromMethod(
+    traits: Ls[(Str, Map[Str, MethodInfo])], 
+    methods: Map[Str, MethodInfo]
+  ) =
+    var implCtx = Set[Str]()
+    val implTrait = traits map {
+      case (traitName, traitMethods) =>
+        val implMethods = traitMethods map {
+          case (name, minfo) =>
+            methods.get(name) match
+              case S(impl) =>
+                implCtx = implCtx + name
+                (name, impl)
+              case None =>
+                (name, minfo)
+        }
+        traitName -> implMethods
+    }
+    val classMethods = methods filter { case (name, _) => !implCtx.contains(name) }
+    (implTrait, classMethods)
 
+  private def collectTrait(clsctx: Map[Str, ClassInfo], cls: ClassInfo) =
+    def collectTraitRec(wcls: ClassInfo): Ls[(Str, Map[Str, MethodInfo])] =
+      val traits = wcls.parents.keys.toList flatMap {
+        pname =>
+          val pcls = clsctx(pname)
+          collectTraitRec(pcls)
+      }
+      // TODO: do this more efficiently
+      val methods = collectMethod(clsctx, wcls)
+      val (implTrait, classMethods) = decoupleImplFromMethod(traits, methods)
+      wcls.kind match
+        case ClsKind => implTrait
+        case TraitKind => (wcls.ident, classMethods) +: implTrait
+
+    collectTraitRec(cls)
 
   def from(clsctx: Map[Str, ClassInfo], cls: ClassInfo) =
     val fieldsLayout = collectField(clsctx, cls)
     val methodLayout = collectMethod(clsctx, cls)
-    val layoutAux = RecordObj(fieldsLayout, methodLayout)
+    val traitsLayout = collectTrait(clsctx, cls)
+    val (implTrait, classMethods) = decoupleImplFromMethod(traitsLayout, methodLayout)
+    val layoutAux = RecordObj(fieldsLayout, classMethods, implTrait)
     layoutAux
 
   def opaque(numFields: Int) =
     val fields = List.range(0, numFields) map { index => (index.toString() -> Type.defaultNumType)}
-    RecordObj(fields, Map[String, MethodInfo]())
+    RecordObj(fields, Map(), Ls())
 
 class VariantObj(val variants: Map[String, Option[Type.Record]]):
   def apply(name: String): Option[Option[Type.Record]] = variants.get(name)

@@ -336,7 +336,7 @@ class GraphOptimizer:
         Ls(),
       )
     // class inheritence and method
-    case NuTypeDef(Cls, TypeName(name), Nil, S(Tup(args)), N, N, parents, N, N, TypingUnit(_)) =>
+    case NuTypeDef(kind, TypeName(name), Nil, S(Tup(args)), N, N, parents, N, N, TypingUnit(_)) =>
       ClassInfo(gencid(),
         name,
         args map {
@@ -344,7 +344,7 @@ class GraphOptimizer:
           case _ => throw GraphOptimizingError("unsupported field")
         }
       )
-    case NuTypeDef(Cls, TypeName(name), Nil, N, N, N, parents, N, N, TypingUnit(_)) =>
+    case NuTypeDef(kind, TypeName(name), Nil, N, N, N, parents, N, N, TypingUnit(_)) =>
       ClassInfo(gencid(),
         name,
         Ls()
