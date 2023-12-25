@@ -92,6 +92,9 @@ class RecordObj(
   def getPVtableOffset: Int =
     RecordObj.headerSize
   
+  def getPItableOffset: Int =
+    RecordObj.headerSize + RecordObj.pvtableSize
+  
   def getParentOffet(name: Str): Int =
     // in our case class have at most 1 parent.
     // its members are decomposed into scalar and
@@ -219,6 +222,7 @@ sealed trait ValueType:
 
 // TODO: support all wasm types
 enum Type:
+  case Void
   case Int32 extends Type, ValueType
   case Int64 extends Type, ValueType
   case Float32 extends Type, ValueType
@@ -232,6 +236,7 @@ enum Type:
     toDocument.print
   
   def toDocument: Document = this match
+    case Void =>  "" |> raw
     case Int32 => "i32" |> raw
     case Int64 => "i64" |> raw
     case Float32 => "f32" |> raw

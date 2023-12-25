@@ -22,8 +22,10 @@ enum MachineInstr:
   case I32And
   case I32Or
   case I32Eqz
-  case I32Lt_s
-  case I32Le_s
+  case I32Lt(signed: Boolean = false)
+  case I32Le(signed: Boolean = false)
+  case I32Gt(signed: Boolean = false)
+  case I32Ge(signed: Boolean = false)
   case I32Eq
   case I64Add
   case I64Sub
@@ -33,8 +35,10 @@ enum MachineInstr:
   case I64And
   case I64Or
   case I64Eqz
-  case I64Lt_s
-  case I64Le_s
+  case I64Lt(signed: Boolean = false)
+  case I64Le(signed: Boolean = false)
+  case I64Gt(signed: Boolean = false)
+  case I64Ge(signed: Boolean = false)
   case I64Eq
   case Drop // Drops the top value of the stack
   case F64Add
@@ -60,9 +64,10 @@ enum MachineInstr:
   // Marks the end of an if-then-else or block
   case Loop(label: Str)
   // A block of instructions with a label at the beginning
-  case Block(label: Str, results: Ls[Str])
+  case Block(label: Str, results: Ls[Type])
   // A block of instructions with a label at the end
   case Br(label: Int)
+  case BrIf(label: Int)
   // Jump to "label", which MUST be the label of an enclosing structure
   case BrTable(labels: Ls[Int])
   case Call(name: Str)
@@ -110,8 +115,10 @@ enum MachineInstr:
       case I32And               => "i32.and" |> raw
       case I32Or                => "i32.or" |> raw
       case I32Eqz               => "i32.eqz" |> raw
-      case I32Lt_s              => "i32.lt_s" |> raw
-      case I32Le_s              => "i32.le_s" |> raw
+      case I32Lt(signed)        => s"i32.lt_${if signed then "s" else "u"}" |> raw
+      case I32Le(signed)        => s"i32.le_${if signed then "s" else "u"}" |> raw
+      case I32Gt(signed)        => s"i32.gt_${if signed then "s" else "u"}" |> raw
+      case I32Ge(signed)        => s"i32.ge_${if signed then "s" else "u"}" |> raw
       case I32Eq                => "i32.eq" |> raw
       case I64Add               => "i64.add" |> raw
       case I64Sub               => "i64.sub" |> raw
@@ -121,8 +128,10 @@ enum MachineInstr:
       case I64And               => "i64.and" |> raw
       case I64Or                => "i64.or" |> raw
       case I64Eqz               => "i64.eqz" |> raw
-      case I64Lt_s              => "i64.lt_s" |> raw
-      case I64Le_s              => "i64.le_s" |> raw
+      case I64Lt(signed)        => s"i64.lt_${if signed then "s" else "u"}" |> raw
+      case I64Le(signed)        => s"i64.le_${if signed then "s" else "u"}" |> raw
+      case I64Gt(signed)        => s"i64.gt_${if signed then "s" else "u"}" |> raw
+      case I64Ge(signed)        => s"i64.ge_${if signed then "s" else "u"}" |> raw
       case I64Eq                => "i64.eq" |> raw
       case F64Add               => "f64.add" |> raw
       case F64Sub               => "f64.sub" |> raw
@@ -142,6 +151,7 @@ enum MachineInstr:
       case Block(label, _)  => s"block $$$label" |> raw
       case Loop(label)      => s"loop $$$label" |> raw
       case Br(label)        => s"br $label" |> raw
+      case BrIf(label)      => s"br_if $label" |> raw
       case BrTable(labels)   => s"br_table ${labels.mkString(" ")}" |> raw
       case Return           => "ret" |> raw
       case End              => "end" |> raw
