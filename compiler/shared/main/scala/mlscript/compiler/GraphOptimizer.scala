@@ -337,18 +337,31 @@ class GraphOptimizer:
       )
     // class inheritence and method
     case NuTypeDef(kind, TypeName(name), Nil, S(Tup(args)), N, N, parents, N, N, TypingUnit(_)) =>
-      ClassInfo(gencid(),
+      val cls = ClassInfo(gencid(),
         name,
         args map {
           case N -> Fld(FldFlags.empty, Var(name)) => name
           case _ => throw GraphOptimizingError("unsupported field")
         }
       )
+      val typeKind = kind match
+        case Cls => ClsKind
+        case Trt => TraitKind
+        case _ => throw GraphOptimizingError("unsupported type def kind")
+      cls.kind = typeKind
+      cls
+      
     case NuTypeDef(kind, TypeName(name), Nil, N, N, N, parents, N, N, TypingUnit(_)) =>
-      ClassInfo(gencid(),
+      val cls = ClassInfo(gencid(),
         name,
         Ls()
       )
+      val typeKind = kind match
+        case Cls => ClsKind
+        case Trt => TraitKind
+        case _ => throw GraphOptimizingError("unsupported type def kind")
+      cls.kind = typeKind
+      cls
 
     case x @ _ => throw GraphOptimizingError(f"unsupported NuTypeDef $x")
 
@@ -414,19 +427,16 @@ class GraphOptimizer:
         mdef.isVirtual = fun.isVirtual
         name -> mdef
       case x @ _ => throw GraphOptimizingError(f"unsupported class method $x")
-
+  
   private def getClassInfoUniverse
     (ctx: Ctx, sclsctx: ClassCtx, fldctx: FieldCtx, fnctx: FnCtx, opctx: OpCtx)
     (ntd: Statement): ClassInfo = ntd match
-      case NuTypeDef(Cls, TypeName(name), Nil, params, N, N, parents, N, N, TypingUnit(entities)) =>
+      case NuTypeDef(kind, TypeName(name), Nil, params, N, N, parents, N, N, TypingUnit(entities)) =>
         given ClassCtx = sclsctx
         given FieldCtx = fldctx
         given FnCtx = fnctx
         given OpCtx = opctx
 
-        if parents.size > 1 then
-          throw GraphOptimizingError("unsupported inheriting from more than 1 class")
-        end if
         // params, name should be guaranteed before handle inheritence and method
         val scls = sclsctx(name)
         val paramsName = scls.fields map { x => Name(x) }
@@ -434,6 +444,23 @@ class GraphOptimizer:
         // parent constructor definitions
         // as constructor is plain function, use plain ctx
         val pcd = parents.map(updateClassInfoParentsUniverse(paramCtx))
+
+        // ensure class inherit at most 1 class and trait inherit only traits
+        val pcdgrouped = pcd.keys.toList groupBy { name =>
+          val cls = sclsctx(name)
+          cls.kind match
+            case ClsKind => 0
+            case TraitKind => 1
+        }
+        kind match
+          case Cls =>
+            if pcdgrouped.getOrElse(0, Nil).size > 1 then
+              throw GraphOptimizingError("unsupported inheriting from more than 1 class")
+          case Trt =>
+            if pcdgrouped.getOrElse(0, Nil).size > 0 then
+              throw GraphOptimizingError("unsupported inheriting from class")
+          case _ => 
+            throw GraphOptimizingError("unsupported object kind")
 
         val grouped = entities groupBy {
           case ntd: NuTypeDef => 0
