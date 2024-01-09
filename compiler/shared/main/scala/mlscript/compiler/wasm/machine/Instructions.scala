@@ -48,7 +48,7 @@ enum MachineInstr:
   case F64And
   case F64Or
   case F64Eqz
-      // Return 1 if operand is 0, 0 otherwise
+  // Return 1 if operand is 0, 0 otherwise
   case F64Lt_s // Signed less-than
   case F64Le_s // Signed less-equals
   case F64Eq
@@ -98,6 +98,9 @@ enum MachineInstr:
 
   // Comment
   case Comment(msg: String)
+  // Pseudo instructions
+  case LdSym(sym: Str) 
+  // Push the address of a symbol (usually name of a data segment) into the stack
 
   override def toString() : String = show
 
@@ -170,5 +173,6 @@ enum MachineInstr:
       case Load8_u          => "i32.load8_u" |> raw
       case Comment(s) =>
         stack(s.split('\n').toList.map(s => raw(s";; $s")))
+      case LdSym(sym) => s"i32.load $$${sym}" |> raw
 
 end MachineInstr
