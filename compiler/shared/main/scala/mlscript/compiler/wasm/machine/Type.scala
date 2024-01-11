@@ -63,10 +63,11 @@ class RecordObj(
     methods(name)
   
   private def searchTraitMethod(name: Str): Opt[ClassMember] =
-    val search = traits collect {
-      case (traitName, traitMethods) =>
+    val search = traits flatMap {
+      case (traitCls, traitMethods) =>
         traitMethods.get(name) match
-          case S(impl) => (traitName, impl)        
+          case S(impl) => Ls((traitCls, impl))
+          case None => Nil
     }
     if search.size > 1 then
       throw WasmBackendError(s"try to invoke $name, but find multiple candidate implementation")
@@ -111,7 +112,15 @@ class RecordObj(
     0
   
   override def toString: String =
-    f"{fields: (${fields.toMap.keys.mkString(",")}), methods: (${methods.keys.mkString(",")}), vtable: (${vtable.map(_._1) mkString ","})}\n"
+    f"{ name: $name, " +
+    f"fields: (${fields.toMap.keys.mkString(", ")}), " +
+    f"methods: (${methods.keys.mkString(", ")}), " +
+    f"vtable: (${vtable.map(_._1) mkString ","}), " +
+    "trait: [" + (traits.map {
+      (cls, mmap) =>
+        f"(${cls.ident}: ${mmap.keys.mkString(", ")})"
+    }).mkString(", ")
+    + "] }"
 
 
 object RecordObj:
@@ -210,6 +219,7 @@ object RecordObj:
     val traitsLayout = collectTrait(clsctx, cls)
     val (implTrait, classMethods) = decoupleImplFromMethod(traitsLayout, methodLayout)
     val layoutAux = RecordObj(cls.ident, fieldsLayout, classMethods, implTrait)
+    println(layoutAux)
     layoutAux
 
   def opaque(numFields: Int) =

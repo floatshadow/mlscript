@@ -163,6 +163,22 @@ class WasmBackend(
     val rawData = size +: traitTbl
     DataString.fromIntSeq(rawData)
 
+  protected def assembleAddress(xs: Ls[MachineInstr]): Ls[MachineInstr] =
+    val got = this.dataCtx.computeOffsets.toMap
+    def translateLabel(addr: Address) = addr match
+      case LabelAddr(symbol) => ImmOffset(got(symbol)._1)
+      case imm: ImmOffset => imm
+
+    xs map {
+      instr => instr match
+        case LdSym(sym) => LdSym(translateLabel(sym))
+        case I32LdOffset(offset) => I32LdOffset(translateLabel(offset))
+        case I32StOffset(offset) => I32StOffset(translateLabel(offset))
+        case I64LdOffset(offset) => I64LdOffset(translateLabel(offset))
+        case I64StOffset(offset) => I64StOffset(translateLabel(offset))
+        case x @ _ => x
+    }
+
   protected def preprocess(goprog: GOProgram): Unit =
     val classes = goprog.classes
     val defs = goprog.defs
@@ -419,7 +435,7 @@ class WasmBackend(
       Right(jp)
     else 
       this.locals = Set()
-      val body = translateNode(godef.body)
+      val body = assembleAddress(translateNode(godef.body))
       val paramsType = godef.params map { case Name(param) => param -> MachineType.defaultNumType}
       // local info collect when codegen
       val localsType = locals.toList map {local => local -> MachineType.defaultNumType}
@@ -493,8 +509,14 @@ class WasmBackend(
           pthis ++ pargs ++ Ls(Call(pctorName), Comment(f"ctor parent ${pcls.ident}"))
       }
       // trait parents
-      val pTrait = pGrouped.getOrElse(1, Nil)
-      val numTraits = pTrait.size
+      val classTraitBtl = itableMangling(cls.ident)
+      val itableOffset = layoutAux.getPItableOffset
+      val ptc = Ls(
+        GetLocal("this"),
+        LdSym(LabelAddr(classTraitBtl)),
+        I32StOffset(ImmOffset(itableOffset)),
+        Comment(s"set itable")
+      )
       
 
       // println(s"class ${cls.ident} virtual: ${layoutAux.hasVirtual}")
@@ -546,7 +568,7 @@ class WasmBackend(
         paramsType,
         localsType,
         retType,
-        (pc ++ pvtbc ++ paramc ++ fc).toList
+        assembleAddress((pc ++ ptc ++ pvtbc ++ paramc ++ fc).toList)
       )
       this.blackMagicFnCtx = this.blackMagicFnCtx.updated(ctorName, machineF)
       // TODO: use better way to recover locals
@@ -584,7 +606,6 @@ class WasmBackend(
         ctorInstrs += Comment(s"bind variable ${bindName}")
 
     ctorInstrs.toList
-
   // handcrafted wasm, performing linear search on interface table of object,
   // return address of found trait vtable
   private def getOrGenerateTraitSearch(cls: ClassInfo): MachineFunction =
@@ -676,7 +697,7 @@ class WasmBackend(
           paramsType,
           localsType,
           retType,
-          instrs
+          assembleAddress(instrs)
         )
         this.blackMagicFnCtx = this.blackMagicFnCtx.updated(builtin, machineF)
         machineF

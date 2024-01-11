@@ -4,6 +4,17 @@ package mlscript.compiler.wasm
 import mlscript.utils.*
 import mlscript.utils.shorthands.*
 
+sealed abstract class Address:
+
+  override def toString(): String = this match
+    case LabelAddr(symbol) => s"$$$symbol"
+    case ImmOffset(offset) => s"$offset"
+
+// Pseudo label offset, would fail in assembler
+final case class LabelAddr(symbol: Str) extends Address
+final case class ImmOffset(offset: Int) extends Address
+
+
 // A subset of instructions defined by the WASM standard
 // TODO: linear stack machine instruction may be hard to read,
 // We hope that we can use s-expression like structure as a better representation
@@ -99,12 +110,12 @@ enum MachineInstr:
   // Comment
   case Comment(msg: String)
   // Pseudo instructions
-  case LdSym(sym: Str) 
+  case LdSym(sym: Address) 
   // Push the address of a symbol (usually name of a data segment) into the stack
-  case I32LdOffset(offset: Int)
-  case I32StOffset(offset: Int)
-  case I64LdOffset(offset: Int)
-  case I64StOffset(offset: Int)
+  case I32LdOffset(offset: Address)
+  case I32StOffset(offset: Address)
+  case I64LdOffset(offset: Address)
+  case I64StOffset(offset: Address)
   // inn.store/load {offset u32, align u32}
 
   override def toString() : String = show
@@ -178,10 +189,10 @@ enum MachineInstr:
       case Load8_u          => "i32.load8_u" |> raw
       case Comment(s) =>
         stack(s.split('\n').toList.map(s => raw(s";; $s")))
-      case LdSym(sym) => s"i32.load $$${sym}" |> raw
-      case I32LdOffset(offset) => s"i32.load { offset $offset }" |> raw
-      case I32StOffset(offset) => s"i32.store { offset $offset }" |> raw
-      case I64LdOffset(offset) => s"i64.load { offset $offset }" |> raw
-      case I64StOffset(offset) => s"i64.store { offset $offset }" |> raw
+      case LdSym(sym) => s"i32.const ${sym}" |> raw
+      case I32LdOffset(offset) => s"i32.load offset=$offset" |> raw
+      case I32StOffset(offset) => s"i32.store offset=$offset" |> raw
+      case I64LdOffset(offset) => s"i64.load offset=$offset" |> raw
+      case I64StOffset(offset) => s"i64.store offset=$offset" |> raw
 
 end MachineInstr
