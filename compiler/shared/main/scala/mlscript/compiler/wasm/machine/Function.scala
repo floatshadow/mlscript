@@ -8,7 +8,7 @@ import mlscript.utils.shorthands.*
 import scala.collection.immutable.ListMap
 import scala.collection.mutable.{Map => MutMap}
 
-class MachineFunction (
+case class MachineFunction (
     val name: String,
     val args: Ls[(String, Type)],
     val locals: Ls[(String, Type)],
@@ -18,6 +18,9 @@ class MachineFunction (
 ):
   override def toString: String = show
   
+  def updated(newbody: Ls[MachineInstr]) =
+    this.copy(instrs = newbody)
+
   def show: String =
     toDocument.print
 

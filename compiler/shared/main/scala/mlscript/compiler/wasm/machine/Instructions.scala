@@ -38,6 +38,8 @@ enum MachineInstr:
   case I32Gt(signed: Boolean = false)
   case I32Ge(signed: Boolean = false)
   case I32Eq
+  case I32Shl
+  case I32Shr(signed: Boolean = false)
   case I64Add
   case I64Sub
   case I64Mul
@@ -51,6 +53,8 @@ enum MachineInstr:
   case I64Gt(signed: Boolean = false)
   case I64Ge(signed: Boolean = false)
   case I64Eq
+  case I64Shl
+  case I64Shr(signed: Boolean = false)
   case Drop // Drops the top value of the stack
   case F64Add
   case F64Sub
@@ -89,6 +93,7 @@ enum MachineInstr:
   // Locals (parameters, local variables)
   case GetLocal(name: Str)
   case SetLocal(name: Str)
+  case TeeLocal(name: Str)
 
   // Global variables
   case GetGlobal(index: Int)
@@ -103,9 +108,9 @@ enum MachineInstr:
   case I64Load
   // Stores a single byte to memory (the least significant byte of the operand)
   // Operands expected are like Store
-  case Store8
+  case I32Store8
   // Load a byte from memory, then zero-extend it to fill an i32
-  case Load8_u
+  case I32Load8_u
 
   // Comment
   case Comment(msg: String)
@@ -139,6 +144,8 @@ enum MachineInstr:
       case I32Gt(signed)        => s"i32.gt_${if signed then "s" else "u"}" |> raw
       case I32Ge(signed)        => s"i32.ge_${if signed then "s" else "u"}" |> raw
       case I32Eq                => "i32.eq" |> raw
+      case I32Shl               => "i32.shl" |> raw
+      case I32Shr(signed)       => s"i32.shr_${if signed then "s" else "u"}" |> raw
       case I64Add               => "i64.add" |> raw
       case I64Sub               => "i64.sub" |> raw
       case I64Mul               => "i64.mul" |> raw
@@ -152,6 +159,8 @@ enum MachineInstr:
       case I64Gt(signed)        => s"i64.gt_${if signed then "s" else "u"}" |> raw
       case I64Ge(signed)        => s"i64.ge_${if signed then "s" else "u"}" |> raw
       case I64Eq                => "i64.eq" |> raw
+      case I64Shl               => "i64.shl" |> raw
+      case I64Shr(signed)       => s"i64.shr_${if signed then "s" else "u"}" |> raw
       case F64Add               => "f64.add" |> raw
       case F64Sub               => "f64.sub" |> raw
       case F64Mul               => "f64.mul" |> raw
@@ -172,21 +181,22 @@ enum MachineInstr:
       case Br(label)        => s"br $label" |> raw
       case BrIf(label)      => s"br_if $label" |> raw
       case BrTable(labels)   => s"br_table ${labels.mkString(" ")}" |> raw
-      case Return           => "ret" |> raw
+      case Return           => "return" |> raw
       case End              => "end" |> raw
       case Call(name)       => s"call $$$name" |> raw
       case CallIndrect(typeName) => s"(call_indirect (type $$$typeName))" |> raw
       case Unreachable      => "unreachable" |> raw
       case GetLocal(name)   => s"local.get $$$name" |> raw
       case SetLocal(name)   => s"local.set $$$name" |> raw
+      case TeeLocal(name)   => s"local.tee $$$name" |> raw
       case GetGlobal(index) => s"global.get $index" |> raw
       case SetGlobal(index) => s"global.set $index" |> raw
       case I32Store            => "i32.store" |> raw
       case I32Load             => "i32.load" |> raw
       case I64Store            => "i64.store" |> raw
       case I64Load             => "i64.load" |> raw
-      case Store8           => "i32.store8" |> raw
-      case Load8_u          => "i32.load8_u" |> raw
+      case I32Store8           => "i32.store8" |> raw
+      case I32Load8_u          => "i32.load8_u" |> raw
       case Comment(s) =>
         stack(s.split('\n').toList.map(s => raw(s";; $s")))
       case LdSym(sym) => s"i32.const ${sym}" |> raw

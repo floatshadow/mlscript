@@ -94,28 +94,6 @@ class RecordObj(
     val index = fields.indexWhere { _._1 == name }
     getHeaderSize + index * defaultFieldSize
   
-  // ad hoc overload only for opaque record e.g. LetCall
-  def getFieldOffset(index: Int) : Int =
-    getHeaderSize + index * defaultFieldSize
-  
-  def getPVtableOffset: Int =
-    cidSize
-  
-  def getPItableOffset: Int =
-    cidSize + pvtableSize
-
-  def getRefCountOffset: Int =
-    cidSize + pvtableSize + itableSize
-  
-  def getHeaderSize: Int =
-    cidSize + pvtableSize + itableSize + rcSize
-
-  def getParentOffet(name: Str): Int =
-    // in our case class have at most 1 parent.
-    // its members are decomposed into scalar and
-    // placed at the beginning of the class
-    0
-  
   override def toString: String =
     f"{ name: $name, " +
     f"fields: (${fields.toMap.keys.mkString(", ")}), " +
@@ -134,6 +112,31 @@ object RecordObj:
   final val itableSize = 4
   final val rcSize = 4
   final val defaultFieldSize = 4
+
+  def getPVtableOffset: Int =
+    cidSize
+  
+  def getPItableOffset: Int =
+    cidSize + pvtableSize
+
+  def getRefCountOffset: Int =
+    cidSize + pvtableSize + itableSize
+  
+  def getHeaderSize: Int =
+    cidSize + pvtableSize + itableSize + rcSize
+  
+  // ad hoc overload only for opaque record e.g. LetCall
+  def getFieldOffset(index: Int) : Int =
+    getHeaderSize + index * defaultFieldSize
+
+  def revertOffset2Index(offset: Int): Int =
+    (offset - getHeaderSize) / defaultFieldSize
+
+  def getParentOffet(name: Str): Int =
+    // in our case class have at most 1 parent.
+    // its members are decomposed into scalar and
+    // placed at the beginning of the class
+    0
 
   // assume trait contains only methods
   private def collectField(clsctx: Map[Str, ClassInfo], cls: ClassInfo): Ls[(String, Type)] =
