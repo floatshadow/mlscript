@@ -367,8 +367,7 @@ class WasmBackend(
         val argsInstr = args flatMap {arg => translateTrivialExpr(arg)}
         val calleeName = defnRef.getName
         val numResultFields = resultNames.size
-        val recordAux = RecordObj.opaque(numResultFields)
-        
+
         // left most result in the bottom
         val bindInstrs = resultNames.reverse flatMap { case Name(name) =>
                             Ls(SetLocal(name))

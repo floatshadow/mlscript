@@ -32,6 +32,7 @@ class RecordObj(
 ):
   import ClassMember.*
   import Symbol.*
+  import RecordObj.*
 
   def getName = name
 
@@ -87,24 +88,28 @@ class RecordObj(
   
   //===-- compute layout information ===//
   def size: Int =
-    val pvtb = if hasVirtual then RecordObj.defaultFieldSize else 0
-    RecordObj.headerSize + pvtb + fields.size * RecordObj.defaultFieldSize
+    getHeaderSize + fields.size * defaultFieldSize
 
   def getFieldOffset(name: String): Int =
     val index = fields.indexWhere { _._1 == name }
-    val pvtb = if hasVirtual then RecordObj.defaultFieldSize else 0
-    RecordObj.headerSize + pvtb + index * RecordObj.defaultFieldSize
+    getHeaderSize + index * defaultFieldSize
   
   // ad hoc overload only for opaque record e.g. LetCall
   def getFieldOffset(index: Int) : Int =
-    RecordObj.headerSize + index * RecordObj.defaultFieldSize
+    getHeaderSize + index * defaultFieldSize
   
   def getPVtableOffset: Int =
-    RecordObj.headerSize
+    cidSize
   
   def getPItableOffset: Int =
-    RecordObj.headerSize + RecordObj.pvtableSize
+    cidSize + pvtableSize
+
+  def getRefCountOffset: Int =
+    cidSize + pvtableSize + itableSize
   
+  def getHeaderSize: Int =
+    cidSize + pvtableSize + itableSize + rcSize
+
   def getParentOffet(name: Str): Int =
     // in our case class have at most 1 parent.
     // its members are decomposed into scalar and
@@ -124,9 +129,10 @@ class RecordObj(
 
 
 object RecordObj:
-  final val headerSize = 4
+  final val cidSize = 4
   final val pvtableSize = 4
   final val itableSize = 4
+  final val rcSize = 4
   final val defaultFieldSize = 4
 
   // assume trait contains only methods
@@ -219,7 +225,7 @@ object RecordObj:
     val traitsLayout = collectTrait(clsctx, cls)
     val (implTrait, classMethods) = decoupleImplFromMethod(traitsLayout, methodLayout)
     val layoutAux = RecordObj(cls.ident, fieldsLayout, classMethods, implTrait)
-    println(layoutAux)
+    // println(layoutAux)
     layoutAux
 
   def opaque(numFields: Int) =
