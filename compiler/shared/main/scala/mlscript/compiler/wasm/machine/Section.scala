@@ -5,12 +5,12 @@ import mlscript.utils.*
 import mlscript.utils.shorthands.*
 import mlscript.*
 
-import scala.collection.mutable.ArrayBuffer
-
+import scala.collection.mutable.{ArrayBuffer, Map => MutMap}
+import mlscript.compiler.wasm.DataSegment.roundUp
 
 // encoding data in wasm data segments
 class DataString(
-    val data: Array[Byte]
+  val data: Array[Byte]
 ):
   override def toString(): String =
     data map { byte => s"\\${byte}%02x"} mkString ""
@@ -18,16 +18,60 @@ class DataString(
   def concate(rhs: DataString): DataString =
     DataString(this.data.concat(rhs.data))
 
+  def size =
+    data.size
+
 object DataString:
 
-    final val byteWidth = 8
+  final val byteWidth = 8
 
-    // little-endian encoding
-    @inline def parseInt(value: Int) =
-        f"${value}%08x".sliding(2, 2).map(Integer.parseInt(_, 16).toByte).toArray.reverse
+  // little-endian encoding
+  @inline private def parseInt(value: Int) =
+      f"${value}%08x".sliding(2, 2).map(Integer.parseInt(_, 16).toByte).toArray.reverse
 
-    def fromInt(value: Int) =
-        DataString(parseInt(value))
+  def fromInt(value: Int) =
+    DataString(parseInt(value))
     
-    def fromIntSeq(seq: IterableOnce[Int]) =
-        DataString(seq.iterator.flatMap(parseInt).toArray)
+  def fromIntSeq(seq: IterableOnce[Int]) =
+    DataString(seq.iterator.flatMap(parseInt).toArray)
+  
+  def zeros(size: Int, width: Int = 32) =
+    DataString(Array.fill(size * (width / byteWidth))(0))
+
+class DataSegment(
+  segment: MutMap[String, DataString]
+):
+
+  def computeOffsets: List[(String, (Int, DataString))] =
+    var size = 0
+    segment.toList.map {
+      case (name, data) =>
+        val offset = size
+        size = size + roundUp(data.size)
+        name -> (offset, data)
+    }
+
+  def memorySize: Int =
+    segment.values.foldLeft(0) {
+      case (size, data) => size + roundUp(data.size)
+    }
+  
+  def register(name: String, data: DataString) =
+    if segment.contains(name) then
+      throw WasmBackendError(s"try to register duplicated data symbol ${name}")
+    else
+      segment.update(name, data)
+  
+  def registerAll(xs: IterableOnce[(String, DataString)]) =
+    xs.iterator.foreach(register)
+
+
+object DataSegment:
+  // alignment should consistent with word size and multiples of 4B
+  final val alignment = 4
+
+  @inline def roundUp(size: Int) =
+    (size + (alignment - 1)) & ~(alignment - 1)
+
+  def empty =
+    DataSegment(MutMap())
