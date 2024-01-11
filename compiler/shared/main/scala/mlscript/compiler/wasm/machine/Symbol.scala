@@ -8,8 +8,8 @@ object Symbol:
     s"_Z${clsName}_${methodName}"
   @inline def vtableMangling(clsName: Str) =
     s"_ZVT_${clsName}"
-  @inline def itableMangling(clsName: Str, traitName: Str) =
-    s"_ZIT_${clsName}_${traitName}"
+  @inline def itableMangling(clsName: Str) =
+    s"_ZIT_${clsName}"
   @inline def traitImplSym(clsName: Str, traitName: Str) =
     s"${clsName}@${traitName}"
   @inline def builtinItableSearch =

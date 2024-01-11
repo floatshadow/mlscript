@@ -16,7 +16,8 @@ object WasmPrinter:
       stack(mod.imports map mkImport),
       stack(mod.types.toList map mkType),
       stack(mod.tables |> mkTable),
-      "(global (mut i32) i32.const 0) " |> raw,
+      stack(mod.globals |> mkGlobals),
+      stack(mod.datas |> mkDataSegment),
       stack(mod.functions map mkFunction)
     )),
     ")" |> raw
@@ -24,6 +25,18 @@ object WasmPrinter:
 
   def mkImport(s: String): Document =
     raw("(import") <:> raw(s) <#>  raw(")")
+  
+  private def mkGlobals(globals: List[(String, Int)]) =
+    globals map {
+      case (name, init) =>
+        raw(s"(global (mut i32) i32.const ${init})")
+    }
+  
+  private def mkDataSegment(data: DataSegment) =
+    data.computeOffsets map {
+      case (name, (offset, dataString)) =>
+        raw(s"(data $$${name} (i32.const ${offset}) \"${dataString}\")")
+    }
   
   private def mkTableInner(offset: Int, tbl: List[String]) =
     raw(s"(;${offset};) ") <#> raw(s"${tbl.map(x => s"$$$x") mkString(" ")}")

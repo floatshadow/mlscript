@@ -25,12 +25,15 @@ enum ClassMember:
 // mlscript class is encoded as a record with some field
 // handle memory layout
 class RecordObj(
+  name: Str,
   fields: Ls[(String, Type)], 
   methods: Map[String, MethodInfo],
   traits: Ls[(ClassInfo, Map[String, MethodInfo])]
 ):
   import ClassMember.*
   import Symbol.*
+
+  def getName = name
 
   def buildVtable() =
     methods.toList.filter(m => m._2.isVirtual)
@@ -206,12 +209,12 @@ object RecordObj:
     val methodLayout = collectMethod(clsctx, cls)
     val traitsLayout = collectTrait(clsctx, cls)
     val (implTrait, classMethods) = decoupleImplFromMethod(traitsLayout, methodLayout)
-    val layoutAux = RecordObj(fieldsLayout, classMethods, implTrait)
+    val layoutAux = RecordObj(cls.ident, fieldsLayout, classMethods, implTrait)
     layoutAux
 
   def opaque(numFields: Int) =
     val fields = List.range(0, numFields) map { index => (index.toString() -> Type.defaultNumType)}
-    RecordObj(fields, Map(), Ls())
+    RecordObj("@anonymous", fields, Map(), Ls())
 
 class VariantObj(val variants: Map[String, Option[Type.Record]]):
   def apply(name: String): Option[Option[Type.Record]] = variants.get(name)

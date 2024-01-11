@@ -5,6 +5,8 @@ import os.*
 // A WebAssembly module
 class Module(
   val name: String,
+  val globals: List[(String, Int)],
+  val datas: DataSegment,
   val imports: List[String],
   val functions: List[MachineFunction],
   val tables: List[(Int, List[String])],

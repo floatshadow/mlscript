@@ -6,14 +6,13 @@ import mlscript.utils.shorthands.*
 import mlscript.*
 
 import scala.collection.mutable.{ArrayBuffer, Map => MutMap}
-import mlscript.compiler.wasm.DataSegment.roundUp
 
 // encoding data in wasm data segments
 class DataString(
   val data: Array[Byte]
 ):
   override def toString(): String =
-    data map { byte => s"\\${byte}%02x"} mkString ""
+    data map { byte => f"\\${byte}%02x"} mkString ""
 
   def concate(rhs: DataString): DataString =
     DataString(this.data.concat(rhs.data))
@@ -41,6 +40,7 @@ object DataString:
 class DataSegment(
   segment: MutMap[String, DataString]
 ):
+  import DataSegment.*
 
   def computeOffsets: List[(String, (Int, DataString))] =
     var size = 0
