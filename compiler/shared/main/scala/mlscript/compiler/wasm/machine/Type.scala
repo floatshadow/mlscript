@@ -27,11 +27,10 @@ enum ClassMember:
 class RecordObj(
   fields: Ls[(String, Type)], 
   methods: Map[String, MethodInfo],
-  traits: Ls[(String, Map[String, MethodInfo])]
+  traits: Ls[(ClassInfo, Map[String, MethodInfo])]
 ):
   import ClassMember.*
-
-  def apply(name: String): Option[Type] = ???
+  import Symbol.*
 
   def buildVtable() =
     methods.toList.filter(m => m._2.isVirtual)
@@ -44,6 +43,12 @@ class RecordObj(
   def getVtableIndex(name: Str): Int =
     vtable.indexWhere {_._1 == name}
 
+  def getItable =
+    traits map {
+      case (name, methods) => (name, methods.toList)
+    }
+    
+  //===-- search members  ===//
   private def containsField(name: Str): Bool =
     // assume params, fields have no name conflict
     fields.toMap.contains(name)
@@ -64,7 +69,7 @@ class RecordObj(
       throw WasmBackendError(s"try to invoke $name, but find multiple candidate implementation")
     
     if search.size == 1 then
-      S(TraitMethod(search.head._1, search.head._2))
+      S(TraitMethod(search.head._1.ident, search.head._2))
     else
       None
 
@@ -75,7 +80,8 @@ class RecordObj(
       S(ClassField(getFieldOffset(name)))
     else 
       searchTraitMethod(name)
-
+  
+  //===-- compute layout information ===//
   def size: Int =
     val pvtb = if hasVirtual then RecordObj.defaultFieldSize else 0
     RecordObj.headerSize + pvtb + fields.size * RecordObj.defaultFieldSize
@@ -110,7 +116,7 @@ object RecordObj:
   final val pvtableSize = 4
   final val itableSize = 4
   final val defaultFieldSize = 4
- 
+
   // assume trait contains only methods
   private def collectField(clsctx: Map[Str, ClassInfo], cls: ClassInfo): Ls[(String, Type)] =
     def collectFieldRec(wcls: ClassInfo): Ls[Str] =
@@ -122,6 +128,8 @@ object RecordObj:
           pcls.kind match
             case ClsKind =>
               collectFieldRec(pcls)
+            case _ =>
+              Ls()
       }
       base ++ params ++ fields
     val fieldNames = collectFieldRec(cls)
@@ -148,6 +156,8 @@ object RecordObj:
           pcls.kind match
             case ClsKind =>
               collectMethodRec(pcls)
+            case _ =>
+              Ls()
       }
       base ++ methods
     collectMethodRec(cls).toMap
@@ -155,12 +165,12 @@ object RecordObj:
   // decouple implemented trait methods from methods lists,
   // it returns class defined methods and full lists of implemented/inherited trait methods
   private def decoupleImplFromMethod(
-    traits: Ls[(Str, Map[Str, MethodInfo])], 
+    traits: Ls[(ClassInfo, Map[Str, MethodInfo])], 
     methods: Map[Str, MethodInfo]
   ) =
     var implCtx = Set[Str]()
     val implTrait = traits map {
-      case (traitName, traitMethods) =>
+      case (traitCls, traitMethods) =>
         val implMethods = traitMethods map {
           case (name, minfo) =>
             methods.get(name) match
@@ -170,13 +180,13 @@ object RecordObj:
               case None =>
                 (name, minfo)
         }
-        traitName -> implMethods
+        traitCls -> implMethods
     }
     val classMethods = methods filter { case (name, _) => !implCtx.contains(name) }
     (implTrait, classMethods)
 
   private def collectTrait(clsctx: Map[Str, ClassInfo], cls: ClassInfo) =
-    def collectTraitRec(wcls: ClassInfo): Ls[(Str, Map[Str, MethodInfo])] =
+    def collectTraitRec(wcls: ClassInfo): Ls[(ClassInfo, Map[Str, MethodInfo])] =
       val traits = wcls.parents.keys.toList flatMap {
         pname =>
           val pcls = clsctx(pname)
@@ -187,7 +197,7 @@ object RecordObj:
       val (implTrait, classMethods) = decoupleImplFromMethod(traits, methods)
       wcls.kind match
         case ClsKind => implTrait
-        case TraitKind => (wcls.ident, classMethods) +: implTrait
+        case TraitKind => (wcls, classMethods) +: implTrait
 
     collectTraitRec(cls)
 
