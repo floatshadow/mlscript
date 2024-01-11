@@ -22,6 +22,7 @@ class WasmBackend(
   import GONode.*
   import ClassMember.*
   import Symbol.*
+  import Refcount.*
 
   case class JoinPoint(
     params: Ls[Name], 
@@ -102,9 +103,6 @@ class WasmBackend(
   var clsctx: Map[Str, ClassInfo] = Map()
   // top level def context
   var fDefCtx: Map[Int, GODef] = Map()
-  // TODO: some functions are hard to encode in graph-ir,
-  // e.g. class constructors, we manully generate wasm code.
-  var blackMagicFnCtx: Map[Str, MachineFunction] = Map()
   // global vtable and itable
   var vtableCtx: Map[Str, (Int, Ls[(Str, MethodInfo)])] = Map()
   // global type table for `call_indirect`
@@ -114,6 +112,7 @@ class WasmBackend(
   // data sections, contains class runtime representation,
   // allocator/reference counting data strutures, etc.
   val dataCtx = DataSegment.empty
+  val builtinCtx = SynthFunctions.empty
 
   def getFunctionType(godef: GODef) =
     val params = godef.params
@@ -198,6 +197,11 @@ class WasmBackend(
         this.layoutCtx = this.layoutCtx.updated(cls.ident, classAux)
     }
 
+    classes.toList.foreach {
+      cls =>
+        generateCtor(cls)
+    }
+
     // method types
     classes.toList.foreach {
       cls =>
@@ -252,6 +256,15 @@ class WasmBackend(
           // trait it self should not be instantiated
           case TraitKind => ()
     }
+    Refcount.registerAllocator(this.dataCtx)
+
+    // register builtin functions
+    builtinCtx.registerFn(builtinDecRef, Refcount.generateDecRef)
+    builtinCtx.registerFn(builtinIncRef, Refcount.generateIncRef)
+    builtinCtx.registerFn(builtinMalloc, Refcount.generateMalloc)
+    builtinCtx.registerFn(builtinFree, Refcount.generateFree)
+    builtinCtx.registerFn(builtinReuse, Refcount.generateReuse)
+    builtinCtx.registerFn(builtinItableSearch, SynthFunctions.generateTraitSearch)
 
     val main = GODef(
       -1, // invalid id
@@ -264,6 +277,7 @@ class WasmBackend(
     )
     this.fDefCtx = this.fDefCtx.updated(-1, main)
 
+  @deprecated("runtime adopts unboxed integer, use `translateTrivialExpr` instead")
   protected def translateTrivialExprUnbox(expr: TrivialExpr) = expr match
     case Ref(Name(name)) => Ls(GetLocal(name), I32Load)
     case Literal(lit) => lit match
@@ -273,7 +287,7 @@ class WasmBackend(
   protected def translateTrivialExpr(expr: TrivialExpr): Ls[MachineInstr] = expr match
     case Ref(Name(name)) => Ls(GetLocal(name))
     case Literal(lit) => lit match
-      case IntLit(value) => Ls(I32Const(value.intValue))
+      case IntLit(value) => Ls(I32Const(value.intValue), I32Const(1), I32Shl, I32Const(1), I32Add, Comment(s"imm $value"))
       case _ => throw WasmBackendError(s"unsupported literal ${lit.toString()}!")
 
   protected def translateExpr(expr: GOExpr): Ls[MachineInstr] = expr match
@@ -302,7 +316,7 @@ class WasmBackend(
             val (_, vtb) = this.vtableCtx(cls.ident)
             val methodIndex = vtb.indexWhere { _._1 == member}
             val methodTyName = typeNameMangling(cls.ident, method.methodName)
-            val pvtboff = layoutAux.getPVtableOffset
+            val pvtboff = RecordObj.getPVtableOffset
             val argsInstr = GetLocal(refName) +: // `this` pointer
                             args.flatMap(arg => translateTrivialExpr(arg))
             argsInstr ++ Ls(GetLocal(refName), I32Const(pvtboff), I32Add, I32Load, Comment(s"class vtable ${cls.ident} offset"), 
@@ -313,7 +327,7 @@ class WasmBackend(
              Comment(s"select field ${member} of object ${refName}"))
         case S(TraitMethod(traitName, method)) =>
           val traitInfo = clsctx(traitName)
-          val builtin = getOrGenerateTraitSearch(cls)
+          val builtin = builtinCtx.getBuiltinFn(builtinItableSearch)
           val (_, vtb) = this.vtableCtx(traitImplSym(cls.ident, traitInfo.ident))
           val methodIndex = vtb.indexWhere { _._1 == member }
           val methodTyName = typeIfaceNameMangling(cls.ident, traitInfo.ident, method.methodName)
@@ -330,16 +344,29 @@ class WasmBackend(
           )
         case None =>
           throw WasmBackendError(s"invalid member ${member} for class ${cls.ident}")
-      
+    
+    // BasicOp handles basic arithematic operations,
+    // thus our integer representation affects.
     case BasicOp(operator, args) =>
-      val argsInstr = args flatMap {arg => translateTrivialExpr(arg)}
       val opInstr = operator match
-        case op if op.equals("+") => I32Add
-        case op if op.equals("-") => I32Sub
-        case op if op.equals("*") => I32Mul
-        case op if op.equals("/") => I32Div
+        case op if op.equals("+") =>
+          // x + y => x + y - 1
+          translateTrivialExpr(args(0)) ++ translateTrivialExpr(args(1)) ++ Ls(I32Const(-1), I32Add)
+        case op if op.equals("-") =>
+          // x - y => x - y + 1
+          translateTrivialExpr(args(0)) ++ translateTrivialExpr(args(1)) ++ Ls(I32Const(1), I32Add)
+        case op if op.equals("*") =>
+          // x * y => (x >> 1) * (y - 1) + 1
+          translateTrivialExpr(args(0)) ++ Ls(I32Const(1), I32Shr(signed = true)) ++
+          translateTrivialExpr(args(1)) ++ Ls(I32Const(-1), I32Add) ++
+          Ls(I32Const(1), I32Add)
+        case op if op.equals("/") =>
+          // x / y => ((x >> 1) / (y << 1) << 1) + 1
+          translateTrivialExpr(args(0)) ++ Ls(I32Const(1), I32Shr(signed = true)) ++
+          translateTrivialExpr(args(1)) ++ Ls(I32Const(1), I32Shr(signed = true)) ++
+          Ls(I32Div, I32Const(1), I32Add)
         case op => throw WasmBackendError(s"unknown operator ${op}")
-      argsInstr :+ opInstr
+      opInstr
     // Lambda and App is deprecated
     case expr @ _ => throw WasmBackendError(s"unsupported GOExpr $expr")
 
@@ -434,7 +461,7 @@ class WasmBackend(
       Right(jp)
     else 
       this.locals = Set()
-      val body = assembleAddress(translateNode(godef.body))
+      val body = translateNode(godef.body)
       val paramsType = godef.params map { case Name(param) => param -> MachineType.defaultNumType}
       // local info collect when codegen
       val localsType = locals.toList map {local => local -> MachineType.defaultNumType}
@@ -455,10 +482,13 @@ class WasmBackend(
       translateGODefs(godef) match
         case Left(function) => function
     }
-    val synthFunctions = blackMagicFnCtx.values.toList
+    val synthFunctions = builtinCtx.getAllFunctions
     // initialize global memory pointer to end of the data segments memory size
     // this might be replace by allocator and reference couting.
     val globals = List("sp" -> dataCtx.memorySize)
+
+    val fnIn = functions ++ synthFunctions
+    val fnAfterAsm = fnIn.map(fn => fn.updated(assembleAddress(fn.instrs)))
 
     // name `Module` shadows Module in java.lang
     wasm.Module(
@@ -466,15 +496,15 @@ class WasmBackend(
       globals,
       dataCtx,
       List(), // empty imports
-      functions ++ synthFunctions,
+      fnAfterAsm,
       lowerVtable(),
       this.typeCtx
     )
-  
-  private def getOrGenerateCtor(cls: ClassInfo): MachineFunction =
-    val ctorName = nameMangling(cls.ident, "constructor")
-    if blackMagicFnCtx.contains(ctorName) then
-      blackMagicFnCtx(ctorName)
+
+  private def generateCtor(cls: ClassInfo): MachineFunction =
+    val ctorName = ctorMangling(cls)
+    if builtinCtx.contains(ctorName) then
+      builtinCtx(ctorName)
     else 
       val bkupLocals = this.locals
       this.locals = Set()
@@ -498,18 +528,18 @@ class WasmBackend(
       val pc = pClass flatMap {
         case (name, ctor) => 
           val pcls = clsctx(name)
-          val poffset = layoutAux.getParentOffet(pcls.ident)
+          val poffset = RecordObj.getParentOffet(pcls.ident)
           val pthis = Ls(GetLocal("this"), I32Const(poffset), I32Add)
           val pargs = ctor match
             case S(argNode) => translateNode(argNode)
             case None => Ls()
           val pctorName = nameMangling(name, "constructor")
-          val pctor = getOrGenerateCtor(pcls)
+          val pctor = generateCtor(pcls)
           pthis ++ pargs ++ Ls(Call(pctorName), Comment(f"ctor parent ${pcls.ident}"))
       }
       // trait parents
       val classTraitBtl = itableMangling(cls.ident)
-      val itableOffset = layoutAux.getPItableOffset
+      val itableOffset = RecordObj.getPItableOffset
       val ptc = Ls(
         GetLocal("this"),
         LdSym(LabelAddr(classTraitBtl)),
@@ -520,7 +550,7 @@ class WasmBackend(
 
       // println(s"class ${cls.ident} virtual: ${layoutAux.hasVirtual}")
       val pvtbc = if layoutAux.hasVirtual then
-        val pvtboff = layoutAux.getPVtableOffset
+        val pvtboff = RecordObj.getPVtableOffset
         val vtbOffset = this.vtableCtx(cls.ident)._1
         Ls(
           GetLocal("this"),
@@ -567,9 +597,9 @@ class WasmBackend(
         paramsType,
         localsType,
         retType,
-        assembleAddress((pc ++ ptc ++ pvtbc ++ paramc ++ fc).toList)
+        (pc ++ ptc ++ pvtbc ++ paramc ++ fc).toList
       )
-      this.blackMagicFnCtx = this.blackMagicFnCtx.updated(ctorName, machineF)
+      builtinCtx.registerFn(ctorName, machineF)
       // TODO: use better way to recover locals
       this.locals = bkupLocals
       machineF
@@ -585,13 +615,13 @@ class WasmBackend(
         val cls = clsctx(scls.ident)
         val recordAux = layoutCtx(cls.ident)
         val objSize = recordAux.size
-        ctorInstrs ++= Ls(GetGlobal(0), SetLocal(bindName))
-        ctorInstrs ++= Ls(GetGlobal(0), I32Const(objSize), I32Add, SetGlobal(0))
-        ctorInstrs += Comment(s"allocate ${objSize} bytes for ${bindName}")
+        val malloc = builtinCtx.getBuiltinFn(builtinMalloc)
+        ctorInstrs ++= Ls(I32Const(objSize), Call(malloc.name), SetLocal(bindName))
+        ctorInstrs += Comment(s"allocate for ${bindName}")
         // class id
         ctorInstrs ++= Ls(GetLocal(bindName), I32Const(cls.id), I32Store)
         
-        val ctorF = getOrGenerateCtor(cls)
+        val ctorF = generateCtor(cls)
         ctorInstrs ++= Ls(GetLocal(bindName)) // `this` pointer
         ctorInstrs ++= args flatMap {
             arg => translateTrivialExpr(arg)
@@ -605,102 +635,8 @@ class WasmBackend(
         ctorInstrs += Comment(s"bind variable ${bindName}")
 
     ctorInstrs.toList
-  // handcrafted wasm, performing linear search on interface table of object,
-  // return address of found trait vtable
-  private def getOrGenerateTraitSearch(cls: ClassInfo): MachineFunction =
-    val builtin = builtinItableSearch
 
-    blackMagicFnCtx.get(builtin) match
-      case S(builtinFn) => builtinFn
-      case N =>
-        /*
-         * ptr -> header | vtable | itable | <fileds>
-         *                           |
-         * itable size | (trait id 1, vtable 1) | (trait id 2, vtable 2) | ... 
-         *  __mlscript_invokeinterface (this*, trait id) 
-         */
-        val objParam = "this"
-        val traitIdParam = "id"
-        val idxLocal = "idx"
-        val sizeLocal = "size"
-        val iptrLocal = "iptr"
-        val scanLocal = "scan"
-        val layoutAux = layoutCtx(cls.ident)
-        val headerTem = RecordObj.defaultFieldSize
-        val scanTem = RecordObj.defaultFieldSize * 2
-        
-        val instrs = Ls(
-          GetLocal(objParam),
-          I32Const(layoutAux.getPItableOffset),
-          I32Add,
-          I32Load,
-          SetLocal(iptrLocal),
-          Comment("repr impl traits"),
-          // size = [iptr] * scanTem + header
-          GetLocal(iptrLocal),
-          I32Load,
-          I32Const(scanTem),
-          I32Mul,
-          I32Const(headerTem),
-          I32Add,
-          SetLocal(sizeLocal),
 
-          Comment("size of traits list"),
-          // idx = -1
-          I32Const(-1),
-          SetLocal(idxLocal),
-          // scan = iptr
-          GetLocal(iptrLocal),
-          I32Const(headerTem),
-          I32Add,
-          SetLocal(scanLocal),
-
-          Block("itable_search", Ls(MachineType.Void)),
-            Loop("itable_loop"),
-              // while scan < size
-              GetLocal(scanLocal),
-              GetLocal(sizeLocal),
-              I32Ge(signed = false),
-              BrIf(1),
-              // check
-              GetLocal(scanLocal),
-              I32Load,
-              Comment("load trait id in itable"),
-              GetLocal(traitIdParam),
-              I32Eq,
-              If_void,
-                GetLocal(scanLocal),
-                I32Const(RecordObj.defaultFieldSize),
-                I32Add,
-                I32Load,
-                SetLocal(idxLocal),
-              End,
-              // scan = scan + scanTem
-              GetLocal(scanLocal),
-              I32Const(scanTem),
-              I32Add,
-              SetLocal(scanLocal),
-              Br(0),
-            End,
-          End,
-          // return address of trait vtable
-          GetLocal(idxLocal)
-        )
-
-        val paramsType = Ls(objParam, traitIdParam) map { param => param -> MachineType.defaultNumType}
-        // local info collect when codegen
-        val localsType = Ls(idxLocal, sizeLocal, iptrLocal, scanLocal) map {local => local -> MachineType.defaultNumType}
-        val retType = Ls(MachineType.defaultNumType)
-        val machineF = MachineFunction(
-          builtin,
-          paramsType,
-          localsType,
-          retType,
-          assembleAddress(instrs)
-        )
-        this.blackMagicFnCtx = this.blackMagicFnCtx.updated(builtin, machineF)
-        machineF
-    
 
     
 end WasmBackend

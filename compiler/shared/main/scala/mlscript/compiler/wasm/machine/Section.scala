@@ -1,5 +1,7 @@
 package mlscript.compiler.wasm
 
+import mlscript.compiler.wasm.Type as MachineType
+
 import mlscript.compiler.*
 import mlscript.utils.*
 import mlscript.utils.shorthands.*
@@ -75,3 +77,121 @@ object DataSegment:
 
   def empty =
     DataSegment(MutMap())
+
+
+// manage compiler synthesized functions, 
+// hand coded WASM
+class SynthFunctions(
+  ctx: MutMap[Str, MachineFunction]
+):
+
+  def contains(key: Str) =
+    ctx.contains(key)
+  
+  def apply(key: Str) =
+    ctx(key)
+
+  def getAllFunctions = ctx.values.toList
+
+  def getBuiltinFn(name: Str) =
+    ctx(name)
+
+  def registerFn(name: Str, fn: MachineFunction) =
+    ctx.update(name, fn)
+
+
+object SynthFunctions:
+  import MachineInstr.*
+  import MachineType.*
+  import Symbol.*
+
+  def empty =
+    SynthFunctions(MutMap.empty)
+  
+  // handcrafted wasm, performing linear search on interface table of object,
+  // return address of found trait vtable
+  def generateTraitSearch =
+      /*
+      * ptr -> header | vtable | itable | <fileds>
+      *                           |
+      * itable size | (trait id 1, vtable 1) | (trait id 2, vtable 2) | ... 
+      *  __mlscript_invokeinterface (this*, trait id) 
+      */
+    val objParam = "this"
+    val traitIdParam = "id"
+    val idxLocal = "idx"
+    val sizeLocal = "size"
+    val iptrLocal = "iptr"
+    val scanLocal = "scan"
+    val headerTem = RecordObj.defaultFieldSize
+    val scanTem = RecordObj.defaultFieldSize * 2
+    
+    val instrs = Ls(
+      GetLocal(objParam),
+      I32Const(RecordObj.getPItableOffset),
+      I32Add,
+      I32Load,
+      SetLocal(iptrLocal),
+      Comment("repr impl traits"),
+      // size = [iptr] * scanTem + header
+      GetLocal(iptrLocal),
+      I32Load,
+      I32Const(scanTem),
+      I32Mul,
+      I32Const(headerTem),
+      I32Add,
+      SetLocal(sizeLocal),
+
+      Comment("size of traits list"),
+      // idx = -1
+      I32Const(-1),
+      SetLocal(idxLocal),
+      // scan = iptr
+      GetLocal(iptrLocal),
+      I32Const(headerTem),
+      I32Add,
+      SetLocal(scanLocal),
+
+      Block("itable_search", Ls(MachineType.Void)),
+        Loop("itable_loop"),
+          // while scan < size
+          GetLocal(scanLocal),
+          GetLocal(sizeLocal),
+          I32Ge(signed = false),
+          BrIf(1),
+          // check
+          GetLocal(scanLocal),
+          I32Load,
+          Comment("load trait id in itable"),
+          GetLocal(traitIdParam),
+          I32Eq,
+          If_void,
+            GetLocal(scanLocal),
+            I32Const(RecordObj.defaultFieldSize),
+            I32Add,
+            I32Load,
+            SetLocal(idxLocal),
+          End,
+          // scan = scan + scanTem
+          GetLocal(scanLocal),
+          I32Const(scanTem),
+          I32Add,
+          SetLocal(scanLocal),
+          Br(0),
+        End,
+      End,
+      // return address of trait vtable
+      GetLocal(idxLocal)
+    )
+
+    val paramsType = Ls(objParam, traitIdParam) map { param => param -> MachineType.defaultNumType}
+    // local info collect when codegen
+    val localsType = Ls(idxLocal, sizeLocal, iptrLocal, scanLocal) map {local => local -> MachineType.defaultNumType}
+    val retType = Ls(MachineType.defaultNumType)
+    MachineFunction(
+      builtinItableSearch,
+      paramsType,
+      localsType,
+      retType,
+      instrs
+    )
