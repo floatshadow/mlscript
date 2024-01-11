@@ -101,6 +101,11 @@ enum MachineInstr:
   // Pseudo instructions
   case LdSym(sym: Str) 
   // Push the address of a symbol (usually name of a data segment) into the stack
+  case I32LdOffset(offset: Int)
+  case I32StOffset(offset: Int)
+  case I64LdOffset(offset: Int)
+  case I64StOffset(offset: Int)
+  // inn.store/load {offset u32, align u32}
 
   override def toString() : String = show
 
@@ -174,5 +179,9 @@ enum MachineInstr:
       case Comment(s) =>
         stack(s.split('\n').toList.map(s => raw(s";; $s")))
       case LdSym(sym) => s"i32.load $$${sym}" |> raw
+      case I32LdOffset(offset) => s"i32.load { offset $offset }" |> raw
+      case I32StOffset(offset) => s"i32.store { offset $offset }" |> raw
+      case I64LdOffset(offset) => s"i64.load { offset $offset }" |> raw
+      case I64StOffset(offset) => s"i64.store { offset $offset }" |> raw
 
 end MachineInstr
