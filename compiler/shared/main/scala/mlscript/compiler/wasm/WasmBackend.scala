@@ -26,7 +26,8 @@ class WasmBackend(
 
   case class JoinPoint(
     params: Ls[Name], 
-    rhs: GONode, 
+    rhs: GONode,
+    outerBlocks: Int = 0,
     needPassArg: Bool = true
   ):
     def passArgs(args: Ls[TrivialExpr]): Ls[MachineInstr] =
@@ -43,7 +44,7 @@ class WasmBackend(
 
     def apply(): Ls[MachineInstr] =
       // store args in a local variable
-      rhs |> translateNode
+      translateNode(rhs, outerBlocks)
 
     // TODO: possible inlining optimization
     private def inlineArgs(args: Ls[TrivialExpr]) =
@@ -351,10 +352,10 @@ class WasmBackend(
       val opInstr = operator match
         case op if op.equals("+") =>
           // x + y => x + y - 1
-          translateTrivialExpr(args(0)) ++ translateTrivialExpr(args(1)) ++ Ls(I32Const(-1), I32Add)
+          translateTrivialExpr(args(0)) ++ translateTrivialExpr(args(1)) ++ Ls(I32Add, I32Const(-1), I32Add)
         case op if op.equals("-") =>
           // x - y => x - y + 1
-          translateTrivialExpr(args(0)) ++ translateTrivialExpr(args(1)) ++ Ls(I32Const(1), I32Add)
+          translateTrivialExpr(args(0)) ++ translateTrivialExpr(args(1)) ++ Ls(I32Sub, I32Const(1), I32Add)
         case op if op.equals("*") =>
           // x * y => (x >> 1) * (y - 1) + 1
           translateTrivialExpr(args(0)) ++ Ls(I32Const(1), I32Shr(signed = true)) ++
@@ -370,7 +371,7 @@ class WasmBackend(
     // Lambda and App is deprecated
     case expr @ _ => throw WasmBackendError(s"unsupported GOExpr $expr")
 
-  protected def translateNode(node: GONode): Ls[MachineInstr] =
+  protected def translateNode(node: GONode, initNestBlocks: Int = 0): Ls[MachineInstr] =
     def translateNodeRec(node: GONode, nestedBlocks: Int): Ls[MachineInstr] = node match
       case LetExpr(Name(name), expr, body) =>
         this.locals = this.locals + name
@@ -378,7 +379,7 @@ class WasmBackend(
         exprInstr ++ translateNodeRec(body, nestedBlocks)
       case LetJoin(Name(name), params, rhs, body) =>
         // lazy translate
-        val jp = JoinPoint(params, rhs)
+        val jp = JoinPoint(params, rhs, nestedBlocks)
         joinPoints += name -> jp
         // wrap with a block
         val buffer = ListBuffer.from(translateNodeRec(body, nestedBlocks))
@@ -422,7 +423,7 @@ class WasmBackend(
           cases.zip(List.range(0, numArms)).foldLeft(dispatchInstrs) {
             case (instrs, ((cls, armNode), index) ) =>
               // depth show number of blocks outside current arm (excluding self)
-              val depth = nestedBlocks + (numArms - index) - 1
+              val depth = (numArms - index) - 1
               val armInstrs = translateNodeRec(armNode, depth)
             
               // construct a new block for a arm:
@@ -430,7 +431,8 @@ class WasmBackend(
               //  (block ...)
               //  instr*  
               // )
-              Block(s"match_${index}", Ls()) +: (instrs ++ armInstrs) :+ End
+              Ls(Block(s"match_${struct}_${index}", Ls()), Comment(s"nested blocks: $depth")) ++
+                (instrs ++ armInstrs ++ Ls(End, Comment(s"end of match_${struct}_${index}")))
           }
         else 
           throw WasmBackendError("not implemented cases dispatch")
@@ -447,7 +449,7 @@ class WasmBackend(
         nestedBlocks match
           case 0 => resultInstrs
           case labels => resultInstrs :+ Br(nestedBlocks)
-    translateNodeRec(node, 0)
+    translateNodeRec(node, initNestBlocks)
 
   // translate GODef to a function.
   // after optimization, some join point will be lifted to a GODef,
