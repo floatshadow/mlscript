@@ -12,7 +12,13 @@ object WasmPrinter:
     "(module " |> raw,
     indent(stack(
       // some test case `out of bounds memory access` if only 1 page
-      "(memory (export \"mem\") 100)" |> raw,
+      "(import \"system\" \"mem\" (memory 100))" |> raw,
+      // ad hoc import for JS glue print utils function
+      stack(
+        raw("(func $log_str (import \"system\" \"log_str\") (param i32 i32))"),
+        raw("(func $log_char (import \"system\" \"log_char\") (param i32))"),
+        raw("(func $log_int (import \"system\" \"log_int\") (param i32))"),
+      ),
       stack(mod.imports map mkImport),
       stack(mod.types.toList map mkType),
       stack(mod.tables |> mkTable),

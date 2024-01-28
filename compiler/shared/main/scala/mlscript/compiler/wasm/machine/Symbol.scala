@@ -29,3 +29,10 @@ object Symbol:
   @inline def builtinIncRef = "incref"
   @inline def builtinDecRef = "decref"
 
+  // pretty printers
+  @inline def generalShow = "show"
+  @inline def objectShow(clsName: Str) = nameMangling(clsName, "show")
+
+  // reserved info
+  @inline def builtinUndefined = "undefined"
+

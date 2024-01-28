@@ -74,7 +74,7 @@ object WasmInterp:
 
     // wasmtime check
     // ad hoc code, manually invoke main function
-    val wasmtimeCommand = s"wasmtime run --invoke main ${wasmPath}"
+    val wasmtimeCommand = s"node ./bin/glue.js ${wasmPath}"
     val stdoutOutput = StringBuilder()
     try {
       stdoutOutput ++= wasmtimeCommand.!!

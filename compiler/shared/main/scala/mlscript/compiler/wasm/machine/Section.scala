@@ -39,6 +39,9 @@ object DataString:
   def zeros(size: Int, width: Int = 32) =
     DataString(Array.fill(size * (width / byteWidth))(0))
 
+  def fromString(str: Str) =
+    DataString(str.getBytes())
+
 class DataSegment(
   segment: MutMap[String, DataString]
 ):
@@ -195,3 +198,61 @@ object SynthFunctions:
       retType,
       instrs
     )
+  
+  def generateShow(classes: Set[ClassInfo]) =
+    val objParam = "this"
+    val numClasses = classes.size
+
+    val checkInt = Ls(
+      Block("check_int_or_pointer", Ls(MachineType.Void)),
+      GetLocal(objParam),
+      I32Const(1),
+      I32And,
+      I32Eqz,
+      BrIf(0),
+      GetLocal(objParam),
+      I32Const(1),
+      I32Shr(signed = true),
+      Call("log_int"),
+      Return,
+      End
+    )
+
+    val getId = Ls(
+      Block("match_id", Ls(MachineType.Void)),
+      GetLocal(objParam),
+      I32Load,
+      BrTable(Ls.range(0, numClasses + 1)),
+      End,
+    )
+    val dispath = classes.toList.sorted.foldLeft(getId)(
+      (cases, cls) =>
+        Ls(
+          Block(f"case_${cls.id}", Ls(MachineType.Void)),
+          Comment(f"case class ${cls.ident}")
+        ) ++
+        cases ++
+        Ls(
+          GetLocal("this"),
+          Call(objectShow(cls.ident)),
+          Return,
+          End,
+        )
+    )
+    val fallback = Ls(
+      LdSym(LabelAddr(builtinUndefined)),
+      I32Const(builtinUndefined.size),
+      Call("log_str")
+    )
+
+    val paramsType = Ls(objParam) map { param => param -> MachineType.defaultNumType}
+    // local info collect when codegen
+    val localsType = Ls()
+    val retType = Ls()
+    MachineFunction(
+      generalShow,
+      paramsType,
+      localsType,
+      retType,
+      checkInt ++ dispath ++ fallback
+    )    

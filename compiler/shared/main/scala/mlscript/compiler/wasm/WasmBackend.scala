@@ -259,13 +259,32 @@ class WasmBackend(
     }
     Refcount.registerAllocator(this.dataCtx)
 
+    // register classes names, fields names
+    classes.foreach(
+      cls =>
+        dataCtx.register(cls.ident, DataString.fromString(cls.ident))
+        cls.fields.foreach(
+          fld =>
+            dataCtx.register(fld, DataString.fromString(fld))
+        )
+    )
+    dataCtx.register(builtinUndefined, DataString.fromString(builtinUndefined))
+
     // register builtin functions
+    // CRTC
     builtinCtx.registerFn(builtinDecRef, Refcount.generateDecRef)
     builtinCtx.registerFn(builtinIncRef, Refcount.generateIncRef)
     builtinCtx.registerFn(builtinMalloc, Refcount.generateMalloc)
     builtinCtx.registerFn(builtinFree, Refcount.generateFree)
     builtinCtx.registerFn(builtinReuse, Refcount.generateReuse)
+    // interface table search
     builtinCtx.registerFn(builtinItableSearch, SynthFunctions.generateTraitSearch)
+    // derived show
+    builtinCtx.registerFn(generalShow, SynthFunctions.generateShow(classes))
+    classes.foreach {
+      cls =>
+        builtinCtx.registerFn(objectShow(cls.ident), generateMonoShow(cls))
+    }
 
     val main = GODef(
       -1, // invalid id
@@ -487,7 +506,7 @@ class WasmBackend(
     val synthFunctions = builtinCtx.getAllFunctions
     // initialize global memory pointer to end of the data segments memory size
     // this might be replace by allocator and reference couting.
-    val globals = List("sp" -> dataCtx.memorySize)
+    val globals = List("sp" -> Refcount.roundUp(dataCtx.memorySize))
 
     val fnIn = functions ++ synthFunctions
     val fnAfterAsm = fnIn.map(fn => fn.updated(assembleAddress(fn.instrs)))
@@ -638,6 +657,53 @@ class WasmBackend(
 
     ctorInstrs.toList
 
+  def generateMonoShow(cls: ClassInfo) =
+    val objParam = "this"
+    val layoutAux = this.layoutCtx(cls.ident)
+
+    val logName = Ls(
+      LdSym(LabelAddr(cls.ident)),
+      I32Const(cls.ident.size),
+      Call("log_str"),
+      I32Const('('.toInt),
+      Call("log_char")
+    )
+
+    val logFields = cls.fields.flatMap {
+      fld => Ls(
+        LdSym(LabelAddr(fld)),
+        I32Const(fld.size),
+        Call("log_str"),
+        I32Const(':'.toInt),
+        Call("log_char"),
+        I32Const(' '.toInt),
+        Call("log_char"),
+        GetLocal(objParam),
+        I32LdOffset(ImmOffset(layoutAux.getFieldOffset(fld))),
+        Call(generalShow),
+        I32Const(','.toInt),
+        Call("log_char"),
+        I32Const(' '.toInt),
+        Call("log_char"),
+      )
+    }
+
+    val epiloge = Ls(
+      I32Const(')'.toInt),
+      Call("log_char")
+    )
+
+    val paramsType = Ls(objParam) map { param => param -> MachineType.defaultNumType}
+    // local info collect when codegen
+    val localsType = Ls()
+    val retType = Ls()
+    MachineFunction(
+      objectShow(cls.ident),
+      paramsType,
+      localsType,
+      retType,
+      logName ++ logFields ++ epiloge
+    )    
 
 
     
