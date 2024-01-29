@@ -197,10 +197,12 @@ class WasmBackend(
         val classAux = RecordObj.from(this.clsctx, cls)
         this.layoutCtx = this.layoutCtx.updated(cls.ident, classAux)
     }
-
+    // create class constructor
     classes.toList.foreach {
       cls =>
-        generateCtor(cls)
+        cls.kind match
+          case ClsKind => generateCtor(cls)
+          case TraitKind =>
     }
 
     // method types
@@ -297,15 +299,20 @@ class WasmBackend(
     )
     this.fDefCtx = this.fDefCtx.updated(-1, main)
 
-  @deprecated("runtime adopts unboxed integer, use `translateTrivialExpr` instead")
-  protected def translateTrivialExprUnbox(expr: TrivialExpr) = expr match
-    case Ref(Name(name)) => Ls(GetLocal(name), I32Load)
-    case Literal(lit) => lit match
-      case IntLit(value) => Ls(I32Const(value.intValue))
-      case _ => throw WasmBackendError(s"unsupported literal ${lit.toString()}!")
-
   protected def translateTrivialExpr(expr: TrivialExpr): Ls[MachineInstr] = expr match
     case Ref(Name(name)) => Ls(GetLocal(name))
+    case Literal(lit) => lit match
+      case IntLit(value) => Ls(I32Const(value.intValue), I32Const(1), I32Shl, I32Const(1), I32Add, Comment(s"imm $value"))
+      case _ => throw WasmBackendError(s"unsupported literal ${lit.toString()}!")
+  
+  // ref count variant of `translateTrivialExpr`, the name is referenced as a field/argument,
+  // thus should increase the ref count.
+  protected def translateTrivialExprRefCount(expr: TrivialExpr): Ls[MachineInstr] = expr match
+    case Ref(Name(name)) => Ls(
+        GetLocal(name),
+        Call(builtinIncRef),
+        GetLocal(name)
+      )
     case Literal(lit) => lit match
       case IntLit(value) => Ls(I32Const(value.intValue), I32Const(1), I32Shl, I32Const(1), I32Add, Comment(s"imm $value"))
       case _ => throw WasmBackendError(s"unsupported literal ${lit.toString()}!")
@@ -464,7 +471,15 @@ class WasmBackend(
         joinPoint.passArgs(args) :+ Br(nestedBlocks)
         
       case Result(res) =>
-        val resultInstrs = res flatMap {expr => translateTrivialExpr(expr)}
+        val resRefs = res collect {
+          case Ref(Name(name)) => name
+        }
+        val lexicalScopeDeref = this.locals.toList.filter(x => !resRefs.contains(x)) flatMap {
+          x =>
+            Ls(GetLocal(x), Call(builtinDecRef))
+        }
+        val resArgs = res flatMap {expr => translateTrivialExpr(expr)}
+        val resultInstrs = lexicalScopeDeref ++ resArgs
         nestedBlocks match
           case 0 => resultInstrs
           case labels => resultInstrs :+ Br(nestedBlocks)
@@ -645,7 +660,7 @@ class WasmBackend(
         val ctorF = generateCtor(cls)
         ctorInstrs ++= Ls(GetLocal(bindName)) // `this` pointer
         ctorInstrs ++= args flatMap {
-            arg => translateTrivialExpr(arg)
+            arg => translateTrivialExprRefCount(arg)
         }
         ctorInstrs += Call(ctorF.name)
 
@@ -703,7 +718,7 @@ class WasmBackend(
       localsType,
       retType,
       logName ++ logFields ++ epiloge
-    )    
+    )
 
 
     
