@@ -123,7 +123,7 @@ object SynthFunctions:
     val objParam = "this"
     val traitIdParam = "id"
     val idxLocal = "idx"
-    val sizeLocal = "size"
+    val sizeLocal = "end"
     val iptrLocal = "iptr"
     val scanLocal = "scan"
     val headerTem = RecordObj.defaultFieldSize
@@ -143,9 +143,11 @@ object SynthFunctions:
       I32Mul,
       I32Const(headerTem),
       I32Add,
+      GetLocal(iptrLocal),
+      I32Add,
       SetLocal(sizeLocal),
 
-      Comment("size of traits list"),
+      Comment("end address of traits list"),
       // idx = -1
       I32Const(-1),
       SetLocal(idxLocal),
