@@ -479,7 +479,7 @@ class WasmBackend(
             Ls(GetLocal(x), Call(builtinDecRef))
         }
         val resArgs = res flatMap {expr => translateTrivialExpr(expr)}
-        val resultInstrs = lexicalScopeDeref ++ resArgs
+        val resultInstrs = resArgs
         nestedBlocks match
           case 0 => resultInstrs
           case labels => resultInstrs :+ Br(nestedBlocks)
