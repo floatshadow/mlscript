@@ -20,69 +20,90 @@ foo(B(1, 2))
 //│ 
 //│ GraphOpt:
 //│ GOProgram({ClassInfo(0, A, [x]) [field] {
-//│ Def(0, add, [value%0], [{}], 
+//│ Def(0, add, [value%0], [{}],
+//│ S: None,
+//│ I: [],
 //│ [None], 1, 
-//│ let x%0 = +(x,value%0)
-//│   in x%0
+//│ let x%0 = this.x
+//│   in let x%1 = +(x%0,value%0)
+//│     in x%1
 //│ )
-//│ Def(1, add2, [value%1], [{}], 
+//│ Def(1, add2, [value%1], [{}],
+//│ S: None,
+//│ I: [],
 //│ [None], 1, 
-//│ let x%1 = this.x[A]()
-//│   in let x%2 = +(x%1,value%1)
-//│     in x%2
+//│ let x%2 = this.x[A]()
+//│   in let x%3 = +(x%2,value%1)
+//│     in x%3
 //│ )
-//│ Def(2, Get, [], [{}], 
+//│ Def(2, Get, [], [{}],
+//│ S: None,
+//│ I: [],
 //│ [None], 1, 
-//│ let x%3 = this.field[A]()
-//│   in x%3
+//│ let x%4 = this.field[A]()
+//│   in x%4
 //│ )}
 //│ ClassInfo(1, B, [y,z]) [] {
 //│ }
 //│ ClassInfo(2, C, []) [] {
 //│ }
 //│ }, {
-//│ Def(3, foo, [t%0], [{}], 
+//│ Def(3, foo, [t%0], [{}],
+//│ S: None,
+//│ I: [],
 //│ [None], 1, 
-//│ let x%5 = t%0.x[B]()
-//│   in x%5
+//│ let x%6 = t%0.x[B]()
+//│   in x%6
 //│ )
 //│ },
-//│ let x%6 = B(1,2)
-//│   in let* (x%7) = foo(x%6)
-//│     in x%7)
+//│ let x%7 = B(1,2)
+//│   in let* (x%8) = foo(x%7)
+//│     in x%8)
 //│ 
 //│ Promoted ------------------------------------
 //│ GOProgram({ClassInfo(0, A, [x]) [field] {
-//│ Def(0, add, [value%0], [{}], 
+//│ Def(0, add, [value%0], [{}],
+//│ S: None,
+//│ I: [],
 //│ [None], 1, 
-//│ let x%0 = +(x,value%0)
-//│   in x%0
+//│ let x%0 = this.x
+//│   in let x%1 = +(x%0,value%0)
+//│     in x%1
 //│ )
-//│ Def(1, add2, [value%1], [{}], 
+//│ Def(1, add2, [value%1], [{}],
+//│ S: None,
+//│ I: [],
 //│ [None], 1, 
-//│ let x%1 = this.x[A]()
-//│   in let x%2 = +(x%1,value%1)
-//│     in x%2
+//│ let x%2 = this.x[A]()
+//│   in let x%3 = +(x%2,value%1)
+//│     in x%3
 //│ )
-//│ Def(2, Get, [], [{}], 
+//│ Def(2, Get, [], [{}],
+//│ S: None,
+//│ I: [],
 //│ [None], 1, 
-//│ let x%3 = this.field[A]()
-//│   in x%3
+//│ let x%4 = this.field[A]()
+//│   in x%4
 //│ )}
 //│ ClassInfo(1, B, [y,z]) [] {
 //│ }
 //│ ClassInfo(2, C, []) [] {
 //│ }
 //│ }, {
-//│ Def(3, foo, [t%0], [{EDirect}], 
+//│ Def(3, foo, [t%0], [{EDirect}],
+//│ S: None,
+//│ I: [],
 //│ [None], 1, 
-//│ let x%5 = t%0.x[B]()
-//│   in x%5
+//│ let x%6 = t%0.x[B]()
+//│   in x%6
 //│ )
 //│ },
-//│ let x%6 = B(1,2)
-//│   in let* (x%7) = foo(x%6)
-//│     in x%7)
+//│ let x%7 = B(1,2)
+//│   in let* (x%8) = foo(x%7)
+//│     in x%8)
+//│ 
+//│ 
+//│ Fuel used: 1
 
 
 :GraphOpt
@@ -102,7 +123,9 @@ foo(A)
 //│ ClassInfo(1, B, []) [] {
 //│ }
 //│ }, {
-//│ Def(0, foo, [t%0], [{}], 
+//│ Def(0, foo, [t%0], [{}],
+//│ S: None,
+//│ I: [],
 //│ [None], 1, 
 //│ let x%0 = t%0.Get[A]()
 //│   in x%0
@@ -118,7 +141,9 @@ foo(A)
 //│ ClassInfo(1, B, []) [] {
 //│ }
 //│ }, {
-//│ Def(0, foo, [t%0], [{EDirect}], 
+//│ Def(0, foo, [t%0], [{EDirect}],
+//│ S: None,
+//│ I: [],
 //│ [None], 1, 
 //│ let x%0 = t%0.Get[A]()
 //│   in x%0
@@ -127,3 +152,6 @@ foo(A)
 //│ let x%1 = A()
 //│   in let* (x%2) = foo(x%1)
 //│     in x%2)
+//│ 
+//│ 
+//│ Fuel used: 1

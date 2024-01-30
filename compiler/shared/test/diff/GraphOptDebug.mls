@@ -23,7 +23,15 @@ foo()
 //│ TypingUnit(NuTypeDef(class, True, (), Tup(), (), None, None, TypingUnit()), NuTypeDef(class, False, (), Tup(), (), None, None, TypingUnit()), NuTypeDef(class, S, (), Tup(_: Var(s)), (), None, None, TypingUnit()), NuTypeDef(class, O, (), Tup(), (), None, None, TypingUnit()), NuFunDef(None, odd, None, [], Lam(Tup(_: Var(x)), Blk(...))), NuFunDef(None, even, None, [], Lam(Tup(_: Var(x)), Blk(...))), NuFunDef(None, foo, None, [], Lam(Tup(), App(Var(odd), Tup(_: If(IfThen(App(App(Var(>), Tup(_: IntLit(10))), Tup(_: IntLit(0))), App(Var(S), Tup(_: Var(O))), Some(Var(O))))))), App(Var(foo), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, True, []),ClassInfo(1, False, []),ClassInfo(2, S, [s]),ClassInfo(3, O, [])}, {
+//│ GOProgram({ClassInfo(0, True, []) [] {
+//│ }
+//│ ClassInfo(1, False, []) [] {
+//│ }
+//│ ClassInfo(2, S, [s]) [] {
+//│ }
+//│ ClassInfo(3, O, []) [] {
+//│ }
+//│ }, {
 //│ Def(0, odd, [x%0], [{}],
 //│ S: None,
 //│ I: [],
@@ -67,7 +75,15 @@ foo()
 //│   in x%16)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, True, []),ClassInfo(1, False, []),ClassInfo(2, S, [s]),ClassInfo(3, O, [])}, {
+//│ GOProgram({ClassInfo(0, True, []) [] {
+//│ }
+//│ ClassInfo(1, False, []) [] {
+//│ }
+//│ ClassInfo(2, S, [s]) [] {
+//│ }
+//│ ClassInfo(3, O, []) [] {
+//│ }
+//│ }, {
 //│ Def(0, odd, [x%0], [{EDestruct,EDirect,ESelect(s)}],
 //│ S: None,
 //│ I: [],
@@ -118,7 +134,15 @@ foo()
 //│ 
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, True, []),ClassInfo(1, False, []),ClassInfo(2, S, [s]),ClassInfo(3, O, [])}, {
+//│ GOProgram({ClassInfo(0, True, []) [] {
+//│ }
+//│ ClassInfo(1, False, []) [] {
+//│ }
+//│ ClassInfo(2, S, [s]) [] {
+//│ }
+//│ ClassInfo(3, O, []) [] {
+//│ }
+//│ }, {
 //│ Def(0, odd, [x%0], [{EDestruct,EDirect,ESelect(s)}],
 //│ S: None,
 //│ I: [],
@@ -187,7 +211,15 @@ foo()
 //│   in x%16)
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, True, []),ClassInfo(1, False, []),ClassInfo(2, S, [s]),ClassInfo(3, O, [])}, {
+//│ GOProgram({ClassInfo(0, True, []) [] {
+//│ }
+//│ ClassInfo(1, False, []) [] {
+//│ }
+//│ ClassInfo(2, S, [s]) [] {
+//│ }
+//│ ClassInfo(3, O, []) [] {
+//│ }
+//│ }, {
 //│ Def(0, odd, [x%0], [{EDestruct,EDirect,ESelect(s)}],
 //│ S: None,
 //│ I: [],
@@ -254,7 +286,15 @@ foo()
 //│   in x%16)
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, True, []),ClassInfo(1, False, []),ClassInfo(2, S, [s]),ClassInfo(3, O, [])}, {
+//│ GOProgram({ClassInfo(0, True, []) [] {
+//│ }
+//│ ClassInfo(1, False, []) [] {
+//│ }
+//│ ClassInfo(2, S, [s]) [] {
+//│ }
+//│ ClassInfo(3, O, []) [] {
+//│ }
+//│ }, {
 //│ Def(0, odd, [x%0], [{EDestruct,EDirect,ESelect(s)}],
 //│ S: None,
 //│ I: [],
@@ -321,7 +361,15 @@ foo()
 //│   in x%16)
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, True, []),ClassInfo(1, False, []),ClassInfo(2, S, [s]),ClassInfo(3, O, [])}, {
+//│ GOProgram({ClassInfo(0, True, []) [] {
+//│ }
+//│ ClassInfo(1, False, []) [] {
+//│ }
+//│ ClassInfo(2, S, [s]) [] {
+//│ }
+//│ ClassInfo(3, O, []) [] {
+//│ }
+//│ }, {
 //│ Def(2, foo, [], [],
 //│ S: None,
 //│ I: [],

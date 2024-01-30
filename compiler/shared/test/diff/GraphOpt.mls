@@ -15,7 +15,9 @@ foo()
 //│ TypingUnit(NuTypeDef(class, Pair, (), Tup(_: Var(x), _: Var(y)), (), None, None, TypingUnit()), NuFunDef(None, mktup2, None, [], Lam(Tup(_: Var(x), _: Var(y)), App(Var(mktup), Tup(_: Var(x), _: Var(y))))), NuFunDef(None, mktup, None, [], Lam(Tup(_: Var(x), _: Var(y)), App(Var(Pair), Tup(_: Var(x), _: Var(y))))), NuFunDef(None, foo, None, [], Lam(Tup(), Blk(...))), App(Var(foo), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, mktup2, [x%0,y%0], [{}],
 //│ S: None,
 //│ I: [],
@@ -42,7 +44,9 @@ foo()
 //│   in x%5)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, mktup2, [x%0,y%0], [{EDirect},{EDirect}],
 //│ S: None,
 //│ I: [],
@@ -94,7 +98,9 @@ bar()
 //│ TypingUnit(NuTypeDef(class, Pair, (), Tup(_: Var(x), _: Var(y)), (), None, None, TypingUnit()), NuFunDef(None, foo, None, [], Lam(Tup(_: Var(pair)), Blk(...))), NuFunDef(None, bar, None, [], Lam(Tup(), Blk(...))), App(Var(bar), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [pair%0], [{}],
 //│ S: None,
 //│ I: [],
@@ -119,7 +125,9 @@ bar()
 //│   in x%6)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [pair%0], [{EDestruct,EDirect,ESelect(x),ESelect(y)}],
 //│ S: None,
 //│ I: [[Some(ICtor(Pair))]],
@@ -147,7 +155,9 @@ bar()
 //│ 
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(1, bar, [], [],
 //│ S: None,
 //│ I: [],
@@ -196,7 +206,9 @@ foo()
 //│ TypingUnit(NuTypeDef(class, Pair, (), Tup(_: Var(x), _: Var(y)), (), None, None, TypingUnit()), NuFunDef(None, silly, None, [], Lam(Tup(_: Var(pair)), Blk(...))), NuFunDef(None, foo, None, [], Lam(Tup(), Blk(...))), App(Var(foo), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, silly, [pair%0], [{}],
 //│ S: None,
 //│ I: [],
@@ -227,7 +239,9 @@ foo()
 //│   in x%11)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, silly, [pair%0], [{EDestruct,EDirect,ESelect(x)}],
 //│ S: None,
 //│ I: [[Some(ICtor(Pair))]],
@@ -262,7 +276,9 @@ foo()
 //│ 
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(1, foo, [], [],
 //│ S: None,
 //│ I: [],
@@ -292,7 +308,9 @@ foo()
 //│   in x%11)
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(1, foo, [], [],
 //│ S: None,
 //│ I: [],
@@ -346,7 +364,9 @@ foo()
 //│ TypingUnit(NuTypeDef(class, Pair, (), Tup(_: Var(x), _: Var(y)), (), None, None, TypingUnit()), NuFunDef(None, inc_fst, None, [], Lam(Tup(_: Var(pair)), Blk(...))), NuFunDef(None, foo, None, [], Lam(Tup(), Blk(...))), App(Var(foo), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, inc_fst, [pair%0], [{}],
 //│ S: None,
 //│ I: [],
@@ -372,7 +392,9 @@ foo()
 //│   in x%7)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, inc_fst, [pair%0], [{EDestruct,EDirect,ESelect(x)}],
 //│ S: None,
 //│ I: [[Some(ICtor(Pair))]],
@@ -399,7 +421,9 @@ foo()
 //│ 
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(1, foo, [], [],
 //│ S: None,
 //│ I: [],
@@ -442,7 +466,9 @@ foo()
 //│ TypingUnit(NuTypeDef(class, Pair, (), Tup(_: Var(x), _: Var(y)), (), None, None, TypingUnit()), NuFunDef(None, inc_fst, None, [], Lam(Tup(_: Var(pair)), Blk(...))), NuFunDef(None, foo, None, [], Lam(Tup(), Blk(...))), App(Var(foo), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, inc_fst, [pair%0], [{}],
 //│ S: None,
 //│ I: [],
@@ -468,7 +494,9 @@ foo()
 //│   in x%7)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, inc_fst, [pair%0], [{EDestruct,EDirect,ESelect(y)}],
 //│ S: None,
 //│ I: [[Some(ICtor(Pair))]],
@@ -495,7 +523,9 @@ foo()
 //│ 
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(1, foo, [], [],
 //│ S: None,
 //│ I: [],
@@ -541,7 +571,11 @@ bar()
 //│ TypingUnit(NuTypeDef(class, Left, (), Tup(_: Var(x)), (), None, None, TypingUnit()), NuTypeDef(class, Right, (), Tup(_: Var(y)), (), None, None, TypingUnit()), NuFunDef(None, foo, None, [], Lam(Tup(_: Var(a), _: Var(b)), Blk(...))), NuFunDef(None, bar, None, [], Lam(Tup(), Blk(...))), App(Var(bar), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, Left, [x]),ClassInfo(1, Right, [y])}, {
+//│ GOProgram({ClassInfo(0, Left, [x]) [] {
+//│ }
+//│ ClassInfo(1, Right, [y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [a%0,b%0], [{}],
 //│ S: None,
 //│ I: [],
@@ -574,7 +608,11 @@ bar()
 //│   in x%11)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, Left, [x]),ClassInfo(1, Right, [y])}, {
+//│ GOProgram({ClassInfo(0, Left, [x]) [] {
+//│ }
+//│ ClassInfo(1, Right, [y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [a%0,b%0], [{EDestruct,EDirect,ESelect(x)},{EDirect}],
 //│ S: None,
 //│ I: [[None,Some(ICtor(Right))]],
@@ -614,7 +652,11 @@ bar()
 //│ 
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, Left, [x]),ClassInfo(1, Right, [y])}, {
+//│ GOProgram({ClassInfo(0, Left, [x]) [] {
+//│ }
+//│ ClassInfo(1, Right, [y]) [] {
+//│ }
+//│ }, {
 //│ Def(1, bar, [], [],
 //│ S: None,
 //│ I: [],
@@ -647,7 +689,13 @@ bar()
 //│ TypingUnit(NuTypeDef(class, True, (), Tup(), (), None, None, TypingUnit()), NuTypeDef(class, False, (), Tup(), (), None, None, TypingUnit()), NuTypeDef(class, Pair, (), Tup(_: Var(x), _: Var(y)), (), None, None, TypingUnit()), NuFunDef(None, foo, None, [], Lam(Tup(_: Var(a)), App(App(Var(+), Tup(_: Sel(Var(a), x))), Tup(_: Sel(Var(a), y))))), NuFunDef(None, bar, None, [], Lam(Tup(), Blk(...))), App(Var(bar), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, True, []),ClassInfo(1, False, []),ClassInfo(2, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, True, []) [] {
+//│ }
+//│ ClassInfo(1, False, []) [] {
+//│ }
+//│ ClassInfo(2, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [a%0], [{}],
 //│ S: None,
 //│ I: [],
@@ -670,7 +718,13 @@ bar()
 //│   in x%5)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, True, []),ClassInfo(1, False, []),ClassInfo(2, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, True, []) [] {
+//│ }
+//│ ClassInfo(1, False, []) [] {
+//│ }
+//│ ClassInfo(2, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [a%0], [{ESelect(x),ESelect(y)}],
 //│ S: None,
 //│ I: [[Some(ICtor(Pair))]],
@@ -697,7 +751,13 @@ bar()
 //│ 
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, True, []),ClassInfo(1, False, []),ClassInfo(2, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, True, []) [] {
+//│ }
+//│ ClassInfo(1, False, []) [] {
+//│ }
+//│ ClassInfo(2, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(1, bar, [], [],
 //│ S: None,
 //│ I: [],
@@ -740,7 +800,11 @@ bar()
 //│ TypingUnit(NuTypeDef(class, C1, (), Tup(_: Var(x), _: Var(y)), (), None, None, TypingUnit()), NuTypeDef(class, C2, (), Tup(_: Var(z)), (), None, None, TypingUnit()), NuFunDef(None, foo, None, [], Lam(Tup(_: Var(a)), If(IfOpApp(Var(a), Var(is), IfBlock(IfThen(App(Var(C1), Tup(_: Var(x), _: Var(y))), Var(x);IfThen(App(Var(C2), Tup(_: Var(z))), Var(z)), None))), NuFunDef(None, bar, None, [], Lam(Tup(), Blk(...))), App(Var(bar), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, C1, [x,y]),ClassInfo(1, C2, [z])}, {
+//│ GOProgram({ClassInfo(0, C1, [x,y]) [] {
+//│ }
+//│ ClassInfo(1, C2, [z]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [a%0], [{}],
 //│ S: None,
 //│ I: [],
@@ -766,7 +830,11 @@ bar()
 //│   in x%6)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, C1, [x,y]),ClassInfo(1, C2, [z])}, {
+//│ GOProgram({ClassInfo(0, C1, [x,y]) [] {
+//│ }
+//│ ClassInfo(1, C2, [z]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [a%0], [{EDestruct,EDirect,ESelect(x),ESelect(z)}],
 //│ S: None,
 //│ I: [[Some(ICtor(C1))]],
@@ -794,7 +862,11 @@ bar()
 //│ 
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, C1, [x,y]),ClassInfo(1, C2, [z])}, {
+//│ GOProgram({ClassInfo(0, C1, [x,y]) [] {
+//│ }
+//│ ClassInfo(1, C2, [z]) [] {
+//│ }
+//│ }, {
 //│ Def(1, bar, [], [],
 //│ S: None,
 //│ I: [],
@@ -834,7 +906,9 @@ baz()
 //│ TypingUnit(NuTypeDef(class, Pair, (), Tup(_: Var(x), _: Var(y)), (), None, None, TypingUnit()), NuFunDef(None, foo, None, [], Lam(Tup(_: Var(a), _: Var(b)), Blk(...))), NuFunDef(None, bar, None, [], Lam(Tup(_: Var(c)), Blk(...))), NuFunDef(None, baz, None, [], Lam(Tup(), Blk(...))), App(Var(baz), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [a%0,b%0], [{}],
 //│ S: None,
 //│ I: [],
@@ -874,7 +948,9 @@ baz()
 //│   in x%16)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [a%0,b%0], [{ESelect(x),ESelect(y)},{ESelect(x),ESelect(y)}],
 //│ S: None,
 //│ I: [[None,Some(ICtor(Pair))],[Some(ICtor(Pair)),Some(ICtor(Pair))]],
@@ -918,7 +994,9 @@ baz()
 //│ 
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(1, bar, [c%0], [{ESelect(x),ESelect(y)}],
 //│ S: None,
 //│ I: [[Some(ICtor(Pair))]],
@@ -954,7 +1032,9 @@ baz()
 //│   in x%16)
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(2, baz, [], [],
 //│ S: None,
 //│ I: [],
@@ -1005,7 +1085,9 @@ foo()
 //│ TypingUnit(NuTypeDef(class, Pair, (), Tup(_: Var(x), _: Var(y)), (), None, None, TypingUnit()), NuFunDef(None, foo, None, [], Lam(Tup(), Blk(...))), App(Var(foo), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [], [{}],
 //│ S: None,
 //│ I: [],
@@ -1019,7 +1101,9 @@ foo()
 //│   in x%2)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, Pair, [x,y])}, {
+//│ GOProgram({ClassInfo(0, Pair, [x,y]) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [], [],
 //│ S: None,
 //│ I: [],
@@ -1060,7 +1144,11 @@ foo()
 //│ TypingUnit(NuTypeDef(class, S, (), Tup(_: Var(s)), (), None, None, TypingUnit()), NuTypeDef(class, O, (), Tup(), (), None, None, TypingUnit()), NuFunDef(None, foo, None, [], Lam(Tup(), Blk(...))), NuFunDef(None, bar, None, [], Lam(Tup(_: Var(x)), Blk(...))), NuFunDef(None, baz, None, [], Lam(Tup(_: Var(x)), Blk(...))), App(Var(foo), Tup()))
 //│ 
 //│ GraphOpt:
-//│ GOProgram({ClassInfo(0, S, [s]),ClassInfo(1, O, [])}, {
+//│ GOProgram({ClassInfo(0, S, [s]) [] {
+//│ }
+//│ ClassInfo(1, O, []) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [], [{}],
 //│ S: None,
 //│ I: [],
@@ -1092,7 +1180,11 @@ foo()
 //│   in x%8)
 //│ 
 //│ Promoted ------------------------------------
-//│ GOProgram({ClassInfo(0, S, [s]),ClassInfo(1, O, [])}, {
+//│ GOProgram({ClassInfo(0, S, [s]) [] {
+//│ }
+//│ ClassInfo(1, O, []) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [], [],
 //│ S: None,
 //│ I: [],
@@ -1127,7 +1219,11 @@ foo()
 //│ 
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, S, [s]),ClassInfo(1, O, [])}, {
+//│ GOProgram({ClassInfo(0, S, [s]) [] {
+//│ }
+//│ ClassInfo(1, O, []) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [], [],
 //│ S: None,
 //│ I: [],
@@ -1149,7 +1245,11 @@ foo()
 //│   in x%8)
 //│ 
 //│ Optimized ------------------------------
-//│ GOProgram({ClassInfo(0, S, [s]),ClassInfo(1, O, [])}, {
+//│ GOProgram({ClassInfo(0, S, [s]) [] {
+//│ }
+//│ ClassInfo(1, O, []) [] {
+//│ }
+//│ }, {
 //│ Def(0, foo, [], [],
 //│ S: None,
 //│ I: [],
